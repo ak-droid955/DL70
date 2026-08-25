@@ -38,9 +38,9 @@
 <script>
 (function(){
   var map = L.map('map', {
-    attributionControl:false, zoomControl:false, scrollWheelZoom:false,
-    dragging:false, doubleClickZoom:false, boxZoom:false, keyboard:false,
-    touchZoom:false, tap:false
+    attributionControl:false, zoomControl:true, scrollWheelZoom:true,
+    dragging:true, doubleClickZoom:true, boxZoom:true, keyboard:false,
+    touchZoom:true, tap:true
   }).setView([28.65,77.12],10);
 
   var HUES = [25,70,122,175,225,270,320];
@@ -102,15 +102,28 @@
 
     var geoLayer = L.geoJSON(data, {
       style: function(feature){
-        return {color: 'oklch(45% 0.005 80)', weight: 1.3, fillColor: 'oklch(80% 0.004 80)', fillOpacity: 0.7};
+        var idx = groupIndex[feature.properties.PC_NAME] || 0;
+        return {color: groupStroke(idx), weight: 1.3, fillColor: groupColor(idx), fillOpacity: 0.7};
       },
       onEachFeature: function(feature, layer){
         var p = feature.properties;
         layer.bindTooltip(p.AC_NO + '. ' + cleanName(p.AC_NAME), {className:'ac-tip', sticky:true});
         layer.on('mouseover', function(){ layer.setStyle({weight:2.6}); });
         layer.on('mouseout', function(){ layer.setStyle({weight:1.3}); });
+        layer.on('click', function(){ map.fitBounds(layer.getBounds(), {padding:[40,40]}); });
       }
     }).addTo(map);
+
+    var labelLayer = L.layerGroup().addTo(map);
+    data.features.forEach(function(f){
+      var c = featureCentroid(f.geometry);
+      if(!c) return;
+      L.marker(c, {
+        icon: L.divIcon({className:'divlabel', html: String(f.properties.AC_NO), iconSize:null}),
+        interactive:false,
+        keyboard:false
+      }).addTo(labelLayer);
+    });
 
     fullBounds = geoLayer.getBounds();
     map.invalidateSize();
