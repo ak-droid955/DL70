@@ -4,6 +4,7 @@ import {
   GROUPS,
   MAX_TURNS_DEFAULT,
   PARTY_COLOR_SWATCHES,
+  forceLockRemainingSeats,
   loadStaticSeats,
   resolveTurn
 } from './gameData.js';
@@ -205,6 +206,16 @@ class RoomStore {
       }
     }
     return { room, resolved };
+  }
+
+  endMatch(code: string, playerId: string): Room {
+    const room = this.requireRoom(code);
+    if (room.hostId !== playerId) throw new RoomError('Only the host can end the match.');
+    if (room.phase !== 'playing') throw new RoomError('Match is not in progress.');
+    forceLockRemainingSeats(room);
+    room.phase = 'gameover';
+    room.updatedAt = Date.now();
+    return room;
   }
 
   private requireRoom(code: string): Room {

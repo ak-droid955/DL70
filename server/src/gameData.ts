@@ -145,6 +145,27 @@ export function loadStaticSeats(): Record<string, StaticSeat> {
   return seats;
 }
 
+// Locks every still-unlocked seat to whoever's currently leading it (or 'INDEPENDENT'
+// if nobody's bid on it at all). Used both on the final turn and when a match is
+// ended early, so both paths settle every seat by the same rule.
+export function forceLockRemainingSeats(room: Room): TurnEvent[] {
+  const events: TurnEvent[] = [];
+  Object.values(room.seats).forEach((seat) => {
+    if (seat.locked) return;
+    const entries = Object.entries(seat.progress || {});
+    if (!entries.length) {
+      seat.locked = 'INDEPENDENT';
+      return;
+    }
+    entries.sort((a, b) => b[1] - a[1]);
+    const [leaderId] = entries[0];
+    seat.locked = leaderId;
+    events.push({ type: 'forced_lock', acNo: seat.acNo, seatName: seat.name, playerId: leaderId });
+    room.players[leaderId].seatsWon = (room.players[leaderId].seatsWon || 0) + 1;
+  });
+  return events;
+}
+
 // Resolves one blind turn in-place on the room object; returns { events, perPlayerSpend, isFinalTurn }.
 export function resolveTurn(room: Room): { events: TurnEvent[]; perPlayerSpend: Record<string, number>; isFinalTurn: boolean } {
   const seats = room.seats,
@@ -219,19 +240,7 @@ export function resolveTurn(room: Room): { events: TurnEvent[]; perPlayerSpend: 
   });
 
   if (isFinalTurn) {
-    Object.values(seats).forEach((seat) => {
-      if (seat.locked) return;
-      const entries = Object.entries(seat.progress || {});
-      if (!entries.length) {
-        seat.locked = 'INDEPENDENT';
-        return;
-      }
-      entries.sort((a, b) => b[1] - a[1]);
-      const [leaderId] = entries[0];
-      seat.locked = leaderId;
-      events.push({ type: 'forced_lock', acNo: seat.acNo, seatName: seat.name, playerId: leaderId });
-      players[leaderId].seatsWon = (players[leaderId].seatsWon || 0) + 1;
-    });
+    events.push(...forceLockRemainingSeats(room));
   }
 
   Object.values(players).forEach((p) => {

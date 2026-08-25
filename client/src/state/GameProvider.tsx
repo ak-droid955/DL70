@@ -87,6 +87,7 @@ interface Ctx {
   onSymbolFile: (file: File) => void;
   submitSetup: () => Promise<void>;
   startGame: () => Promise<void>;
+  endMatch: () => Promise<void>;
   selectSeat: (acNo: string | null) => void;
   closeSeat: () => void;
   addSeatSpend: (acNo: string, amt: number) => void;
@@ -241,6 +242,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const endMatch = async () => {
+    const { room, myPlayerId } = stateRef.current;
+    if (!room || !myPlayerId) return;
+    try {
+      await call('game:endMatch', { code: room.code, playerId: myPlayerId });
+    } catch (err) {
+      patch({ error: (err as Error).message });
+    }
+  };
+
   const selectSeat = (acNo: string | null) => patch({ selectedSeatAcNo: acNo });
   const closeSeat = () => patch({ selectedSeatAcNo: null });
 
@@ -317,6 +328,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       onSymbolFile,
       submitSetup,
       startGame,
+      endMatch,
       selectSeat,
       closeSeat,
       addSeatSpend,

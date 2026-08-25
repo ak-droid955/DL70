@@ -70,6 +70,14 @@ export function registerSocketHandlers(io: Server, socket: Socket) {
     });
   });
 
+  socket.on('game:endMatch', (input: { code: string; playerId: string }, cb: Callback<{ room: Room }>) => {
+    guard(cb, () => {
+      const room = roomStore.endMatch(input.code, input.playerId);
+      io.to(room.code).emit('room:update', room);
+      return { room };
+    });
+  });
+
   socket.on(
     'game:submitTurn',
     (
