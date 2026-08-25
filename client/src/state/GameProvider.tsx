@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { SERVER_URL } from '../lib/config';
 import { call, socket } from '../lib/socket';
 import type { Player, Room, StaticSeat } from '../lib/types';
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:8787';
 const LS_PLAYER_ID = 'dvs_player_id';
 const LS_ROOM_CODE = 'dvs_room_code';
 const LS_TOKEN = 'dvs_token';
