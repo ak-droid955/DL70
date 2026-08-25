@@ -68,6 +68,13 @@ export interface StaticSeat {
   geometry: GeoJSON.Geometry;
 }
 
+export interface OpenRoomSummary {
+  code: string;
+  playerCount: number;
+  hostPartyName: string;
+  createdAt: number;
+}
+
 export const PARTY_COLOR_SWATCHES = [
   'oklch(62% 0.19 25)',
   'oklch(66% 0.17 55)',

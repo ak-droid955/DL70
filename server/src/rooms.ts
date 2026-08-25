@@ -20,6 +20,13 @@ export interface NewPlayerInput {
   symbol: string | null;
 }
 
+export interface OpenRoomSummary {
+  code: string;
+  playerCount: number;
+  hostPartyName: string;
+  createdAt: number;
+}
+
 export class RoomError extends Error {}
 
 class RoomStore {
@@ -108,6 +115,18 @@ class RoomStore {
     const token = this.makeToken();
     this.tokens.set(player.id, token);
     return { room, playerId: player.id, token };
+  }
+
+  listOpenRooms(): OpenRoomSummary[] {
+    return Array.from(this.rooms.values())
+      .filter((room) => room.phase === 'lobby' && Object.keys(room.players).length < MAX_PLAYERS)
+      .map((room) => ({
+        code: room.code,
+        playerCount: Object.keys(room.players).length,
+        hostPartyName: room.players[room.hostId]?.partyName || 'Unknown',
+        createdAt: room.createdAt
+      }))
+      .sort((a, b) => b.createdAt - a.createdAt);
   }
 
   peekRoom(code: string): { code: string; phase: Room['phase']; playerCount: number } {

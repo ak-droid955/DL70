@@ -1,5 +1,5 @@
 import type { Server, Socket } from 'socket.io';
-import { RoomError, roomStore, type NewPlayerInput } from './rooms.js';
+import { RoomError, roomStore, type NewPlayerInput, type OpenRoomSummary } from './rooms.js';
 import type { Room } from './types.js';
 
 type Ack<T> = (res: { ok: true } & T) => void;
@@ -33,6 +33,10 @@ export function registerSocketHandlers(io: Server, socket: Socket) {
 
   socket.on('room:peek', (input: { code: string }, cb: Callback<{ code: string; phase: Room['phase']; playerCount: number }>) => {
     guard(cb, () => roomStore.peekRoom(input.code));
+  });
+
+  socket.on('room:list', (_input: unknown, cb: Callback<{ rooms: OpenRoomSummary[] }>) => {
+    guard(cb, () => ({ rooms: roomStore.listOpenRooms() }));
   });
 
   socket.on(

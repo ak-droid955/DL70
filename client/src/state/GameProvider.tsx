@@ -80,6 +80,7 @@ interface Ctx {
   getRemaining: () => number;
   goCreate: () => void;
   goJoin: () => Promise<void>;
+  joinRoomByCode: (code: string) => Promise<void>;
   onJoinCodeChange: (v: string) => void;
   onNameChange: (v: string) => void;
   onPartyNameChange: (v: string) => void;
@@ -184,8 +185,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const onJoinCodeChange = (v: string) => patch({ joinCodeInput: v.toUpperCase() });
 
-  const goJoin = async () => {
-    const code = (stateRef.current.joinCodeInput || '').trim().toUpperCase();
+  const joinRoomByCode = async (rawCode: string) => {
+    const code = (rawCode || '').trim().toUpperCase();
     if (!code) return patch({ error: 'Enter a room code' });
     try {
       await call('room:peek', { code });
@@ -194,6 +195,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       patch({ error: (err as Error).message });
     }
   };
+
+  const goJoin = () => joinRoomByCode(stateRef.current.joinCodeInput);
 
   const onNameChange = (v: string) => patch({ nameInput: v });
   const onPartyNameChange = (v: string) => patch({ partyNameInput: v });
@@ -321,6 +324,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       getRemaining,
       goCreate,
       goJoin,
+      joinRoomByCode,
       onJoinCodeChange,
       onNameChange,
       onPartyNameChange,
