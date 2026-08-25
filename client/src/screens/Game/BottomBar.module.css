@@ -1,0 +1,77 @@
+.bar {
+  height: 88px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+}
+
+.scoreboard {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  height: 100%;
+  align-items: center;
+}
+
+.chip {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 2px solid;
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+
+.chipSymbol {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.chipParty {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.chipStatus {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.budget {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.budgetLabel {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.budgetValue {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.submitBtn {
+  flex-shrink: 0;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  padding: 14px 24px;
+  border-radius: 12px;
+  border: none;
+  color: white;
+  cursor: pointer;
+}

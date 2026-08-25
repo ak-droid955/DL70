@@ -1,0 +1,83 @@
+.screen {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  background: var(--bg);
+  padding: 24px;
+  text-align: center;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 40px;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+
+.subtitle {
+  max-width: 520px;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.createBtn {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  padding: 16px 28px;
+  border-radius: 14px;
+  border: none;
+  background: var(--navy);
+  color: white;
+  cursor: pointer;
+}
+
+.joinRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.codeInput {
+  font-family: var(--font-body);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-align: center;
+  width: 120px;
+  padding: 16px 10px;
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  font-size: 16px;
+  text-transform: uppercase;
+}
+
+.joinBtn {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  padding: 16px 22px;
+  border-radius: 14px;
+  border: 2px solid var(--navy);
+  background: white;
+  color: var(--navy);
+  cursor: pointer;
+}
+
+.error {
+  color: var(--red);
+  font-weight: 600;
+  font-size: 14px;
+}

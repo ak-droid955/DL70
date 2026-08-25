@@ -1,0 +1,90 @@
+.screen {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: var(--bg);
+  padding: 24px;
+}
+
+.roomCodeLabel {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.roomCode {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 48px;
+  letter-spacing: 0.1em;
+  color: var(--navy);
+}
+
+.playerList {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.playerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.symbol {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.partyName {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.playerName {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.countLabel {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.startBtn {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  padding: 16px 32px;
+  border-radius: 14px;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.waitingLabel {
+  color: var(--text-muted);
+  font-size: 13px;
+}

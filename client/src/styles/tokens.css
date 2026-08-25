@@ -1,0 +1,73 @@
+:root {
+  --bg: oklch(97% 0.01 80);
+  --panel: oklch(99% 0.003 80);
+  --panel-alt: oklch(99.3% 0.002 80);
+  --border: oklch(88% 0.01 80);
+  --border-alt: oklch(89% 0.004 80);
+  --text: oklch(22% 0.01 80);
+  --text-alt: oklch(23% 0.01 80);
+  --text-muted: oklch(50% 0.01 80);
+  --navy: oklch(26% 0.04 260);
+  --orange: oklch(72% 0.15 55);
+  --green: oklch(55% 0.14 145);
+  --red: oklch(55% 0.18 25);
+  --track: oklch(93% 0.005 80);
+  --disabled: oklch(80% 0.01 80);
+  --overlay-dim: oklch(20% 0.01 80 / 0.45);
+  --overlay-strong: oklch(20% 0.01 80 / 0.55);
+  --overlay-wait: oklch(97% 0.01 80 / 0.96);
+  --modal-shadow: 0 20px 60px oklch(20% 0.01 80 / 0.3);
+
+  --font-heading: 'Poppins', Helvetica, Arial, sans-serif;
+  --font-body: Helvetica, Arial, sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--bg);
+}
+
+button {
+  font-family: inherit;
+}
+
+input {
+  font-family: var(--font-body);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(80% 0.01 80);
+  border-radius: 4px;
+}
+
+@keyframes dvsSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes dvsPop {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
