@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Server } from 'socket.io';
 import { loadStaticSeats } from './gameData.js';
+import { roomStore } from './rooms.js';
 import { registerSocketHandlers } from './socketHandlers.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -29,8 +30,23 @@ app.get('/api/health', (_req, res) => res.json({ ok: true }));
 // client/dist won't exist here and this is a no-op.
 const clientDist = join(__dirname, '..', '..', 'client', 'dist');
 if (existsSync(clientDist)) {
-  app.use(express.static(clientDist));
+  // Vite's JS/CSS filenames are content-hashed, so those are safe to cache
+  // hard and long. index.html is not hashed, so it must never be cached —
+  // otherwise a browser (or an intermediary proxy/CDN) that cached an old
+  // index.html keeps requesting asset filenames a later deploy no longer has,
+  // which is exactly what "the page sometimes won't load" looks like right
+  // after a redeploy: a 404 on the JS bundle with a blank page behind it.
+  app.use(
+    express.static(clientDist, {
+      index: false,
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'no-store');
+        else res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+    })
+  );
   app.get(/^(?!\/api\/).*/, (_req, res) => {
+    res.set('Cache-Control', 'no-store');
     res.sendFile(join(clientDist, 'index.html'));
   });
 }
@@ -43,6 +59,12 @@ const io = new Server(httpServer, {
 io.on('connection', (socket) => {
   registerSocketHandlers(io, socket);
 });
+
+const ROOM_SWEEP_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
+setInterval(() => {
+  const removed = roomStore.sweepStaleRooms();
+  if (removed > 0) console.log(`Swept ${removed} stale room(s)`);
+}, ROOM_SWEEP_INTERVAL_MS);
 
 httpServer.listen(PORT, () => {
   console.log(`Vidhan Sabha Showdown server listening on :${PORT}`);

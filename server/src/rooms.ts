@@ -12,6 +12,12 @@ import type { Player, Room, TurnLogEntry } from './types.js';
 
 const MAX_PLAYERS = 5;
 const MAX_SYMBOL_BYTES = 250_000; // ~250KB data URL ceiling, guards against abuse
+// Rooms live only in memory, so an abandoned room (players closed the tab
+// mid-game, or never started) would otherwise sit there forever, growing
+// process memory without bound for as long as the server stays up. Anything
+// untouched this long is swept — see sweepStaleRooms(), called periodically
+// from index.ts.
+const ROOM_MAX_IDLE_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 export interface NewPlayerInput {
   name: string;
@@ -235,6 +241,22 @@ class RoomStore {
     const room = this.rooms.get(code.toUpperCase());
     if (!room) throw new RoomError('Room not found.');
     return room;
+  }
+
+  // Deletes any room untouched for longer than ROOM_MAX_IDLE_MS, and the
+  // rejoin tokens for the players in it. Returns how many were removed, for
+  // logging.
+  sweepStaleRooms(): number {
+    const cutoff = Date.now() - ROOM_MAX_IDLE_MS;
+    let removed = 0;
+    this.rooms.forEach((room, code) => {
+      if (room.updatedAt < cutoff) {
+        Object.keys(room.players).forEach((playerId) => this.tokens.delete(playerId));
+        this.rooms.delete(code);
+        removed++;
+      }
+    });
+    return removed;
   }
 }
 
