@@ -1,10 +1,19 @@
-import { PARTY_COLOR_SWATCHES, PARTY_SYMBOLS } from '../lib/types';
+import { PARTY_COLOR_SWATCHES, PARTY_SYMBOLS, TURN_TIMER_OPTIONS } from '../lib/types';
 import { useGame } from '../state/GameProvider';
 import styles from './Setup.module.css';
 
 export default function Setup() {
-  const { state, onNameChange, onPartyNameChange, onPartyCodeChange, pickColor, pickSymbol, onSymbolFile, submitSetup } =
-    useGame();
+  const {
+    state,
+    onNameChange,
+    onPartyNameChange,
+    onPartyCodeChange,
+    pickColor,
+    pickTurnTimer,
+    pickSymbol,
+    onSymbolFile,
+    submitSetup
+  } = useGame();
 
   return (
     <div className={styles.screen}>
@@ -90,6 +99,30 @@ export default function Setup() {
             </label>
           </div>
         </div>
+
+        {state.pendingMode === 'create' && (
+          <div>
+            <div className={styles.label}>Room timer</div>
+            <div className={styles.timerTrack}>
+              {TURN_TIMER_OPTIONS.map((opt, i) => {
+                const selected = i === state.turnTimerChoice;
+                return (
+                  <button
+                    type="button"
+                    key={opt.label}
+                    onClick={() => pickTurnTimer(i)}
+                    className={styles.timerStop}
+                    aria-pressed={selected}
+                  >
+                    <span className={`${styles.timerDot} ${i <= state.turnTimerChoice ? styles.timerDotFilled : ''}`} />
+                    <span className={`${styles.timerLabel} ${selected ? styles.timerLabelActive : ''}`}>{opt.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className={styles.timerHint}>How long each turn lasts. Applies to everyone in the room.</div>
+          </div>
+        )}
 
         {state.error && <div className={styles.error}>{state.error}</div>}
 

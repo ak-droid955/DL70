@@ -52,6 +52,12 @@ export interface Room {
   turn: number;
   maxTurns: number;
   budgetPerTurn: number;
+  // Per-turn time limit in seconds, chosen by the host at room creation.
+  // null means "No Limit" — turns only resolve once every player submits.
+  turnTimerSeconds: number | null;
+  // Epoch ms at which the current turn auto-resolves. null when untimed, in
+  // the lobby, or after the game is over. Lets clients render a live countdown.
+  turnDeadline: number | null;
   hostId: string;
   players: Record<string, Player>;
   seats: Record<string, Seat>;

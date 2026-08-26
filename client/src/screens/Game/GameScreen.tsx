@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useGame } from '../../state/GameProvider';
 import BottomBar from './BottomBar';
 import MapView from './MapView';
@@ -7,6 +8,22 @@ import styles from './GameScreen.module.css';
 import Sidebar from './Sidebar';
 import SummaryModal from './SummaryModal';
 import WaitingOverlay from './WaitingOverlay';
+
+// Live per-turn countdown driven by the server-set deadline. Re-renders once a
+// second; the server is the source of truth and auto-resolves the turn when the
+// clock actually hits zero, so this is display-only.
+function TurnCountdown({ deadline }: { deadline: number }) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const remaining = Math.max(0, Math.round((deadline - now) / 1000));
+  const mm = Math.floor(remaining / 60);
+  const ss = remaining % 60;
+  const text = mm > 0 ? `${mm}:${String(ss).padStart(2, '0')}` : `${ss}s`;
+  return <div className={`${styles.turnPill} ${remaining <= 10 ? styles.turnPillUrgent : ''}`}>⏱ {text}</div>;
+}
 
 export default function GameScreen() {
   const { state, getMe, endMatch } = useGame();
@@ -36,6 +53,7 @@ export default function GameScreen() {
       <div className={styles.topBar}>
         <div className={styles.title}>Vidhan Sabha Showdown</div>
         <div className={styles.turnPill}>{turnLabel}</div>
+        {room.phase === 'playing' && room.turnDeadline && <TurnCountdown deadline={room.turnDeadline} />}
         <div className={styles.rightGroup}>
           {isHost && room.phase === 'playing' && (
             <button className={styles.endMatchBtn} onClick={handleEndMatch}>

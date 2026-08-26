@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { SERVER_URL } from '../lib/config';
 import { call, socket } from '../lib/socket';
+import { TURN_TIMER_OPTIONS } from '../lib/types';
 import type { Player, Room, StaticSeat } from '../lib/types';
 
 const LS_PLAYER_ID = 'dvs_player_id';
@@ -20,6 +21,7 @@ interface State {
   partyNameInput: string;
   partyCodeInput: string;
   colorChoice: number;
+  turnTimerChoice: number; // index into TURN_TIMER_OPTIONS; only used when creating a room
   symbolDataUrl: string | null;
   symbolChoice: string | null; // emoji of the selected preset symbol, if any
   pendingMode: PendingMode;
@@ -41,6 +43,7 @@ const initialState: State = {
   partyNameInput: '',
   partyCodeInput: '',
   colorChoice: 0,
+  turnTimerChoice: 0,
   symbolDataUrl: null,
   symbolChoice: null,
   pendingMode: null,
@@ -88,6 +91,7 @@ interface Ctx {
   onPartyNameChange: (v: string) => void;
   onPartyCodeChange: (v: string) => void;
   pickColor: (i: number) => void;
+  pickTurnTimer: (i: number) => void;
   pickSymbol: (emoji: string) => void;
   onSymbolFile: (file: File) => void;
   submitSetup: () => Promise<void>;
@@ -204,6 +208,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const onPartyCodeChange = (v: string) =>
     patch({ partyCodeInput: v.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) });
   const pickColor = (i: number) => patch({ colorChoice: i });
+  const pickTurnTimer = (i: number) => patch({ turnTimerChoice: i });
 
   // Render a preset election-symbol emoji to a 96x96 PNG data URL so it flows
   // through the same `symbol` field (and server validation) as an upload.
@@ -239,7 +244,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   };
 
   const submitSetup = async () => {
-    const { pendingMode, pendingCode, nameInput, partyNameInput, partyCodeInput, colorChoice, symbolDataUrl } = stateRef.current;
+    const { pendingMode, pendingCode, nameInput, partyNameInput, partyCodeInput, colorChoice, turnTimerChoice, symbolDataUrl } =
+      stateRef.current;
     if (!nameInput.trim() || !partyNameInput.trim()) return patch({ error: 'Enter your name and party name' });
     try {
       const payload = {
@@ -251,7 +257,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
       };
       const { room, playerId, token } =
         pendingMode === 'create'
-          ? await call<{ room: Room; playerId: string; token: string }>('room:create', payload)
+          ? await call<{ room: Room; playerId: string; token: string }>('room:create', {
+              ...payload,
+              turnTimerSeconds: TURN_TIMER_OPTIONS[turnTimerChoice]?.seconds ?? null
+            })
           : await call<{ room: Room; playerId: string; token: string }>('room:join', { ...payload, code: pendingCode });
       persistSession(room.code, playerId, token);
       patch({ step: 'in-room', room, myPlayerId: playerId, error: null });
@@ -342,6 +351,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       onPartyNameChange,
       onPartyCodeChange,
       pickColor,
+      pickTurnTimer,
       pickSymbol,
       onSymbolFile,
       submitSetup,

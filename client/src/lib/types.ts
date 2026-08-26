@@ -72,6 +72,8 @@ export interface Room {
   turn: number;
   maxTurns: number;
   budgetPerTurn: number;
+  turnTimerSeconds: number | null; // per-turn limit; null = No Limit
+  turnDeadline: number | null; // epoch ms the current turn auto-resolves; null when untimed
   hostId: string;
   players: Record<string, Player>;
   seats: Record<string, Seat>;
@@ -122,6 +124,21 @@ export const PARTY_COLOR_SWATCHES = [
   'oklch(58% 0.17 275)', // indigo
   'oklch(62% 0.19 340)', // magenta
   'oklch(64% 0.18 320)' // pink
+];
+
+// Per-turn time-limit options for the room timer, shown as a slider on the
+// setup screen. `seconds: null` is the "No Limit" position (timing off — turns
+// resolve only when every player submits). The timed scale starts at 10s and is
+// capped at 5m. Keep the numeric values in sync with TURN_TIMER_OPTIONS on the
+// server (rooms.ts).
+export const TURN_TIMER_OPTIONS: { label: string; seconds: number | null }[] = [
+  { label: 'No Limit', seconds: null },
+  { label: '10s', seconds: 10 },
+  { label: '30s', seconds: 30 },
+  { label: '1m', seconds: 60 },
+  { label: '2m', seconds: 120 },
+  { label: '3m', seconds: 180 },
+  { label: '5m', seconds: 300 }
 ];
 
 // Preset election symbols offered on the setup screen. The chosen emoji is

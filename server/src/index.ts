@@ -56,6 +56,10 @@ const io = new Server(httpServer, {
   cors: { origin: CLIENT_ORIGIN }
 });
 
+// Lets a turn timer that fires off any particular socket still push the updated
+// room to everyone in that room's channel.
+roomStore.setBroadcaster((room) => io.to(room.code).emit('room:update', room));
+
 io.on('connection', (socket) => {
   registerSocketHandlers(io, socket);
 });

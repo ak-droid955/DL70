@@ -12,6 +12,9 @@ import type { Player, Room, TurnLogEntry } from './types.js';
 
 const MAX_PLAYERS = 5;
 const MAX_SYMBOL_BYTES = 250_000; // ~250KB data URL ceiling, guards against abuse
+// Allowed per-turn time limits (seconds). Anything else (including null/absent)
+// is treated as "No Limit". Keep in sync with TURN_TIMER_OPTIONS on the client.
+const TURN_TIMER_OPTIONS = [10, 30, 60, 120, 180, 300];
 // Rooms live only in memory, so an abandoned room (players closed the tab
 // mid-game, or never started) would otherwise sit there forever, growing
 // process memory without bound for as long as the server stays up. Anything
@@ -25,6 +28,8 @@ export interface NewPlayerInput {
   partyCode?: string;
   colorIndex: number;
   symbol: string | null;
+  // Only read when creating a room (the host sets the pace for everyone).
+  turnTimerSeconds?: number | null;
 }
 
 export interface OpenRoomSummary {
@@ -40,6 +45,56 @@ class RoomStore {
   private rooms = new Map<string, Room>();
   // playerId -> secret token, used to authorize rejoin. Never broadcast.
   private tokens = new Map<string, string>();
+  // roomCode -> pending auto-resolve timeout for the current timed turn.
+  private turnTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  // Injected from index.ts so a timer firing off-socket can still push the
+  // updated room to everyone in the channel.
+  private broadcast: (room: Room) => void = () => {};
+
+  setBroadcaster(fn: (room: Room) => void): void {
+    this.broadcast = fn;
+  }
+
+  private normalizeTurnTimer(seconds: number | null | undefined): number | null {
+    return typeof seconds === 'number' && TURN_TIMER_OPTIONS.includes(seconds) ? seconds : null;
+  }
+
+  private clearTurnTimer(code: string): void {
+    const t = this.turnTimers.get(code);
+    if (t) {
+      clearTimeout(t);
+      this.turnTimers.delete(code);
+    }
+  }
+
+  // (Re)starts the countdown for the room's current turn. No-op (and clears any
+  // running timer) when the room is untimed or not in play. Sets turnDeadline so
+  // clients can render the countdown; on expiry the turn is force-resolved with
+  // whatever has been submitted so far.
+  private startTurnTimer(room: Room): void {
+    this.clearTurnTimer(room.code);
+    if (room.phase !== 'playing' || !room.turnTimerSeconds) {
+      room.turnDeadline = null;
+      return;
+    }
+    room.turnDeadline = Date.now() + room.turnTimerSeconds * 1000;
+    const timer = setTimeout(() => this.forceResolveTurn(room.code), room.turnTimerSeconds * 1000);
+    this.turnTimers.set(room.code, timer);
+  }
+
+  // Fired when a timed turn's clock runs out: resolve the turn with the
+  // submissions on hand (players who didn't submit simply spend nothing this
+  // turn), then broadcast the new room state.
+  private forceResolveTurn(code: string): void {
+    const room = this.rooms.get(code);
+    if (!room || room.phase !== 'playing') {
+      this.clearTurnTimer(code);
+      return;
+    }
+    this.settleTurn(room);
+    room.updatedAt = Date.now();
+    this.broadcast(room);
+  }
 
   private roomCode(): string {
     const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -121,6 +176,8 @@ class RoomStore {
       turn: 1,
       maxTurns: MAX_TURNS_DEFAULT,
       budgetPerTurn: BUDGET_PER_TURN_DEFAULT,
+      turnTimerSeconds: this.normalizeTurnTimer(input.turnTimerSeconds),
+      turnDeadline: null,
       hostId: player.id,
       players: { [player.id]: player },
       seats,
@@ -187,6 +244,7 @@ class RoomStore {
     if (room.phase !== 'lobby') throw new RoomError('Game already started.');
     if (Object.keys(room.players).length < 2) throw new RoomError('Need at least 2 players to start.');
     room.phase = 'playing';
+    this.startTurnTimer(room); // arms the first turn's countdown (no-op if untimed)
     room.updatedAt = Date.now();
     return room;
   }
@@ -217,21 +275,28 @@ class RoomStore {
     room.updatedAt = Date.now();
 
     const allReady = Object.values(room.players).every((p) => p.ready);
-    let resolved: TurnLogEntry | null = null;
-    if (allReady) {
-      const resolvedTurnNumber = room.turn;
-      const { events, perPlayerSpend } = resolveTurn(room);
-      const entry: TurnLogEntry = { turn: resolvedTurnNumber, events, perPlayerSpend };
-      room.turnLog.push(entry);
-      resolved = entry;
-      if (resolvedTurnNumber >= room.maxTurns) {
-        room.phase = 'gameover';
-      } else {
-        room.turn = resolvedTurnNumber + 1;
-        room.pendingTurn = { turnNumber: room.turn, submissions: {} };
-      }
-    }
+    const resolved = allReady ? this.settleTurn(room) : null;
     return { room, resolved };
+  }
+
+  // Resolves the current turn and advances the room: either ends the game on
+  // the final turn or opens the next turn and (re)arms its countdown. Shared by
+  // the all-players-submitted path and the timer-expiry path.
+  private settleTurn(room: Room): TurnLogEntry {
+    const resolvedTurnNumber = room.turn;
+    const { events, perPlayerSpend } = resolveTurn(room);
+    const entry: TurnLogEntry = { turn: resolvedTurnNumber, events, perPlayerSpend };
+    room.turnLog.push(entry);
+    if (resolvedTurnNumber >= room.maxTurns) {
+      room.phase = 'gameover';
+      this.clearTurnTimer(room.code);
+      room.turnDeadline = null;
+    } else {
+      room.turn = resolvedTurnNumber + 1;
+      room.pendingTurn = { turnNumber: room.turn, submissions: {} };
+      this.startTurnTimer(room);
+    }
+    return entry;
   }
 
   endMatch(code: string, playerId: string): Room {
@@ -240,6 +305,8 @@ class RoomStore {
     if (room.phase !== 'playing') throw new RoomError('Match is not in progress.');
     forceLockRemainingSeats(room);
     room.phase = 'gameover';
+    this.clearTurnTimer(room.code);
+    room.turnDeadline = null;
     room.updatedAt = Date.now();
     return room;
   }
@@ -259,6 +326,7 @@ class RoomStore {
     this.rooms.forEach((room, code) => {
       if (room.updatedAt < cutoff) {
         Object.keys(room.players).forEach((playerId) => this.tokens.delete(playerId));
+        this.clearTurnTimer(code);
         this.rooms.delete(code);
         removed++;
       }

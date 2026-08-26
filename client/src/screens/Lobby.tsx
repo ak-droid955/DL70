@@ -1,5 +1,12 @@
+import { TURN_TIMER_OPTIONS } from '../lib/types';
 import { useGame } from '../state/GameProvider';
 import styles from './Lobby.module.css';
+
+function timerLabel(seconds: number | null): string {
+  if (!seconds) return 'No time limit';
+  const opt = TURN_TIMER_OPTIONS.find((o) => o.seconds === seconds);
+  return `${opt ? opt.label : `${seconds}s`} per turn`;
+}
 
 export default function Lobby() {
   const { state, startGame } = useGame();
@@ -12,6 +19,7 @@ export default function Lobby() {
     <div className={styles.screen}>
       <div className={styles.roomCodeLabel}>ROOM CODE</div>
       <div className={styles.roomCode}>{room.code}</div>
+      <div className={styles.timerBadge}>⏱ {timerLabel(room.turnTimerSeconds)}</div>
 
       <div className={styles.playerList}>
         {players.map((p) => (
