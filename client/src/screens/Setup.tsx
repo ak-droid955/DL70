@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { PARTY_COLOR_SWATCHES, PARTY_SYMBOLS, TURN_TIMER_OPTIONS } from '../lib/types';
 import { useGame } from '../state/GameProvider';
 import styles from './Setup.module.css';
@@ -103,22 +104,26 @@ export default function Setup() {
         {state.pendingMode === 'create' && (
           <div>
             <div className={styles.label}>Room timer</div>
-            <div className={styles.timerTrack}>
-              {TURN_TIMER_OPTIONS.map((opt, i) => {
-                const selected = i === state.turnTimerChoice;
-                return (
-                  <button
-                    type="button"
-                    key={opt.label}
-                    onClick={() => pickTurnTimer(i)}
-                    className={styles.timerStop}
-                    aria-pressed={selected}
-                  >
-                    <span className={`${styles.timerDot} ${i <= state.turnTimerChoice ? styles.timerDotFilled : ''}`} />
-                    <span className={`${styles.timerLabel} ${selected ? styles.timerLabelActive : ''}`}>{opt.label}</span>
-                  </button>
-                );
-              })}
+            <input
+              type="range"
+              min={0}
+              max={TURN_TIMER_OPTIONS.length - 1}
+              step={1}
+              value={state.turnTimerChoice}
+              onChange={(e) => pickTurnTimer(Number(e.target.value))}
+              className={styles.timerSlider}
+              style={{ '--pct': `${(state.turnTimerChoice / (TURN_TIMER_OPTIONS.length - 1)) * 100}%` } as CSSProperties}
+              aria-label="Room timer"
+            />
+            <div className={styles.timerLabels}>
+              {TURN_TIMER_OPTIONS.map((opt, i) => (
+                <span
+                  key={opt.label}
+                  className={`${styles.timerLabel} ${i === state.turnTimerChoice ? styles.timerLabelActive : ''}`}
+                >
+                  {opt.label}
+                </span>
+              ))}
             </div>
             <div className={styles.timerHint}>How long each turn lasts. Applies to everyone in the room.</div>
           </div>
