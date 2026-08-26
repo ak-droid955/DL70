@@ -1,9 +1,10 @@
-import { PARTY_COLOR_SWATCHES } from '../lib/types';
+import { PARTY_COLOR_SWATCHES, PARTY_SYMBOLS } from '../lib/types';
 import { useGame } from '../state/GameProvider';
 import styles from './Setup.module.css';
 
 export default function Setup() {
-  const { state, onNameChange, onPartyNameChange, pickColor, onSymbolFile, submitSetup } = useGame();
+  const { state, onNameChange, onPartyNameChange, onPartyCodeChange, pickColor, pickSymbol, onSymbolFile, submitSetup } =
+    useGame();
 
   return (
     <div className={styles.screen}>
@@ -31,6 +32,17 @@ export default function Setup() {
         </div>
 
         <div>
+          <div className={styles.label}>Party code (optional)</div>
+          <input
+            className={styles.input}
+            value={state.partyCodeInput}
+            onChange={(e) => onPartyCodeChange(e.target.value)}
+            placeholder="e.g. NEP"
+            maxLength={6}
+          />
+        </div>
+
+        <div>
           <div className={styles.label}>Party colour</div>
           <div className={styles.swatchRow}>
             {PARTY_COLOR_SWATCHES.map((c, i) => (
@@ -46,19 +58,36 @@ export default function Setup() {
 
         <div>
           <div className={styles.label}>Party symbol (optional)</div>
+          <div className={styles.symbolGrid}>
+            {PARTY_SYMBOLS.map((s) => (
+              <button
+                type="button"
+                key={s.label}
+                title={s.label}
+                aria-label={s.label}
+                onClick={() => pickSymbol(s.emoji)}
+                className={`${styles.symbolBtn} ${state.symbolChoice === s.emoji ? styles.symbolBtnSelected : ''}`}
+              >
+                {s.emoji}
+              </button>
+            ))}
+          </div>
           <div className={styles.symbolRow}>
             {state.symbolDataUrl && (
               <div className={styles.symbolPreview} style={{ backgroundImage: `url(${state.symbolDataUrl})` }} />
             )}
-            <input
-              className={styles.fileInput}
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) onSymbolFile(file);
-              }}
-            />
+            <label className={styles.uploadLabel}>
+              or upload your own
+              <input
+                className={styles.fileInput}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) onSymbolFile(file);
+                }}
+              />
+            </label>
           </div>
         </div>
 

@@ -40,15 +40,25 @@ export const VOTE_BANK_LEADER_BONUS_BASE = 60; // ₹K, paid each turn to each V
 export const VOTE_BANK_BONUS_FULL_EFFECT_STRENGTH = 60; // strength value at/above which the bonus is undiscounted
 export const VOTE_BANK_BONUS_MIN_MULTIPLIER = 0.4; // floor multiplier when spend is concentrated elsewhere (or nowhere)
 
+// NOTE: order and length must stay identical to PARTY_COLOR_SWATCHES in
+// client/src/lib/types.ts — a colour is stored by its index in this array.
 export const PARTY_COLOR_SWATCHES = [
   'oklch(62% 0.19 25)', // red
+  'oklch(64% 0.2 15)', // crimson
   'oklch(66% 0.17 55)', // orange
+  'oklch(68% 0.16 40)', // burnt orange
   'oklch(72% 0.15 95)', // gold
+  'oklch(74% 0.14 75)', // amber
   'oklch(64% 0.15 140)', // green
+  'oklch(66% 0.16 120)', // lime
   'oklch(60% 0.13 195)', // teal
+  'oklch(62% 0.13 165)', // emerald
   'oklch(58% 0.16 250)', // blue
+  'oklch(62% 0.14 220)', // sky
   'oklch(60% 0.18 300)', // purple
-  'oklch(62% 0.19 340)' // magenta
+  'oklch(58% 0.17 275)', // indigo
+  'oklch(62% 0.19 340)', // magenta
+  'oklch(64% 0.18 320)' // pink
 ];
 
 export { VOTE_BANKS, VOTE_BANK_IDS };

@@ -22,6 +22,7 @@ const ROOM_MAX_IDLE_MS = 6 * 60 * 60 * 1000; // 6 hours
 export interface NewPlayerInput {
   name: string;
   partyName: string;
+  partyCode?: string;
   colorIndex: number;
   symbol: string | null;
 }
@@ -58,6 +59,11 @@ class RoomStore {
     const name = (input.name || '').trim().slice(0, 40);
     const partyName = (input.partyName || '').trim().slice(0, 60);
     if (!name || !partyName) throw new RoomError('Enter your name and party name');
+    // Optional short party code/abbreviation, e.g. "AAP". Uppercased, alphanumerics only, max 6.
+    const partyCode = (input.partyCode || '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '')
+      .slice(0, 6);
     let symbol = input.symbol || null;
     if (symbol) {
       if (typeof symbol !== 'string' || !symbol.startsWith('data:image/') || symbol.length > MAX_SYMBOL_BYTES) {
@@ -66,15 +72,16 @@ class RoomStore {
     }
     const colorIndex = Number.isInteger(input.colorIndex) ? input.colorIndex : 0;
     const color = PARTY_COLOR_SWATCHES[((colorIndex % PARTY_COLOR_SWATCHES.length) + PARTY_COLOR_SWATCHES.length) % PARTY_COLOR_SWATCHES.length];
-    return { name, partyName, color, symbol };
+    return { name, partyName, partyCode, color, symbol };
   }
 
   private makePlayer(input: NewPlayerInput): Player {
-    const { name, partyName, color, symbol } = this.validatePlayerInput(input);
+    const { name, partyName, partyCode, color, symbol } = this.validatePlayerInput(input);
     return {
       id: 'p_' + randomBytes(6).toString('hex'),
       name,
       partyName,
+      partyCode,
       color,
       symbol,
       seatsWon: 0,

@@ -21,6 +21,7 @@ export default function Lobby() {
             <div style={{ flex: 1 }}>
               <div className={styles.partyName}>
                 {p.partyName}
+                {p.partyCode ? <span className={styles.partyCode}>{p.partyCode}</span> : null}
                 {p.id === room.hostId ? ' · Host' : ''}
               </div>
               <div className={styles.playerName}>

@@ -61,10 +61,46 @@
   border-color: var(--text);
 }
 
+.symbolGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.symbolBtn {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  line-height: 1;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  transition: border-color 0.12s ease, transform 0.12s ease;
+}
+.symbolBtn:hover {
+  transform: translateY(-1px);
+}
+.symbolBtnSelected {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 2px var(--navy) inset;
+}
+
 .symbolRow {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.uploadLabel {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .symbolPreview {

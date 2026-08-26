@@ -4,6 +4,7 @@ export interface Player {
   id: string;
   name: string;
   partyName: string;
+  partyCode: string;
   color: string;
   symbol: string | null;
   seatsWon: number;

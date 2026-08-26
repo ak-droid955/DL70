@@ -2,6 +2,7 @@ export interface Player {
   id: string;
   name: string;
   partyName: string;
+  partyCode: string;
   color: string;
   symbol: string | null;
   seatsWon: number;
@@ -102,13 +103,39 @@ export interface OpenRoomSummary {
   createdAt: number;
 }
 
+// NOTE: order and length must stay identical to PARTY_COLOR_SWATCHES in
+// server/src/gameData.ts — the server stores a colour by its index here.
 export const PARTY_COLOR_SWATCHES = [
-  'oklch(62% 0.19 25)',
-  'oklch(66% 0.17 55)',
-  'oklch(72% 0.15 95)',
-  'oklch(64% 0.15 140)',
-  'oklch(60% 0.13 195)',
-  'oklch(58% 0.16 250)',
-  'oklch(60% 0.18 300)',
-  'oklch(62% 0.19 340)'
+  'oklch(62% 0.19 25)', // red
+  'oklch(64% 0.2 15)', // crimson
+  'oklch(66% 0.17 55)', // orange
+  'oklch(68% 0.16 40)', // burnt orange
+  'oklch(72% 0.15 95)', // gold
+  'oklch(74% 0.14 75)', // amber
+  'oklch(64% 0.15 140)', // green
+  'oklch(66% 0.16 120)', // lime
+  'oklch(60% 0.13 195)', // teal
+  'oklch(62% 0.13 165)', // emerald
+  'oklch(58% 0.16 250)', // blue
+  'oklch(62% 0.14 220)', // sky
+  'oklch(60% 0.18 300)', // purple
+  'oklch(58% 0.17 275)', // indigo
+  'oklch(62% 0.19 340)', // magenta
+  'oklch(64% 0.18 320)' // pink
+];
+
+// Preset election symbols offered on the setup screen. The chosen emoji is
+// rendered to a PNG data URL (see GameProvider.pickSymbol) so it travels
+// through the same `symbol` field as an uploaded image.
+export const PARTY_SYMBOLS: { label: string; emoji: string }[] = [
+  { label: 'Broom', emoji: '🧹' },
+  { label: 'Lotus', emoji: '🪷' },
+  { label: 'Hand', emoji: '✋' },
+  { label: 'Bicycle', emoji: '🚲' },
+  { label: 'Elephant', emoji: '🐘' },
+  { label: 'Bow & Arrow', emoji: '🏹' },
+  { label: 'Lantern', emoji: '🏮' },
+  { label: 'Umbrella', emoji: '☂️' },
+  { label: 'Star', emoji: '⭐' },
+  { label: 'Coconut', emoji: '🥥' }
 ];

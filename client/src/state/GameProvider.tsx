@@ -18,8 +18,10 @@ interface State {
   joinCodeInput: string;
   nameInput: string;
   partyNameInput: string;
+  partyCodeInput: string;
   colorChoice: number;
   symbolDataUrl: string | null;
+  symbolChoice: string | null; // emoji of the selected preset symbol, if any
   pendingMode: PendingMode;
   pendingCode: string | null;
   error: string | null;
@@ -37,8 +39,10 @@ const initialState: State = {
   joinCodeInput: '',
   nameInput: '',
   partyNameInput: '',
+  partyCodeInput: '',
   colorChoice: 0,
   symbolDataUrl: null,
+  symbolChoice: null,
   pendingMode: null,
   pendingCode: null,
   error: null,
@@ -82,7 +86,9 @@ interface Ctx {
   onJoinCodeChange: (v: string) => void;
   onNameChange: (v: string) => void;
   onPartyNameChange: (v: string) => void;
+  onPartyCodeChange: (v: string) => void;
   pickColor: (i: number) => void;
+  pickSymbol: (emoji: string) => void;
   onSymbolFile: (file: File) => void;
   submitSetup: () => Promise<void>;
   startGame: () => Promise<void>;
@@ -195,7 +201,25 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const onNameChange = (v: string) => patch({ nameInput: v });
   const onPartyNameChange = (v: string) => patch({ partyNameInput: v });
+  const onPartyCodeChange = (v: string) =>
+    patch({ partyCodeInput: v.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) });
   const pickColor = (i: number) => patch({ colorChoice: i });
+
+  // Render a preset election-symbol emoji to a 96x96 PNG data URL so it flows
+  // through the same `symbol` field (and server validation) as an upload.
+  const pickSymbol = (emoji: string) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 96;
+    canvas.height = 96;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.font = '72px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(emoji, 48, 54);
+    patch({ symbolDataUrl: canvas.toDataURL('image/png'), symbolChoice: emoji });
+  };
+
   const onSymbolFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -207,7 +231,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         canvas.height = 96;
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 96, 96);
-        patch({ symbolDataUrl: canvas.toDataURL('image/png') });
+        patch({ symbolDataUrl: canvas.toDataURL('image/png'), symbolChoice: null });
       };
       img.src = ev.target?.result as string;
     };
@@ -215,10 +239,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
   };
 
   const submitSetup = async () => {
-    const { pendingMode, pendingCode, nameInput, partyNameInput, colorChoice, symbolDataUrl } = stateRef.current;
+    const { pendingMode, pendingCode, nameInput, partyNameInput, partyCodeInput, colorChoice, symbolDataUrl } = stateRef.current;
     if (!nameInput.trim() || !partyNameInput.trim()) return patch({ error: 'Enter your name and party name' });
     try {
-      const payload = { name: nameInput.trim(), partyName: partyNameInput.trim(), colorIndex: colorChoice, symbol: symbolDataUrl || null };
+      const payload = {
+        name: nameInput.trim(),
+        partyName: partyNameInput.trim(),
+        partyCode: partyCodeInput.trim(),
+        colorIndex: colorChoice,
+        symbol: symbolDataUrl || null
+      };
       const { room, playerId, token } =
         pendingMode === 'create'
           ? await call<{ room: Room; playerId: string; token: string }>('room:create', payload)
@@ -310,7 +340,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       onJoinCodeChange,
       onNameChange,
       onPartyNameChange,
+      onPartyCodeChange,
       pickColor,
+      pickSymbol,
       onSymbolFile,
       submitSetup,
       startGame,
