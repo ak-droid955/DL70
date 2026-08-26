@@ -3,9 +3,8 @@ import { useGame } from '../state/GameProvider';
 import styles from './Lobby.module.css';
 
 function timerLabel(seconds: number | null): string {
-  if (!seconds) return 'No time limit';
   const opt = TURN_TIMER_OPTIONS.find((o) => o.seconds === seconds);
-  return `${opt ? opt.label : `${seconds}s`} per turn`;
+  return `${opt ? opt.label : `${seconds ?? 60}s`} per turn`;
 }
 
 export default function Lobby() {

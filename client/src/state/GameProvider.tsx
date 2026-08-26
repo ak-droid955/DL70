@@ -43,7 +43,7 @@ const initialState: State = {
   partyNameInput: '',
   partyCodeInput: '',
   colorChoice: 0,
-  turnTimerChoice: 0,
+  turnTimerChoice: 2, // default 1m (index into TURN_TIMER_OPTIONS)
   symbolDataUrl: null,
   symbolChoice: null,
   pendingMode: null,

@@ -12,9 +12,11 @@ import type { Player, Room, TurnLogEntry } from './types.js';
 
 const MAX_PLAYERS = 5;
 const MAX_SYMBOL_BYTES = 250_000; // ~250KB data URL ceiling, guards against abuse
-// Allowed per-turn time limits (seconds). Anything else (including null/absent)
-// is treated as "No Limit". Keep in sync with TURN_TIMER_OPTIONS on the client.
+// Allowed per-turn time limits (seconds). Every room is timed; an invalid or
+// absent choice falls back to DEFAULT_TURN_TIMER. Keep in sync with
+// TURN_TIMER_OPTIONS on the client.
 const TURN_TIMER_OPTIONS = [10, 30, 60, 120, 180, 300];
+const DEFAULT_TURN_TIMER = 60;
 // Rooms live only in memory, so an abandoned room (players closed the tab
 // mid-game, or never started) would otherwise sit there forever, growing
 // process memory without bound for as long as the server stays up. Anything
@@ -55,8 +57,8 @@ class RoomStore {
     this.broadcast = fn;
   }
 
-  private normalizeTurnTimer(seconds: number | null | undefined): number | null {
-    return typeof seconds === 'number' && TURN_TIMER_OPTIONS.includes(seconds) ? seconds : null;
+  private normalizeTurnTimer(seconds: number | null | undefined): number {
+    return typeof seconds === 'number' && TURN_TIMER_OPTIONS.includes(seconds) ? seconds : DEFAULT_TURN_TIMER;
   }
 
   private clearTurnTimer(code: string): void {

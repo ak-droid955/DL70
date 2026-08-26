@@ -127,12 +127,10 @@ export const PARTY_COLOR_SWATCHES = [
 ];
 
 // Per-turn time-limit options for the room timer, shown as a slider on the
-// setup screen. `seconds: null` is the "No Limit" position (timing off — turns
-// resolve only when every player submits). The timed scale starts at 10s and is
-// capped at 5m. Keep the numeric values in sync with TURN_TIMER_OPTIONS on the
-// server (rooms.ts).
-export const TURN_TIMER_OPTIONS: { label: string; seconds: number | null }[] = [
-  { label: 'No Limit', seconds: null },
+// setup screen. Every room is timed: the scale starts at 10s and is capped at
+// 5m. Keep the numeric values in sync with TURN_TIMER_OPTIONS on the server
+// (rooms.ts).
+export const TURN_TIMER_OPTIONS: { label: string; seconds: number }[] = [
   { label: '10s', seconds: 10 },
   { label: '30s', seconds: 30 },
   { label: '1m', seconds: 60 },
