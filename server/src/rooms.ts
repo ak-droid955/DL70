@@ -1,11 +1,14 @@
 import { randomBytes } from 'node:crypto';
 import {
   BUDGET_PER_TURN_DEFAULT,
+  FIRST_ENTRY_MAX_RUNGS,
   MAX_TURNS_DEFAULT,
   PARTY_COLOR_SWATCHES,
+  TOTAL_RUNGS,
   VOTE_BANK_IDS,
   forceLockRemainingSeats,
   loadStaticSeats,
+  maxPerRungFor,
   resolveTurn
 } from './gameData.js';
 import type { Player, Room, TurnLogEntry } from './types.js';
@@ -258,14 +261,27 @@ class RoomStore {
     if (room.phase !== 'playing') throw new RoomError('Game is not in progress.');
     if (player.ready) return { room, resolved: null }; // already submitted this turn, no-op
 
+    // Spending is by whole Campaign Rungs: a submitted amount is snapped down to
+    // a whole number of rungs at the seat's fixed per-rung cost, capped so a
+    // player can never pass the final rung, and — on their first turn spending
+    // in a seat — capped at FIRST_ENTRY_MAX_RUNGS rungs.
     const cleanSeatSpends: Record<string, number> = {};
     let total = 0;
     Object.entries(seatSpends || {}).forEach(([acNo, amt]) => {
       const seat = room.seats[acNo];
-      const n = Math.max(0, Math.floor(Number(amt) || 0));
-      if (!seat || seat.locked || n <= 0) return;
-      cleanSeatSpends[acNo] = n;
-      total += n;
+      if (!seat || seat.locked) return;
+      const perRung = maxPerRungFor(acNo);
+      const committed = seat.progress[playerId] || 0;
+      const currentRungs = Math.floor(committed / perRung);
+      const firstEntry = committed <= 0;
+      const roomToTop = TOTAL_RUNGS - currentRungs;
+      const maxAddRungs = firstEntry ? Math.min(FIRST_ENTRY_MAX_RUNGS, roomToTop) : roomToTop;
+      const requestedRungs = Math.max(0, Math.floor((Number(amt) || 0) / perRung));
+      const rungs = Math.min(requestedRungs, Math.max(0, maxAddRungs));
+      const spend = rungs * perRung;
+      if (spend <= 0) return;
+      cleanSeatSpends[acNo] = spend;
+      total += spend;
     });
 
     if (total > player.budgetThisTurn) {

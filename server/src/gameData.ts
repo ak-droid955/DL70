@@ -19,8 +19,31 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export const MAX_TURNS_DEFAULT = 10;
 export const BUDGET_PER_TURN_DEFAULT = 300; // in ₹ thousands
-export const CONFLICT_FEE_PER_EXTRA = 5; // ₹K deducted per extra contestant sharing a seat this turn
-export const LOCK_MARGIN_RATIO = 0.2; // leader must beat runner-up by this fraction of threshold to lock
+
+// Campaign Rungs: every constituency has TOTAL_RUNGS rungs. A rung costs a
+// fixed amount (MAX_PER_RUNG, per constituency, in ₹K); spending that amount
+// climbs one rung. The first player to reach the final rung permanently wins
+// (locks) the seat. On a player's FIRST turn spending in a seat they may climb
+// at most FIRST_ENTRY_MAX_RUNGS rungs.
+export const TOTAL_RUNGS = 10;
+export const FIRST_ENTRY_MAX_RUNGS = 3;
+
+// Fixed ₹K cost to climb one rung, per constituency (AC_NO -> ₹K). Sourced from
+// the game's per-constituency spending table.
+const MAX_PER_RUNG: Record<string, number> = {
+  '1': 65, '2': 75, '3': 65, '4': 65, '5': 75, '6': 80, '7': 65, '8': 65, '9': 75, '10': 60,
+  '11': 80, '12': 60, '13': 75, '14': 70, '15': 75, '16': 70, '17': 75, '18': 75, '19': 80, '20': 80,
+  '21': 80, '22': 80, '23': 65, '24': 65, '25': 70, '26': 60, '27': 85, '28': 75, '29': 70, '30': 80,
+  '31': 90, '32': 85, '33': 90, '34': 85, '35': 70, '36': 75, '37': 70, '38': 60, '39': 90, '40': 110,
+  '41': 85, '42': 75, '43': 80, '44': 75, '45': 80, '46': 85, '47': 60, '48': 60, '49': 80, '50': 100,
+  '51': 105, '52': 75, '53': 80, '54': 105, '55': 60, '56': 60, '57': 90, '58': 85, '59': 80, '60': 75,
+  '61': 80, '62': 70, '63': 60, '64': 70, '65': 85, '66': 80, '67': 80, '68': 65, '69': 100, '70': 90
+};
+const MAX_PER_RUNG_FALLBACK = 75; // used only if an acNo is somehow missing from the table above
+
+export function maxPerRungFor(acNo: string): number {
+  return MAX_PER_RUNG[acNo] ?? MAX_PER_RUNG_FALLBACK;
+}
 
 // Vote Bank leadership reward. Unlike the old one-time "claim" bonus this
 // replaces, leadership is re-evaluated every turn and the current leader of
@@ -141,6 +164,7 @@ export interface StaticSeat {
   pcName: string;
   electors: number;
   threshold: number;
+  maxPerRung: number; // fixed ₹K cost to climb one Campaign Rung in this seat
   centroid: [number, number] | null;
   geometry: GeoJSON.Geometry;
   primaryVoteBank: VoteBankId;
@@ -169,6 +193,7 @@ export function loadStaticSeats(): Record<string, StaticSeat> {
       pcName: (f.properties as any).PC_NAME,
       electors: elec,
       threshold: computeThreshold(elec),
+      maxPerRung: maxPerRungFor(acNo),
       centroid: featureCentroid(f.geometry),
       geometry: f.geometry,
       primaryVoteBank: vb.primaryVoteBank,
@@ -221,25 +246,30 @@ export function resolveTurn(room: Room): { events: TurnEvent[]; perPlayerSpend: 
     });
   });
 
-  // Effective (post-conflict-fee) spend this turn, per player per seat — feeds
-  // both Vote Bank influence generation and the geographic-relevance
-  // multiplier on any Vote Bank leadership bonus, below.
+  // Spend this turn, per player per seat — feeds both Vote Bank influence
+  // generation and the geographic-relevance multiplier on any Vote Bank
+  // leadership bonus, below. Every rung costs a fixed amount, so a rung's spend
+  // applies in full (no contest fees).
   const effectiveSpendThisTurn: Record<string, Record<string, number>> = {};
+  // Each seat's progress as it stood before this turn — used to break ties when
+  // two players reach the final rung on the same turn (whoever was ahead wins).
+  const priorProgressBySeat: Record<string, Record<string, number>> = {};
 
   Object.entries(seatSpendersThisTurn).forEach(([acNo, spenders]) => {
     const seat = seats[acNo];
     if (!seat || seat.locked) return;
-    const n = spenders.length;
-    const conflictFee = n >= 2 ? CONFLICT_FEE_PER_EXTRA * (n - 1) : 0;
+    const rungTenTotal = maxPerRungFor(acNo) * TOTAL_RUNGS; // money at the final rung
+    priorProgressBySeat[acNo] = { ...seat.progress };
     spenders.forEach(({ playerId, amt }) => {
-      const effective = Math.max(0, amt - conflictFee);
-      seat.progress[playerId] = (seat.progress[playerId] || 0) + effective;
-      perPlayerSpend[playerId] += amt;
-      if (conflictFee > 0) events.push({ type: 'conflict', acNo, playerId, fee: conflictFee, seatName: seat.name });
-      if (effective > 0) {
-        effectiveSpendThisTurn[playerId] = effectiveSpendThisTurn[playerId] || {};
-        effectiveSpendThisTurn[playerId][acNo] = (effectiveSpendThisTurn[playerId][acNo] || 0) + effective;
-      }
+      // amt is validated at submit time (whole rungs, first-entry cap, ≤ final
+      // rung); clamp to the rung-10 ceiling here too so nothing is overspent.
+      const before = seat.progress[playerId] || 0;
+      const applied = Math.max(0, Math.min(amt, rungTenTotal - before));
+      if (applied <= 0) return;
+      seat.progress[playerId] = before + applied;
+      perPlayerSpend[playerId] += applied;
+      effectiveSpendThisTurn[playerId] = effectiveSpendThisTurn[playerId] || {};
+      effectiveSpendThisTurn[playerId][acNo] = (effectiveSpendThisTurn[playerId][acNo] || 0) + applied;
     });
   });
 
@@ -309,19 +339,20 @@ export function resolveTurn(room: Room): { events: TurnEvent[]; perPlayerSpend: 
     }
   });
 
+  // A seat locks the moment a player reaches the final rung. If two players
+  // reach it on the same blind turn, whoever was ahead going into the turn wins
+  // (ties broken deterministically); normally only one player tops out at once.
   Object.values(seats).forEach((seat) => {
     if (seat.locked) return;
-    const entries = Object.entries(seat.progress || {});
-    if (!entries.length) return;
-    entries.sort((a, b) => b[1] - a[1]);
-    const [leaderId, leaderAmt] = entries[0];
-    const runnerUpAmt = entries[1] ? entries[1][1] : 0;
-    const margin = leaderAmt - runnerUpAmt;
-    if (leaderAmt >= seat.threshold && margin >= seat.threshold * LOCK_MARGIN_RATIO) {
-      seat.locked = leaderId;
-      events.push({ type: 'lock', acNo: seat.acNo, seatName: seat.name, playerId: leaderId });
-      players[leaderId].seatsWon = (players[leaderId].seatsWon || 0) + 1;
-    }
+    const rungTenTotal = maxPerRungFor(seat.acNo) * TOTAL_RUNGS;
+    const atTop = Object.entries(seat.progress || {}).filter(([, amt]) => amt >= rungTenTotal);
+    if (!atTop.length) return;
+    const prior = priorProgressBySeat[seat.acNo] || {};
+    atTop.sort((a, b) => (prior[b[0]] || 0) - (prior[a[0]] || 0) || (a[0] < b[0] ? -1 : 1));
+    const winnerId = atTop[0][0];
+    seat.locked = winnerId;
+    events.push({ type: 'lock', acNo: seat.acNo, seatName: seat.name, playerId: winnerId });
+    players[winnerId].seatsWon = (players[winnerId].seatsWon || 0) + 1;
   });
 
   if (isFinalTurn) {

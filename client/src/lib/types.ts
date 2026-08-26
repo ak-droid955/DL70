@@ -91,6 +91,7 @@ export interface StaticSeat {
   pcName: string;
   electors: number;
   threshold: number;
+  maxPerRung: number; // fixed ₹K cost to climb one Campaign Rung in this seat
   centroid: [number, number] | null;
   geometry: GeoJSON.Geometry;
   primaryVoteBank: VoteBankId;
@@ -107,6 +108,13 @@ export interface OpenRoomSummary {
 
 // NOTE: order and length must stay identical to PARTY_COLOR_SWATCHES in
 // server/src/gameData.ts — the server stores a colour by its index here.
+// Campaign Rungs: every seat has TOTAL_RUNGS rungs, each costing the seat's
+// fixed maxPerRung. First to the final rung wins; a player's first turn in a
+// seat may climb at most FIRST_ENTRY_MAX_RUNGS rungs. Keep in sync with the
+// server (gameData.ts).
+export const TOTAL_RUNGS = 10;
+export const FIRST_ENTRY_MAX_RUNGS = 3;
+
 export const PARTY_COLOR_SWATCHES = [
   'oklch(62% 0.19 25)', // red
   'oklch(64% 0.2 15)', // crimson

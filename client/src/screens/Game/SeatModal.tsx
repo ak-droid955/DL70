@@ -1,16 +1,17 @@
-import { VOTE_BANKS } from '../../lib/types';
+import { FIRST_ENTRY_MAX_RUNGS, TOTAL_RUNGS, VOTE_BANKS } from '../../lib/types';
 import { useGame } from '../../state/GameProvider';
 import styles from './SeatModal.module.css';
 
 const VOTE_BANK_NAME_BY_ID = Object.fromEntries(VOTE_BANKS.map((b) => [b.id, b.name]));
 
 export default function SeatModal() {
-  const { state, getMe, closeSeat, addSeatSpend, clearSeatDraft } = useGame();
+  const { state, getMe, getRemaining, closeSeat, addSeatSpend, clearSeatDraft } = useGame();
   const room = state.room!;
   const me = getMe();
   const seat = state.selectedSeatAcNo ? room.seats[state.selectedSeatAcNo] : null;
   if (!seat) return null;
   const staticSeat = state.staticSeats?.[seat.acNo];
+  const perRung = staticSeat?.maxPerRung ?? 75;
 
   const players = Object.values(room.players);
   const rows = players
@@ -18,16 +19,29 @@ export default function SeatModal() {
       const committed = seat.progress[p.id] || 0;
       const pending = p.id === state.myPlayerId ? state.draftSeatSpends[seat.acNo] || 0 : 0;
       const total = committed + pending;
+      const rungs = Math.min(TOTAL_RUNGS, Math.floor(total / perRung));
+      const pendingRungs = Math.floor(pending / perRung);
       return {
         partyName: p.partyName,
         color: p.color,
-        total,
+        rungs,
         mineTag: p.id === state.myPlayerId ? ' (you)' : '',
-        pendingLabel: pending ? `(+${pending}K pending)` : '',
-        pct: Math.min(100, Math.round((total / seat.threshold) * 100))
+        pendingLabel: pendingRungs ? `(+${pendingRungs} rung${pendingRungs > 1 ? 's' : ''} pending)` : '',
+        pct: Math.round((rungs / TOTAL_RUNGS) * 100)
       };
     })
-    .sort((a, b) => b.total - a.total);
+    .sort((a, b) => b.rungs - a.rungs);
+
+  // Rung caps for the current player in this seat.
+  const myCommitted = me ? seat.progress[me.id] || 0 : 0;
+  const myPending = state.draftSeatSpends[seat.acNo] || 0;
+  const myCommittedRungs = Math.floor(myCommitted / perRung);
+  const myDraftRungs = Math.floor(myPending / perRung);
+  const firstEntry = myCommitted <= 0;
+  const maxAddThisTurn = firstEntry ? FIRST_ENTRY_MAX_RUNGS : TOTAL_RUNGS - myCommittedRungs;
+  const atTop = myCommittedRungs + myDraftRungs >= TOTAL_RUNGS;
+  const canAffordRung = getRemaining() >= perRung;
+  const canAddRung = myDraftRungs < maxAddThisTurn && !atTop && canAffordRung;
 
   const lockedPlayer = seat.locked && seat.locked !== 'INDEPENDENT' ? room.players[seat.locked] : null;
   const lockedLabel =
@@ -61,8 +75,8 @@ export default function SeatModal() {
             <div className={styles.statValue}>{seat.electors.toLocaleString('en-IN')}</div>
           </div>
           <div>
-            <div className={styles.statLabel}>WIN TARGET</div>
-            <div className={styles.statValue}>₹{seat.threshold}K</div>
+            <div className={styles.statLabel}>₹ PER RUNG</div>
+            <div className={styles.statValue}>₹{perRung}K</div>
           </div>
         </div>
 
@@ -86,7 +100,8 @@ export default function SeatModal() {
                   {row.mineTag}
                 </div>
                 <div className={styles.rowTotal}>
-                  ₹{row.total}K{row.pendingLabel ? ` ${row.pendingLabel}` : ''}
+                  Rung {row.rungs}/{TOTAL_RUNGS}
+                  {row.pendingLabel ? ` ${row.pendingLabel}` : ''}
                 </div>
               </div>
               <div className={styles.progressTrack}>
@@ -102,22 +117,31 @@ export default function SeatModal() {
           )}
 
           {editable && (
-            <div className={styles.spendRow}>
-              <button className={styles.spendBtn} onClick={() => addSeatSpend(seat.acNo, 10)}>
-                +₹10K
-              </button>
-              <button className={styles.spendBtn} onClick={() => addSeatSpend(seat.acNo, 25)}>
-                +₹25K
-              </button>
-              <button className={styles.spendBtn} onClick={() => addSeatSpend(seat.acNo, 50)}>
-                +₹50K
-              </button>
-              {hasDraft && (
-                <button className={styles.clearBtn} onClick={() => clearSeatDraft(seat.acNo)}>
-                  Clear
+            <>
+              <div className={styles.spendRow}>
+                <button
+                  className={styles.spendBtn}
+                  disabled={!canAddRung}
+                  onClick={() => addSeatSpend(seat.acNo, perRung)}
+                >
+                  +1 Rung (₹{perRung}K)
                 </button>
-              )}
-            </div>
+                {hasDraft && (
+                  <button className={styles.clearBtn} onClick={() => clearSeatDraft(seat.acNo)}>
+                    Clear
+                  </button>
+                )}
+              </div>
+              <div className={styles.spendHint}>
+                {atTop
+                  ? 'Ready to take the final rung — win this seat.'
+                  : firstEntry
+                    ? `First move here: up to ${FIRST_ENTRY_MAX_RUNGS} rungs this turn.`
+                    : !canAffordRung
+                      ? 'Not enough budget left for another rung.'
+                      : `Each rung costs ₹${perRung}K. Reach rung ${TOTAL_RUNGS} to win the seat.`}
+              </div>
+            </>
           )}
         </div>
       </div>
