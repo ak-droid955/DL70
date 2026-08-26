@@ -84,12 +84,9 @@ export function registerSocketHandlers(io: Server, socket: Socket) {
 
   socket.on(
     'game:submitTurn',
-    (
-      input: { code: string; playerId: string; seatSpends: Record<string, number>; groupSpends: Record<string, number> },
-      cb: Callback<{ room: Room }>
-    ) => {
+    (input: { code: string; playerId: string; seatSpends: Record<string, number> }, cb: Callback<{ room: Room }>) => {
       guard(cb, () => {
-        const { room } = roomStore.submitTurn(input.code, input.playerId, input.seatSpends, input.groupSpends);
+        const { room } = roomStore.submitTurn(input.code, input.playerId, input.seatSpends);
         io.to(room.code).emit('room:update', room);
         return { room };
       });

@@ -5,7 +5,15 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import type { Group, Player, Room, Seat, TurnEvent } from './types.js';
+import type { Player, Room, Seat, TurnEvent } from './types.js';
+import {
+  VOTE_BANKS,
+  VOTE_BANK_IDS,
+  loadConstituencyVoteBanks,
+  validateConstituencyVoteBanks,
+  type ConstituencyVoteBanks,
+  type VoteBankId
+} from './voteBanks.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -13,7 +21,24 @@ export const MAX_TURNS_DEFAULT = 10;
 export const BUDGET_PER_TURN_DEFAULT = 300; // in ₹ thousands
 export const CONFLICT_FEE_PER_EXTRA = 5; // ₹K deducted per extra contestant sharing a seat this turn
 export const LOCK_MARGIN_RATIO = 0.2; // leader must beat runner-up by this fraction of threshold to lock
-export const GROUP_BONUS = 60; // ₹K added to claimer's next-turn budget
+
+// Vote Bank leadership reward. Unlike the old one-time "claim" bonus this
+// replaces, leadership is re-evaluated every turn and the current leader of
+// each Vote Bank is paid this bonus again each turn they remain the leader —
+// so contesting a rival's Vote Bank lead is a way to cut off their income,
+// not just a one-off race. Reuses the same budget-bonus mechanism the game
+// already had (added to the leader's next-turn budgetThisTurn) rather than a
+// separate currency.
+export const VOTE_BANK_LEADER_BONUS_BASE = 60; // ₹K, paid each turn to each Vote Bank's current leader
+// Geographic-relevance rule for that bonus: how much of the base bonus a
+// leader actually receives this turn depends on how strongly this turn's own
+// seat spending concentrated in constituencies where the Vote Bank they lead
+// is strong (a spend-weighted average of that Vote Bank's strength across the
+// seats they spent in this turn). A leader who spent nothing this turn gets
+// the floor multiplier. Both the strength needed for full effect and the
+// floor are configurable.
+export const VOTE_BANK_BONUS_FULL_EFFECT_STRENGTH = 60; // strength value at/above which the bonus is undiscounted
+export const VOTE_BANK_BONUS_MIN_MULTIPLIER = 0.4; // floor multiplier when spend is concentrated elsewhere (or nowhere)
 
 export const PARTY_COLOR_SWATCHES = [
   'oklch(62% 0.19 25)', // red
@@ -26,18 +51,8 @@ export const PARTY_COLOR_SWATCHES = [
   'oklch(62% 0.19 340)' // magenta
 ];
 
-export const GROUPS: Omit<Group, 'claimedBy' | 'progress'>[] = [
-  { id: 'traders', name: 'Traders & Shopkeepers', short: 'TR', ask: 90 },
-  { id: 'transport', name: 'Auto & Transport Unions', short: 'AU', ask: 70 },
-  { id: 'rwa', name: 'Resident Welfare Assoc.', short: 'RW', ask: 80 },
-  { id: 'jj', name: 'Unauthorised Colony Residents', short: 'JJ', ask: 60 },
-  { id: 'govt', name: 'Govt / DTC / DJB Staff', short: 'GS', ask: 100 },
-  { id: 'women', name: 'Women & SHG Groups', short: 'WS', ask: 75 },
-  { id: 'farmers', name: 'Border Village Farmers', short: 'FM', ask: 65 },
-  { id: 'youth', name: 'Students & Youth', short: 'SY', ask: 55 },
-  { id: 'purvanchali', name: 'Purvanchali / Migrant Groups', short: 'PM', ask: 85 },
-  { id: 'religious', name: 'Community & Religious Groups', short: 'CR', ask: 95 }
-];
+export { VOTE_BANKS, VOTE_BANK_IDS };
+export type { VoteBankId };
 
 export function cleanName(n: string | undefined | null): string {
   return (n || '').replace(/\s*\(SC\)\s*$/i, '').replace(/\(SC\)/i, '').trim();
@@ -118,6 +133,9 @@ export interface StaticSeat {
   threshold: number;
   centroid: [number, number] | null;
   geometry: GeoJSON.Geometry;
+  primaryVoteBank: VoteBankId;
+  secondaryVoteBanks: VoteBankId[];
+  voteBankStrength: Record<VoteBankId, number>;
 }
 
 let cachedStaticSeats: Record<string, StaticSeat> | null = null;
@@ -127,10 +145,14 @@ export function loadStaticSeats(): Record<string, StaticSeat> {
   const raw = readFileSync(join(__dirname, 'data', 'delhi_AC.json'), 'utf-8');
   const data = JSON.parse(raw) as GeoJSON.FeatureCollection;
   const electors = estimateElectors(data.features);
+  const acNos = data.features.map((f) => String((f.properties as any).AC_NO));
+  validateConstituencyVoteBanks(acNos);
+  const voteBanks = loadConstituencyVoteBanks();
   const seats: Record<string, StaticSeat> = {};
   data.features.forEach((f, i) => {
-    const acNo = String((f.properties as any).AC_NO);
+    const acNo = acNos[i];
     const elec = electors[i];
+    const vb = voteBanks.get(acNo) as ConstituencyVoteBanks;
     seats[acNo] = {
       acNo,
       name: cleanName((f.properties as any).AC_NAME),
@@ -138,7 +160,10 @@ export function loadStaticSeats(): Record<string, StaticSeat> {
       electors: elec,
       threshold: computeThreshold(elec),
       centroid: featureCentroid(f.geometry),
-      geometry: f.geometry
+      geometry: f.geometry,
+      primaryVoteBank: vb.primaryVoteBank,
+      secondaryVoteBanks: vb.secondaryVoteBanks,
+      voteBankStrength: vb.voteBankStrength
     };
   });
   cachedStaticSeats = seats;
@@ -169,7 +194,6 @@ export function forceLockRemainingSeats(room: Room): TurnEvent[] {
 // Resolves one blind turn in-place on the room object; returns { events, perPlayerSpend, isFinalTurn }.
 export function resolveTurn(room: Room): { events: TurnEvent[]; perPlayerSpend: Record<string, number>; isFinalTurn: boolean } {
   const seats = room.seats,
-    groups = room.groups,
     players = room.players;
   const submissions = (room.pendingTurn && room.pendingTurn.submissions) || {};
   const events: TurnEvent[] = [];
@@ -187,6 +211,11 @@ export function resolveTurn(room: Room): { events: TurnEvent[]; perPlayerSpend: 
     });
   });
 
+  // Effective (post-conflict-fee) spend this turn, per player per seat — feeds
+  // both Vote Bank influence generation and the geographic-relevance
+  // multiplier on any Vote Bank leadership bonus, below.
+  const effectiveSpendThisTurn: Record<string, Record<string, number>> = {};
+
   Object.entries(seatSpendersThisTurn).forEach(([acNo, spenders]) => {
     const seat = seats[acNo];
     if (!seat || seat.locked) return;
@@ -197,30 +226,76 @@ export function resolveTurn(room: Room): { events: TurnEvent[]; perPlayerSpend: 
       seat.progress[playerId] = (seat.progress[playerId] || 0) + effective;
       perPlayerSpend[playerId] += amt;
       if (conflictFee > 0) events.push({ type: 'conflict', acNo, playerId, fee: conflictFee, seatName: seat.name });
-    });
-  });
-
-  Object.entries(submissions).forEach(([pid, sub]) => {
-    Object.entries((sub && sub.groupSpends) || {}).forEach(([gid, amt]) => {
-      if (amt > 0) {
-        const group = groups.find((g) => g.id === gid);
-        if (group && !group.claimedBy) {
-          group.progress[pid] = (group.progress[pid] || 0) + amt;
-          perPlayerSpend[pid] += amt;
-        }
+      if (effective > 0) {
+        effectiveSpendThisTurn[playerId] = effectiveSpendThisTurn[playerId] || {};
+        effectiveSpendThisTurn[playerId][acNo] = (effectiveSpendThisTurn[playerId][acNo] || 0) + effective;
       }
     });
   });
 
-  groups.forEach((group) => {
-    if (group.claimedBy) return;
-    const qualifiers = Object.entries(group.progress || {}).filter(([, amt]) => amt >= group.ask);
-    if (qualifiers.length) {
-      qualifiers.sort((a, b) => b[1] - a[1]);
-      const winnerId = qualifiers[0][0];
-      group.claimedBy = winnerId;
-      events.push({ type: 'group_claim', groupId: group.id, groupName: group.name, playerId: winnerId });
-      players[winnerId].pendingBonus = (players[winnerId].pendingBonus || 0) + GROUP_BONUS;
+  // Vote Bank influence: campaigning in a constituency generates influence
+  // with that seat's Vote Banks in proportion to each bank's strength there
+  // (not something players spend on directly) — accumulates across turns and
+  // across every constituency a player campaigns in.
+  const staticSeats = loadStaticSeats();
+  Object.entries(effectiveSpendThisTurn).forEach(([playerId, bySeat]) => {
+    Object.entries(bySeat).forEach(([acNo, effective]) => {
+      const staticSeat = staticSeats[acNo];
+      if (!staticSeat) return;
+      VOTE_BANK_IDS.forEach((bankId) => {
+        const strength = staticSeat.voteBankStrength[bankId];
+        const gained = (effective * strength) / 100;
+        if (gained <= 0) return;
+        room.voteBankInfluence[bankId][playerId] = (room.voteBankInfluence[bankId][playerId] || 0) + gained;
+      });
+    });
+  });
+
+  // Vote Bank leadership is re-evaluated every turn (never permanent, unlike a
+  // seat lock) — whoever has the most accumulated influence leads. The
+  // current leader of each bank is paid a recurring bonus, scaled down unless
+  // this turn's own spend concentrated in constituencies where that bank is
+  // actually strong (the "geographic relevance" rule) — a leader coasting on
+  // old influence without campaigning anywhere this turn gets the floor rate.
+  VOTE_BANKS.forEach((bank) => {
+    const influence = room.voteBankInfluence[bank.id];
+    const entries = Object.entries(influence).filter(([, amt]) => amt > 0);
+    const previousLeaderId = room.voteBankLeaders[bank.id];
+    if (!entries.length) {
+      room.voteBankLeaders[bank.id] = null;
+      return;
+    }
+    entries.sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
+    const [leaderId] = entries[0];
+    room.voteBankLeaders[bank.id] = leaderId;
+    if (leaderId !== previousLeaderId) {
+      events.push({
+        type: 'vote_bank_leader_change',
+        voteBankId: bank.id,
+        voteBankName: bank.name,
+        playerId: leaderId,
+        previousLeaderId
+      });
+    }
+
+    const spendBySeat = effectiveSpendThisTurn[leaderId];
+    let weightedStrength = 0;
+    if (spendBySeat) {
+      let totalSpend = 0;
+      let weightedSum = 0;
+      Object.entries(spendBySeat).forEach(([acNo, amt]) => {
+        const s = staticSeats[acNo];
+        if (!s) return;
+        totalSpend += amt;
+        weightedSum += amt * s.voteBankStrength[bank.id];
+      });
+      weightedStrength = totalSpend > 0 ? weightedSum / totalSpend : 0;
+    }
+    const multiplier = Math.min(1, Math.max(VOTE_BANK_BONUS_MIN_MULTIPLIER, weightedStrength / VOTE_BANK_BONUS_FULL_EFFECT_STRENGTH));
+    const bonusAmount = Math.round(VOTE_BANK_LEADER_BONUS_BASE * multiplier);
+    if (bonusAmount > 0) {
+      players[leaderId].pendingBonus = (players[leaderId].pendingBonus || 0) + bonusAmount;
+      events.push({ type: 'vote_bank_bonus', voteBankId: bank.id, voteBankName: bank.name, playerId: leaderId, amount: bonusAmount });
     }
   });
 

@@ -1,9 +1,9 @@
 import { randomBytes } from 'node:crypto';
 import {
   BUDGET_PER_TURN_DEFAULT,
-  GROUPS,
   MAX_TURNS_DEFAULT,
   PARTY_COLOR_SWATCHES,
+  VOTE_BANK_IDS,
   forceLockRemainingSeats,
   loadStaticSeats,
   resolveTurn
@@ -96,6 +96,12 @@ class RoomStore {
     });
     const code = this.roomCode();
     const now = Date.now();
+    const voteBankInfluence: Room['voteBankInfluence'] = {} as Room['voteBankInfluence'];
+    const voteBankLeaders: Room['voteBankLeaders'] = {} as Room['voteBankLeaders'];
+    VOTE_BANK_IDS.forEach((id) => {
+      voteBankInfluence[id] = {};
+      voteBankLeaders[id] = null;
+    });
     const room: Room = {
       code,
       phase: 'lobby',
@@ -105,7 +111,8 @@ class RoomStore {
       hostId: player.id,
       players: { [player.id]: player },
       seats,
-      groups: GROUPS.map((g) => ({ ...g, claimedBy: null, progress: {} })),
+      voteBankInfluence,
+      voteBankLeaders,
       pendingTurn: { turnNumber: 1, submissions: {} },
       turnLog: [],
       createdAt: now,
@@ -171,12 +178,7 @@ class RoomStore {
     return room;
   }
 
-  submitTurn(
-    code: string,
-    playerId: string,
-    seatSpends: Record<string, number>,
-    groupSpends: Record<string, number>
-  ): { room: Room; resolved: TurnLogEntry | null } {
+  submitTurn(code: string, playerId: string, seatSpends: Record<string, number>): { room: Room; resolved: TurnLogEntry | null } {
     const room = this.requireRoom(code);
     const player = room.players[playerId];
     if (!player) throw new RoomError('Player not found in this room.');
@@ -192,20 +194,12 @@ class RoomStore {
       cleanSeatSpends[acNo] = n;
       total += n;
     });
-    const cleanGroupSpends: Record<string, number> = {};
-    Object.entries(groupSpends || {}).forEach(([gid, amt]) => {
-      const group = room.groups.find((g) => g.id === gid);
-      const n = Math.max(0, Math.floor(Number(amt) || 0));
-      if (!group || group.claimedBy || n <= 0) return;
-      cleanGroupSpends[gid] = n;
-      total += n;
-    });
 
     if (total > player.budgetThisTurn) {
       throw new RoomError('Spend exceeds your remaining budget this turn.');
     }
 
-    room.pendingTurn.submissions[playerId] = { seatSpends: cleanSeatSpends, groupSpends: cleanGroupSpends };
+    room.pendingTurn.submissions[playerId] = { seatSpends: cleanSeatSpends };
     player.ready = true;
     room.updatedAt = Date.now();
 

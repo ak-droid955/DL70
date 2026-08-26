@@ -1,3 +1,5 @@
+import type { VoteBankId } from './voteBanks.js';
+
 export interface Player {
   id: string;
   name: string;
@@ -21,18 +23,8 @@ export interface Seat {
   progress: Record<string, number>; // playerId -> amount
 }
 
-export interface Group {
-  id: string;
-  name: string;
-  short: string;
-  ask: number;
-  claimedBy: string | null;
-  progress: Record<string, number>;
-}
-
 export interface TurnSubmission {
   seatSpends: Record<string, number>;
-  groupSpends: Record<string, number>;
 }
 
 export interface PendingTurn {
@@ -42,9 +34,10 @@ export interface PendingTurn {
 
 export type TurnEvent =
   | { type: 'conflict'; acNo: string; playerId: string; fee: number; seatName: string }
-  | { type: 'group_claim'; groupId: string; groupName: string; playerId: string }
   | { type: 'lock'; acNo: string; seatName: string; playerId: string }
-  | { type: 'forced_lock'; acNo: string; seatName: string; playerId: string };
+  | { type: 'forced_lock'; acNo: string; seatName: string; playerId: string }
+  | { type: 'vote_bank_leader_change'; voteBankId: VoteBankId; voteBankName: string; playerId: string; previousLeaderId: string | null }
+  | { type: 'vote_bank_bonus'; voteBankId: VoteBankId; voteBankName: string; playerId: string; amount: number };
 
 export interface TurnLogEntry {
   turn: number;
@@ -61,7 +54,13 @@ export interface Room {
   hostId: string;
   players: Record<string, Player>;
   seats: Record<string, Seat>;
-  groups: Group[];
+  // Cumulative campaign influence per Vote Bank per player, built up across
+  // turns from spend in constituencies where that Vote Bank is strong (see
+  // resolveTurn in gameData.ts). Not something players spend on directly.
+  voteBankInfluence: Record<VoteBankId, Record<string, number>>;
+  // Current leader (highest cumulative influence) per Vote Bank, recomputed
+  // every resolved turn. null until at least one player has any influence.
+  voteBankLeaders: Record<VoteBankId, string | null>;
   pendingTurn: PendingTurn;
   turnLog: TurnLogEntry[];
   createdAt: number;

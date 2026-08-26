@@ -17,10 +17,14 @@ export default function SummaryModal({ lastLog }: { lastLog: TurnLogEntry }) {
           {players.map((p) => {
             const evs = lastLog.events.filter((e) => e.playerId === p.id);
             const locks = evs.filter((e) => e.type === 'lock' || e.type === 'forced_lock').map((e) => (e as any).seatName);
-            const groupsWon = evs.filter((e) => e.type === 'group_claim').map((e) => (e as any).groupName);
+            const newLeaderships = evs.filter((e) => e.type === 'vote_bank_leader_change').map((e) => (e as any).voteBankName);
+            const bonuses = evs.filter((e) => e.type === 'vote_bank_bonus') as Extract<
+              TurnLogEntry['events'][number],
+              { type: 'vote_bank_bonus' }
+            >[];
             const conflicts = evs.filter((e) => e.type === 'conflict');
             const spent = lastLog.perPlayerSpend[p.id] || 0;
-            const nothing = !locks.length && !groupsWon.length && !conflicts.length;
+            const nothing = !locks.length && !newLeaderships.length && !bonuses.length && !conflicts.length;
 
             return (
               <div className={styles.row} key={p.id}>
@@ -30,11 +34,18 @@ export default function SummaryModal({ lastLog }: { lastLog: TurnLogEntry }) {
                   <div className={styles.spent}>spent ₹{spent}K</div>
                 </div>
                 {locks.length > 0 && <div className={styles.line}>Won: {locks.join(', ')}</div>}
-                {groupsWon.length > 0 && <div className={`${styles.line} ${styles.groups}`}>Group secured: {groupsWon.join(', ')}</div>}
+                {newLeaderships.length > 0 && (
+                  <div className={`${styles.line} ${styles.groups}`}>Took over Vote Bank lead: {newLeaderships.join(', ')}</div>
+                )}
+                {bonuses.length > 0 && (
+                  <div className={`${styles.line} ${styles.groups}`}>
+                    Vote Bank bonus: {bonuses.map((b) => `${b.voteBankName} +₹${b.amount}K`).join(', ')}
+                  </div>
+                )}
                 {conflicts.length > 0 && (
                   <div className={`${styles.line} ${styles.conflict}`}>Paid contest fees in {conflicts.length} seat(s)</div>
                 )}
-                {nothing && <div className={`${styles.line} ${styles.nothing}`}>No seats or groups secured this turn</div>}
+                {nothing && <div className={`${styles.line} ${styles.nothing}`}>No seats or Vote Banks gained this turn</div>}
               </div>
             );
           })}

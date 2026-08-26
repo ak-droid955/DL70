@@ -21,20 +21,43 @@ export interface Seat {
   progress: Record<string, number>;
 }
 
-export interface Group {
-  id: string;
+export type VoteBankId =
+  | 'traders'
+  | 'transport_unions'
+  | 'rwa'
+  | 'unauthorised_colonies'
+  | 'govt_staff'
+  | 'women_shg'
+  | 'farmers'
+  | 'students_youth'
+  | 'purvanchali_migrant'
+  | 'community_religious';
+
+export interface VoteBankDef {
+  id: VoteBankId;
   name: string;
   short: string;
-  ask: number;
-  claimedBy: string | null;
-  progress: Record<string, number>;
 }
+
+export const VOTE_BANKS: VoteBankDef[] = [
+  { id: 'traders', name: 'Traders & Shopkeepers', short: 'TR' },
+  { id: 'transport_unions', name: 'Auto & Transport Unions', short: 'AU' },
+  { id: 'rwa', name: 'Resident Welfare Associations', short: 'RW' },
+  { id: 'unauthorised_colonies', name: 'Unauthorised Colony Residents', short: 'JJ' },
+  { id: 'govt_staff', name: 'Govt / DTC / DJB Staff', short: 'GS' },
+  { id: 'women_shg', name: 'Women & SHG Groups', short: 'WS' },
+  { id: 'farmers', name: 'Border Village Farmers', short: 'FM' },
+  { id: 'students_youth', name: 'Students & Youth', short: 'SY' },
+  { id: 'purvanchali_migrant', name: 'Purvanchali / Migrant Groups', short: 'PM' },
+  { id: 'community_religious', name: 'Community & Religious Groups', short: 'CR' }
+];
 
 export type TurnEvent =
   | { type: 'conflict'; acNo: string; playerId: string; fee: number; seatName: string }
-  | { type: 'group_claim'; groupId: string; groupName: string; playerId: string }
   | { type: 'lock'; acNo: string; seatName: string; playerId: string }
-  | { type: 'forced_lock'; acNo: string; seatName: string; playerId: string };
+  | { type: 'forced_lock'; acNo: string; seatName: string; playerId: string }
+  | { type: 'vote_bank_leader_change'; voteBankId: VoteBankId; voteBankName: string; playerId: string; previousLeaderId: string | null }
+  | { type: 'vote_bank_bonus'; voteBankId: VoteBankId; voteBankName: string; playerId: string; amount: number };
 
 export interface TurnLogEntry {
   turn: number;
@@ -51,7 +74,8 @@ export interface Room {
   hostId: string;
   players: Record<string, Player>;
   seats: Record<string, Seat>;
-  groups: Group[];
+  voteBankInfluence: Record<VoteBankId, Record<string, number>>;
+  voteBankLeaders: Record<VoteBankId, string | null>;
   pendingTurn: { turnNumber: number; submissions: Record<string, unknown> };
   turnLog: TurnLogEntry[];
 }
@@ -66,6 +90,9 @@ export interface StaticSeat {
   threshold: number;
   centroid: [number, number] | null;
   geometry: GeoJSON.Geometry;
+  primaryVoteBank: VoteBankId;
+  secondaryVoteBanks: VoteBankId[];
+  voteBankStrength: Record<VoteBankId, number>;
 }
 
 export interface OpenRoomSummary {

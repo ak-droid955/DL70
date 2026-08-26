@@ -27,7 +27,6 @@ interface State {
   myPlayerId: string | null;
   selectedSeatAcNo: string | null;
   draftSeatSpends: Record<string, number>;
-  draftGroupSpends: Record<string, number>;
   summarySeenForTurn: number;
 }
 
@@ -47,7 +46,6 @@ const initialState: State = {
   myPlayerId: null,
   selectedSeatAcNo: null,
   draftSeatSpends: {},
-  draftGroupSpends: {},
   summarySeenForTurn: 0
 };
 
@@ -93,8 +91,6 @@ interface Ctx {
   closeSeat: () => void;
   addSeatSpend: (acNo: string, amt: number) => void;
   clearSeatDraft: (acNo: string) => void;
-  addGroupSpend: (gid: string, amt: number) => void;
-  clearGroupDraft: (gid: string) => void;
   submitTurn: () => Promise<void>;
   dismissSummary: () => void;
   playAgain: () => void;
@@ -177,8 +173,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const me = getMe();
     if (!me) return 0;
     const sSum = Object.values(stateRef.current.draftSeatSpends).reduce((a, b) => a + b, 0);
-    const gSum = Object.values(stateRef.current.draftGroupSpends).reduce((a, b) => a + b, 0);
-    return me.budgetThisTurn - sSum - gSum;
+    return me.budgetThisTurn - sSum;
   }, [getMe]);
 
   const goCreate = () => patch({ step: 'setup', pendingMode: 'create', error: null });
@@ -271,25 +266,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
       return { ...s, draftSeatSpends: d };
     });
 
-  const addGroupSpend = (gid: string, amt: number) => {
-    const { room } = stateRef.current;
-    const group = room?.groups.find((g) => g.id === gid);
-    if (!group || group.claimedBy || getRemaining() < amt) return;
-    setState((s) => ({ ...s, draftGroupSpends: { ...s.draftGroupSpends, [gid]: (s.draftGroupSpends[gid] || 0) + amt } }));
-  };
-  const clearGroupDraft = (gid: string) =>
-    setState((s) => {
-      const d = { ...s.draftGroupSpends };
-      delete d[gid];
-      return { ...s, draftGroupSpends: d };
-    });
-
   const submitTurn = async () => {
-    const { room, myPlayerId, draftSeatSpends, draftGroupSpends } = stateRef.current;
+    const { room, myPlayerId, draftSeatSpends } = stateRef.current;
     if (!room || !myPlayerId) return;
     try {
-      await call('game:submitTurn', { code: room.code, playerId: myPlayerId, seatSpends: draftSeatSpends, groupSpends: draftGroupSpends });
-      patch({ draftSeatSpends: {}, draftGroupSpends: {}, selectedSeatAcNo: null });
+      await call('game:submitTurn', { code: room.code, playerId: myPlayerId, seatSpends: draftSeatSpends });
+      patch({ draftSeatSpends: {}, selectedSeatAcNo: null });
     } catch (err) {
       patch({ error: (err as Error).message });
     }
@@ -337,8 +319,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
       closeSeat,
       addSeatSpend,
       clearSeatDraft,
-      addGroupSpend,
-      clearGroupDraft,
       submitTurn,
       dismissSummary,
       playAgain

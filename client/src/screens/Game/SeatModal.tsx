@@ -1,5 +1,8 @@
+import { VOTE_BANKS } from '../../lib/types';
 import { useGame } from '../../state/GameProvider';
 import styles from './SeatModal.module.css';
+
+const VOTE_BANK_NAME_BY_ID = Object.fromEntries(VOTE_BANKS.map((b) => [b.id, b.name]));
 
 export default function SeatModal() {
   const { state, getMe, closeSeat, addSeatSpend, clearSeatDraft } = useGame();
@@ -7,6 +10,7 @@ export default function SeatModal() {
   const me = getMe();
   const seat = state.selectedSeatAcNo ? room.seats[state.selectedSeatAcNo] : null;
   if (!seat) return null;
+  const staticSeat = state.staticSeats?.[seat.acNo];
 
   const players = Object.values(room.players);
   const rows = players
@@ -61,6 +65,17 @@ export default function SeatModal() {
             <div className={styles.statValue}>₹{seat.threshold}K</div>
           </div>
         </div>
+
+        {staticSeat && (
+          <div className={styles.voteBankRow}>
+            <div className={styles.voteBankLabel}>PRIMARY VOTE BANK</div>
+            <div className={styles.voteBankPrimary}>{VOTE_BANK_NAME_BY_ID[staticSeat.primaryVoteBank]}</div>
+            <div className={styles.voteBankLabel}>ALSO STRONG HERE</div>
+            <div className={styles.voteBankSecondary}>
+              {staticSeat.secondaryVoteBanks.map((id) => VOTE_BANK_NAME_BY_ID[id]).join(', ')}
+            </div>
+          </div>
+        )}
 
         <div className={styles.body}>
           {rows.map((row) => (
