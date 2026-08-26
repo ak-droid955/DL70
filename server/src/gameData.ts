@@ -329,9 +329,13 @@ export function resolveTurn(room: Room): { events: TurnEvent[]; perPlayerSpend: 
   }
 
   Object.values(players).forEach((p) => {
-    p.totalSpent = (p.totalSpent || 0) + (perPlayerSpend[p.id] || 0);
+    const spent = perPlayerSpend[p.id] || 0;
+    // Whatever a player didn't spend this turn (including everything, if they
+    // were timed out before submitting) rolls into next turn's budget.
+    const rollover = Math.max(0, (p.budgetThisTurn || 0) - spent);
+    p.totalSpent = (p.totalSpent || 0) + spent;
     p.ready = false;
-    p.budgetThisTurn = room.budgetPerTurn + (p.pendingBonus || 0);
+    p.budgetThisTurn = rollover + room.budgetPerTurn + (p.pendingBonus || 0);
     p.pendingBonus = 0;
   });
 
