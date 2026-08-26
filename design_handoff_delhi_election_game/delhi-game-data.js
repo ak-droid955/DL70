@@ -23,10 +23,10 @@ export const GROUPS = [
   { id: 'traders', name: 'Traders & Shopkeepers', short: 'TR', ask: 90 },
   { id: 'transport', name: 'Auto & Transport Unions', short: 'AU', ask: 70 },
   { id: 'rwa', name: 'Resident Welfare Assoc.', short: 'RW', ask: 80 },
-  { id: 'jj', name: 'Unauthorised Colony Residents', short: 'JJ', ask: 60 },
+  { id: 'jj', name: 'JJ Colony Clusters', short: 'JJ', ask: 60 },
   { id: 'govt', name: 'Govt / DTC / DJB Staff', short: 'GS', ask: 100 },
   { id: 'women', name: 'Women & SHG Groups', short: 'WS', ask: 75 },
-  { id: 'farmers', name: 'Border Village Farmers', short: 'FM', ask: 65 },
+  { id: 'farmers', name: 'Delhi Dehat', short: 'FM', ask: 65 },
   { id: 'youth', name: 'Students & Youth', short: 'SY', ask: 55 },
   { id: 'purvanchali', name: 'Purvanchali / Migrant Groups', short: 'PM', ask: 85 },
   { id: 'religious', name: 'Community & Religious Groups', short: 'CR', ask: 95 }

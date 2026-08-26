@@ -43,10 +43,10 @@ export const VOTE_BANKS: VoteBankDef[] = [
   { id: 'traders', name: 'Traders & Shopkeepers', short: 'TR' },
   { id: 'transport_unions', name: 'Auto & Transport Unions', short: 'AU' },
   { id: 'rwa', name: 'Resident Welfare Associations', short: 'RW' },
-  { id: 'unauthorised_colonies', name: 'Unauthorised Colony Residents', short: 'JJ' },
+  { id: 'unauthorised_colonies', name: 'JJ Colony Clusters', short: 'JJ' },
   { id: 'govt_staff', name: 'Govt / DTC / DJB Staff', short: 'GS' },
   { id: 'women_shg', name: 'Women & SHG Groups', short: 'WS' },
-  { id: 'farmers', name: 'Border Village Farmers', short: 'FM' },
+  { id: 'farmers', name: 'Delhi Dehat', short: 'FM' },
   { id: 'students_youth', name: 'Students & Youth', short: 'SY' },
   { id: 'purvanchali_migrant', name: 'Purvanchali / Migrant Groups', short: 'PM' },
   { id: 'community_religious', name: 'Community & Religious Groups', short: 'CR' }
