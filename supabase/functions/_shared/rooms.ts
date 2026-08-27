@@ -161,6 +161,14 @@ function rowToRoom(row: Record<string, any>): Room {
   };
 }
 
+// NOTE: jsonb columns are written with sql.json(), NOT
+// `${JSON.stringify(x)}::jsonb`. Passing a pre-stringified value makes
+// postgres.js send it as a *text* parameter, which lands in the column as a
+// JSON string ("{\"a\":1}") rather than a JSON object ({"a":1}) — the value
+// ends up double-encoded, every read has to JSON.parse it back out, and SQL
+// against the column (jsonb_object_keys, ->>, the cleanup job) fails with
+// "cannot call jsonb_object_keys on a scalar". sql.json() serializes once and
+// tags the parameter as json so it stores as a real object.
 async function persistRoom(tx: typeof sql, room: Room): Promise<void> {
   await tx`
     update rooms set
@@ -171,12 +179,12 @@ async function persistRoom(tx: typeof sql, room: Room): Promise<void> {
       turn_timer_seconds = ${room.turnTimerSeconds},
       turn_deadline = ${room.turnDeadline ? new Date(room.turnDeadline).toISOString() : null},
       host_id = ${room.hostId},
-      players = ${JSON.stringify(room.players)}::jsonb,
-      seats = ${JSON.stringify(room.seats)}::jsonb,
-      vote_bank_influence = ${JSON.stringify(room.voteBankInfluence)}::jsonb,
-      vote_bank_leaders = ${JSON.stringify(room.voteBankLeaders)}::jsonb,
-      pending_turn = ${JSON.stringify(room.pendingTurn)}::jsonb,
-      turn_log = ${JSON.stringify(room.turnLog)}::jsonb,
+      players = ${sql.json(room.players as never)},
+      seats = ${sql.json(room.seats as never)},
+      vote_bank_influence = ${sql.json(room.voteBankInfluence as never)},
+      vote_bank_leaders = ${sql.json(room.voteBankLeaders as never)},
+      pending_turn = ${sql.json(room.pendingTurn as never)},
+      turn_log = ${sql.json(room.turnLog as never)},
       updated_at = ${new Date(room.updatedAt).toISOString()}
     where code = ${room.code}
   `;
@@ -232,9 +240,9 @@ class RoomStore {
           players, seats, vote_bank_influence, vote_bank_leaders, pending_turn, turn_log, created_at, updated_at
         ) values (
           ${candidate}, 'lobby', 1, ${MAX_TURNS_DEFAULT}, ${BUDGET_PER_TURN_DEFAULT}, ${turnTimerSeconds}, null, ${player.id},
-          ${JSON.stringify({ [player.id]: player })}::jsonb, ${JSON.stringify(seats)}::jsonb,
-          ${JSON.stringify(voteBankInfluence)}::jsonb, ${JSON.stringify(voteBankLeaders)}::jsonb,
-          ${JSON.stringify({ turnNumber: 1, submissions: {} })}::jsonb, '[]'::jsonb, ${now}, ${now}
+          ${sql.json({ [player.id]: player } as never)}, ${sql.json(seats as never)},
+          ${sql.json(voteBankInfluence as never)}, ${sql.json(voteBankLeaders as never)},
+          ${sql.json({ turnNumber: 1, submissions: {} } as never)}, '[]'::jsonb, ${now}, ${now}
         )
         on conflict (code) do nothing
         returning code

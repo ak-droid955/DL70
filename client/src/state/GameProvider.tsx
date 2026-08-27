@@ -37,6 +37,13 @@ interface State {
   selectedSeatAcNo: string | null;
   draftSeatSpends: Record<string, number>;
   summarySeenForTurn: number;
+  // True while a room-mutating request is in flight. Every action that
+  // creates or changes server state is gated on this, and the buttons that
+  // trigger them are disabled while it's set — without that, a double-click
+  // on "Create Room & Join" creates two *separate rooms* (the host keeps the
+  // last one and their friends join the abandoned one), and a double-click on
+  // "Join Room" adds the same person to the lobby twice.
+  busy: boolean;
 }
 
 const initialState: State = {
@@ -58,7 +65,8 @@ const initialState: State = {
   myPlayerId: null,
   selectedSeatAcNo: null,
   draftSeatSpends: {},
-  summarySeenForTurn: 0
+  summarySeenForTurn: 0,
+  busy: false
 };
 
 function safeGet(kind: 'session' | 'local', key: string): string | null {
@@ -119,6 +127,29 @@ export function GameProvider({ children }: { children: ReactNode }) {
   stateRef.current = state;
 
   const patch = useCallback((p: Partial<State>) => setState((s) => ({ ...s, ...p })), []);
+
+  // A ref, not state: two clicks fired in the same tick would both read the
+  // same (stale) `state.busy === false` and both go through. The ref is set
+  // synchronously, so the second click sees it immediately. `state.busy`
+  // exists only to re-render the buttons as disabled.
+  const busyRef = useRef(false);
+
+  // Wraps a server-mutating action so it can never run concurrently with
+  // itself or another one. Returns a no-op if something is already in flight.
+  const runExclusive = useCallback(
+    async (fn: () => Promise<void>) => {
+      if (busyRef.current) return;
+      busyRef.current = true;
+      patch({ busy: true });
+      try {
+        await fn();
+      } finally {
+        busyRef.current = false;
+        patch({ busy: false });
+      }
+    },
+    [patch]
+  );
 
   // Load static seat/geo reference data once, and attempt to rejoin a session
   // this browser already belongs to (stored player id / room code / token).
@@ -270,51 +301,57 @@ export function GameProvider({ children }: { children: ReactNode }) {
     reader.readAsDataURL(file);
   };
 
-  const submitSetup = async () => {
-    const { pendingMode, pendingCode, nameInput, partyNameInput, partyCodeInput, colorChoice, turnTimerChoice, symbolDataUrl } =
-      stateRef.current;
-    if (!nameInput.trim() || !partyNameInput.trim()) return patch({ error: 'Enter your name and party name' });
-    try {
-      const payload = {
-        name: nameInput.trim(),
-        partyName: partyNameInput.trim(),
-        partyCode: partyCodeInput.trim(),
-        colorIndex: colorChoice,
-        symbol: symbolDataUrl || null
-      };
-      const { room, playerId, token } =
-        pendingMode === 'create'
-          ? await call<{ room: Room; playerId: string; token: string }>('room:create', {
-              ...payload,
-              turnTimerSeconds: TURN_TIMER_OPTIONS[turnTimerChoice]?.seconds ?? null
-            })
-          : await call<{ room: Room; playerId: string; token: string }>('room:join', { ...payload, code: pendingCode });
-      persistSession(room.code, playerId, token);
-      patch({ step: 'in-room', room, myPlayerId: playerId, error: null });
-    } catch (err) {
-      patch({ error: (err as Error).message });
-    }
-  };
+  const submitSetup = () =>
+    runExclusive(async () => {
+      const { pendingMode, pendingCode, nameInput, partyNameInput, partyCodeInput, colorChoice, turnTimerChoice, symbolDataUrl } =
+        stateRef.current;
+      if (!nameInput.trim() || !partyNameInput.trim()) {
+        patch({ error: 'Enter your name and party name' });
+        return;
+      }
+      try {
+        const payload = {
+          name: nameInput.trim(),
+          partyName: partyNameInput.trim(),
+          partyCode: partyCodeInput.trim(),
+          colorIndex: colorChoice,
+          symbol: symbolDataUrl || null
+        };
+        const { room, playerId, token } =
+          pendingMode === 'create'
+            ? await call<{ room: Room; playerId: string; token: string }>('room:create', {
+                ...payload,
+                turnTimerSeconds: TURN_TIMER_OPTIONS[turnTimerChoice]?.seconds ?? null
+              })
+            : await call<{ room: Room; playerId: string; token: string }>('room:join', { ...payload, code: pendingCode });
+        persistSession(room.code, playerId, token);
+        patch({ step: 'in-room', room, myPlayerId: playerId, error: null });
+      } catch (err) {
+        patch({ error: (err as Error).message });
+      }
+    });
 
-  const startGame = async () => {
-    const { room, myPlayerId } = stateRef.current;
-    if (!room || !myPlayerId) return;
-    try {
-      await call('game:start', { code: room.code, playerId: myPlayerId });
-    } catch (err) {
-      patch({ error: (err as Error).message });
-    }
-  };
+  const startGame = () =>
+    runExclusive(async () => {
+      const { room, myPlayerId } = stateRef.current;
+      if (!room || !myPlayerId) return;
+      try {
+        await call('game:start', { code: room.code, playerId: myPlayerId });
+      } catch (err) {
+        patch({ error: (err as Error).message });
+      }
+    });
 
-  const endMatch = async () => {
-    const { room, myPlayerId } = stateRef.current;
-    if (!room || !myPlayerId) return;
-    try {
-      await call('game:endMatch', { code: room.code, playerId: myPlayerId });
-    } catch (err) {
-      patch({ error: (err as Error).message });
-    }
-  };
+  const endMatch = () =>
+    runExclusive(async () => {
+      const { room, myPlayerId } = stateRef.current;
+      if (!room || !myPlayerId) return;
+      try {
+        await call('game:endMatch', { code: room.code, playerId: myPlayerId });
+      } catch (err) {
+        patch({ error: (err as Error).message });
+      }
+    });
 
   const selectSeat = (acNo: string | null) => patch({ selectedSeatAcNo: acNo });
   const closeSeat = () => patch({ selectedSeatAcNo: null });
@@ -332,16 +369,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
       return { ...s, draftSeatSpends: d };
     });
 
-  const submitTurn = async () => {
-    const { room, myPlayerId, draftSeatSpends } = stateRef.current;
-    if (!room || !myPlayerId) return;
-    try {
-      await call('game:submitTurn', { code: room.code, playerId: myPlayerId, seatSpends: draftSeatSpends });
-      patch({ draftSeatSpends: {}, selectedSeatAcNo: null });
-    } catch (err) {
-      patch({ error: (err as Error).message });
-    }
-  };
+  const submitTurn = () =>
+    runExclusive(async () => {
+      const { room, myPlayerId, draftSeatSpends } = stateRef.current;
+      if (!room || !myPlayerId) return;
+      try {
+        await call('game:submitTurn', { code: room.code, playerId: myPlayerId, seatSpends: draftSeatSpends });
+        patch({ draftSeatSpends: {}, selectedSeatAcNo: null });
+      } catch (err) {
+        patch({ error: (err as Error).message });
+      }
+    });
 
   const dismissSummary = () => {
     const { room } = stateRef.current;

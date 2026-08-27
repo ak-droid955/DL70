@@ -7,7 +7,10 @@ export default function BottomBar() {
   const me = getMe();
   const players = Object.values(room.players);
   const scoreboard = players.slice().sort((a, b) => b.seatsWon - a.seatsWon);
-  const locked = !!(me && me.ready);
+  // `ready` only flips once the server has accepted the submission, so the
+  // in-flight flag covers the window in between — otherwise a second click
+  // lands before the first response comes back.
+  const locked = !!(me && me.ready) || state.busy;
 
   return (
     <div className={styles.bar}>
@@ -43,7 +46,7 @@ export default function BottomBar() {
         onClick={submitTurn}
         style={{ background: locked ? 'var(--disabled)' : 'var(--navy)' }}
       >
-        {locked ? 'Submitted' : 'Submit Turn'}
+        {me && me.ready ? 'Submitted' : state.busy ? 'Submitting…' : 'Submit Turn'}
       </button>
     </div>
   );

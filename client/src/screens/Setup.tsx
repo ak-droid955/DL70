@@ -131,8 +131,14 @@ export default function Setup() {
 
         {state.error && <div className={styles.error}>{state.error}</div>}
 
-        <button className={styles.submitBtn} onClick={submitSetup}>
-          {state.pendingMode === 'create' ? 'Create Room & Join' : 'Join Room'}
+        <button className={styles.submitBtn} onClick={submitSetup} disabled={state.busy}>
+          {state.busy
+            ? state.pendingMode === 'create'
+              ? 'Creating room…'
+              : 'Joining…'
+            : state.pendingMode === 'create'
+              ? 'Create Room & Join'
+              : 'Join Room'}
         </button>
       </div>
     </div>

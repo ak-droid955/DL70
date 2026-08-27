@@ -193,3 +193,8 @@
   cursor: pointer;
   margin-top: 4px;
 }
+
+.submitBtn:disabled {
+  background: var(--disabled);
+  cursor: progress;
+}

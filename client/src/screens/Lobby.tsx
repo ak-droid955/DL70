@@ -45,11 +45,11 @@ export default function Lobby() {
       {isHost ? (
         <button
           className={styles.startBtn}
-          disabled={!canStart}
+          disabled={!canStart || state.busy}
           onClick={startGame}
-          style={{ background: canStart ? 'var(--navy)' : 'var(--disabled)' }}
+          style={{ background: canStart && !state.busy ? 'var(--navy)' : 'var(--disabled)' }}
         >
-          Start Campaign ({room.maxTurns} turns)
+          {state.busy ? 'Starting…' : `Start Campaign (${room.maxTurns} turns)`}
         </button>
       ) : (
         <div className={styles.waitingLabel}>Waiting for the host to start…</div>
