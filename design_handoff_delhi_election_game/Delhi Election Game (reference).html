@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    html,body{margin:0;height:100%;}
+    *{box-sizing:border-box;}
+    ::-webkit-scrollbar{width:8px;height:8px;}
+    ::-webkit-scrollbar-thumb{background:oklch(80% 0.01 80);border-radius:4px;}
+    @keyframes dvsSpin{to{transform:rotate(360deg);}}
+    @keyframes dvsPop{from{transform:scale(0.9);opacity:0;}to{transform:scale(1);opacity:1;}}
+  </style>
+</helmet>
+
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+  <div style="height:100vh;display:flex;align-items:center;justify-content:center;font-family:Helvetica,sans-serif;color:oklch(50% 0.01 80);background:oklch(97% 0.01 80)">Loading Delhi constituencies…</div>
+</sc-if>
+
+<sc-if value="{{ isLanding }}" hint-placeholder-val="{{ false }}">
+  <div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:oklch(97% 0.01 80);font-family:Helvetica,sans-serif;color:oklch(22% 0.01 80);padding:24px;text-align:center">
+    <div style="font-family:'Poppins',Helvetica,sans-serif;font-weight:800;font-size:40px;letter-spacing:-0.01em;color:oklch(26% 0.04 260)">Vidhan Sabha Showdown</div>
+    <div style="max-width:520px;color:oklch(50% 0.01 80);font-size:15px;line-height:1.5">A blind-bidding campaign game across all 70 Delhi assembly seats. 2–5 players, each on their own browser tab on this computer — every tab is a separate party's campaign HQ.</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+      <button onClick="{{ goCreate }}" style="font-family:'Poppins',Helvetica,sans-serif;font-weight:700;font-size:16px;padding:16px 28px;border-radius:14px;border:none;background:oklch(26% 0.04 260);color:white;cursor:pointer">Create Room</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input value="{{ joinCodeInput }}" onChange="{{ onJoinCodeChange }}" placeholder="ROOM CODE" maxlength="4" style="font-family:Helvetica,sans-serif;font-weight:700;letter-spacing:0.15em;text-align:center;width:120px;padding:16px 10px;border-radius:14px;border:2px solid oklch(88% 0.01 80);font-size:16px;text-transform:uppercase" />
+        <button onClick="{{ goJoin }}" style="font-family:'Poppins',Helvetica,sans-serif;font-weight:700;font-size:16px;padding:16px 22px;border-radius:14px;border:2px solid oklch(26% 0.04 260);background:white;color:oklch(26% 0.04 260);cursor:pointer">Join Room</button>
+      </div>
+    </div>
+    <sc-if value="{{ error }}"><div style="color:oklch(55% 0.18 25);font-weight:600;font-size:14px">{{ error }}</div></sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ isSetup }}" hint-placeholder-val="{{ false }}">
+  <div style="height:100vh;display:flex;align-items:center;justify-content:center;background:oklch(97% 0.01 80);font-family:Helvetica,sans-serif;color:oklch(22% 0.01 80);padding:24px">
+    <div style="width:100%;max-width:420px;background:oklch(99% 0.003 80);border:1px solid oklch(88% 0.01 80);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:16px">
+      <div style="font-family:'Poppins',Helvetica,sans-serif;font-weight:800;font-size:22px;color:oklch(26% 0.04 260)">Set up your campaign</div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:oklch(50% 0.01 80);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Your name</div>
+        <input value="{{ nameInput }}" onChange="{{ onNameChange }}" placeholder="e.g. Priya" style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid oklch(88% 0.01 80);font-size:15px;font-family:Helvetica,sans-serif" />
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:oklch(50% 0.01 80);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Party name</div>
+        <input value="{{ partyNameInput }}" onChange="{{ onPartyNameChange }}" placeholder="e.g. Nagrik Ekta Party" style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid oklch(88% 0.01 80);font-size:15px;font-family:Helvetica,sans-serif" />
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:oklch(50% 0.01 80);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Party colour</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <sc-for list="{{ colorSwatches }}" as="sw" hint-placeholder-count="8">
+            <div onClick="{{ sw.onClick }}" style="width:34px;height:34px;border-radius:50%;background:{{ sw.value }};cursor:pointer;border:{{ sw.borderStyle }}"></div>
+          </sc-for>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:oklch(50% 0.01 80);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Party symbol (optional)</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <sc-if value="{{ symbolDataUrl }}" hint-placeholder-val="{{ false }}"><div style="width:48px;height:48px;border-radius:12px;border:1.5px solid oklch(88% 0.01 80);background-image:url({{ symbolDataUrl }});background-size:cover;background-position:center"></div></sc-if>
+          <input type="file" accept="image/*" onChange="{{ onSymbolFile }}" style="font-size:13px" />
+        </div>
+      </div>
+      <sc-if value="{{ error }}"><div style="color:oklch(55% 0.18 25);font-weight:600;font-size:13px">{{ error }}</div></sc-if>
+      <button onClick="{{ submitSetup }}" style="font-family:'Poppins',Helvetica,sans-serif;font-weight:700;font-size:16px;padding:14px;border-radius:12px;border:none;background:oklch(26% 0.04 260);color:white;cursor:pointer;margin-top:4px">{{ setupButtonLabel }}</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ isLobby }}" hint-placeholder-val="{{ false }}">
+  <div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:oklch(97% 0.01 80);font-family:Helvetica,sans-serif;color:oklch(22% 0.01 80);padding:24px">
+    <div style="font-size:13px;font-weight:700;letter-spacing:0.1em;color:oklch(50% 0.01 80)">ROOM CODE</div>
+    <div style="font-family:'Poppins',Helvetica,sans-serif;font-weight:800;font-size:48px;letter-spacing:0.1em;color:oklch(26% 0.04 260)">{{ roomCode }}</div>
+    <div style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{ lobbyPlayers }}" as="p" hint-placeholder-count="2">
+        <div style="display:flex;align-items:center;gap:12px;background:oklch(99% 0.003 80);border:1.5px solid oklch(88% 0.01 80);border-radius:14px;padding:12px 16px">
+          <div style="width:14px;height:14px;border-radius:50%;background:{{ p.color }};flex-shrink:0"></div>
+          <sc-if value="{{ p.symbol }}" hint-placeholder-val="{{ false }}"><div style="width:28px;height:28px;border-radius:8px;flex-shrink:0;background-image:url({{ p.symbol }});background-size:cover;background-position:center"></div></sc-if>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:14px">{{ p.partyName }}<sc-if value="{{ p.isHost }}"> · Host</sc-if></div>
+            <div style="font-size:12px;color:oklch(50% 0.01 80)">{{ p.name }}<sc-if value="{{ p.isMe }}"> (you)</sc-if></div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="color:oklch(50% 0.01 80);font-size:13px">{{ playerCountLabel }}</div>
+    <sc-if value="{{ isHost }}">
+      <button onClick="{{ startGame }}" disabled="{{ !canStart }}" style="font-family:'Poppins',Helvetica,sans-serif;font-weight:700;font-size:16px;padding:16px 32px;border-radius:14px;border:none;background:{{ startButtonBg }};color:white;cursor:pointer">Start Campaign ({{ maxTurns }} turns)</button>
+    </sc-if>
+    <sc-if value="{{ !isHost }}">
+      <div style="color:oklch(50% 0.01 80);font-size:13px">Waiting for the host to start…</div>
+    </sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ isInGame }}" hint-placeholder-val="{{ false }}">
+  <div style="height:100vh;display:flex;flex-direction:column;background:oklch(97% 0.01 80);font-family:Helvetica,sans-serif;color:oklch(22% 0.01 80);position:relative;overflow:hidden">
+
+    <div style="height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:oklch(26% 0.04 260);color:white">
+      <div style="font-family:'Poppins',Helvetica,sans-serif;font-weight:800;font-size:15px">Vidhan Sabha Showdown</div>
+      <div style="font-family:'Poppins',Helvetica,sans-serif;font-weight:800;font-size:15px;background:oklch(72% 0.15 55);color:oklch(22% 0.01 80);padding:6px 16px;border-radius:999px">{{ turnLabel }}</div>
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;opacity:0.8">ROOM {{ roomCode }}</div>
+    </div>
+
+    <div style="flex:1;display:flex;min-height:0">
+      <div style="width:250px;flex-shrink:0;background:oklch(99% 0.003 80);border-right:1px solid oklch(88% 0.01 80);overflow-y:auto;padding:14px">
+        <div style="font-family:'Poppins',Helvetica,sans-serif;font-weight:800;font-size:13px;color:oklch(50% 0.01 80);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Interest Groups</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ groupRows }}" as="g" hint-placeholder-count="10">
+            <div style="border:1.5px solid oklch(88% 0.01 80);border-radius:12px;padding:10px;background:white">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px">
+                <div style="font-weight:700;font-size:12.5px">{{ g.name }}</div>
+                <div style="font-size:11px;color:oklch(50% 0.01 80);flex-shrink:0">₹{{ g.ask }}K</div>
+              </div>
+              <div style="height:6px;border-radius:4px;background:oklch(93% 0.005 80);margin-top:6px;overflow:hidden">
+                <div style="height:100%;background:{{ g.barColor }};width:{{ g.pct }}"></div>
+              </div>
+              <sc-if value="{{ g.claimedName }}">
+                <div style="font-size:11px;margin-top:6px;font-weight:700;color:{{ g.barColor }}">Won by {{ g.claimedName }}</div>
+              </sc-if>
+              <sc-if value="{{ g.canContribute }}">
+                <div style="display:flex;gap:6px;margin-top:8px">
+                  <button onClick="{{ g.add10 }}" style="flex:1;font-size:11px;font-weight:700;padding:5px 0;border-radius:6px;border:1px solid oklch(88% 0.01 80);background:oklch(97% 0.01 80);cursor:pointer">+10K</button>
+                  <button onClick="{{ g.add25 }}" style="flex:1;font-size:11px;font-weight:700;padding:5px 0;border-radius:6px;border:1px solid oklch(88% 0.01 80);background:oklch(97% 0.01 80);cursor:pointer">+25K</button>
+                  <sc-if value="{{ g.hasDraft }}"><button onClick="{{ g.clear }}" style="font-size:11px;font-weight:700;padding:5px 8px;border-radius:6px;border:1px solid oklch(88% 0.01 80);background:white;cursor:pointer">✕</button></sc-if>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="flex:1;position:relative;min-width:0">
+        <div ref="{{ setMapEl }}" style="position:absolute;inset:0;background:oklch(97% 0.01 80)"></div>
+      </div>
+    </div>
+
+    <div style="height:88px;flex-shrink:0;display:flex;align-items:center;gap:14px;padding:0 16px;background:oklch(99% 0.003 80);border-top:1px solid oklch(88% 0.01 80)">
+      <div style="flex:1;display:flex;gap:10px;overflow-x:auto;height:100%;align-items:center">
+        <sc-for list="{{ scoreboard }}" as="p" hint-placeholder-count="3">
+          <div style="flex-shrink:0;display:flex;align-items:center;gap:8px;background:{{ p.chipBg }};border:2px solid {{ p.color }};border-radius:12px;padding:8px 12px">
+            <sc-if value="{{ p.symbol }}" hint-placeholder-val="{{ false }}"><div style="width:26px;height:26px;border-radius:7px;flex-shrink:0;background-image:url({{ p.symbol }});background-size:cover;background-position:center"></div></sc-if>
+            <div>
+              <div style="font-size:12px;font-weight:700">{{ p.partyName }}</div>
+              <div style="font-size:11px;color:oklch(50% 0.01 80)">{{ p.seatsWon }} seats{{ p.readyTag }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:11px;color:oklch(50% 0.01 80);font-weight:700">MY BUDGET THIS TURN</div>
+        <div style="font-family:'Poppins',Helvetica,sans-serif;font-weight:800;font-size:18px">₹{{ remainingBudget }}K left</div>
+      </div>
+      <button onClick="{{ submitTurn }}" disabled="{{ myReadyLocked }}" style="flex-shrink:0;font-family:'Poppins',Helvetica,sans-serif;font-weight:700;font-size:15px;padding:14px 24px;border-radius:12px;border:none;background:{{ submitButtonBg }};color:white;cursor:pointer">{{ submitButtonLabel }}</button>
+    </div>
+
+    <sc-if value="{{ selectedSeat }}">
+      <div style="position:absolute;inset:0;background:oklch(20% 0.01 80 / 0.45);display:flex;align-items:center;justify-content:center;z-index:1500;animation:dvsPop 0.15s ease-out">
+        <div style="width:420px;max-height:80vh;overflow-y:auto;background:white;border-radius:18px;padding:0;box-shadow:0 20px 60px oklch(20% 0.01 80 / 0.3)">
+          <div style="padding:18px 22px;background:oklch(26% 0.04 260);color:white;border-radius:18px 18px 0 0;display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div style="font-family:'Poppins',Helvetica,sans-serif;font-weight:800;font-size:20px">{{ selectedSeat.name }}</div>
+              <div style="font-size:12px;opacity:0.75;margin-top:2px">Seat {{ selectedSeat.acNo }} of 70 · {{ selectedSeat.pcName }}</div>
+            </div>
+            <div onClick="{{ closeSeat }}" style="cursor:pointer;font-size:18px;line-height:1;opacity:0.8">✕</div>
+          </div>
+          <div style="display:flex;padding:14px 22px;gap:18px;border-bottom:1px solid oklch(88% 0.01 80)">
+            <div><div style="font-size:11px;color:oklch(50% 0.01 80);font-weight:700">ELECTORS (EST.)</div><div style="font-weight:800;font-size:16px">{{ selectedSeat.electorsLabel }}</div></div>
+            <div><div style="font-size:11px;color:oklch(50% 0.01 80);font-weight:700">WIN TARGET</div><div style="font-weight:800;font-size:16px">₹{{ selectedSeat.threshold }}K</div></div>
+          </div>
+          <div style="padding:16px 22px;display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ selectedSeat.rows }}" as="row" hint-placeholder-count="2">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px">
+                  <div style="font-weight:700">{{ row.partyName }}{{ row.mineTag }}</div>
+                  <div style="color:oklch(50% 0.01 80)">₹{{ row.total }}K<sc-if value="{{ row.pendingLabel }}"> {{ row.pendingLabel }}</sc-if></div>
+                </div>
+                <div style="height:9px;border-radius:5px;background:oklch(93% 0.005 80);overflow:hidden;position:relative">
+                  <div style="height:100%;background:{{ row.color }};width:{{ row.pct }}"></div>
+                </div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ selectedSeat.lockedLabel }}">
+              <div style="text-align:center;font-weight:700;color:{{ selectedSeat.lockedColor }};padding:8px;background:oklch(97% 0.01 80);border-radius:10px">{{ selectedSeat.lockedLabel }}</div>
+            </sc-if>
+            <sc-if value="{{ selectedSeat.editable }}">
+              <div style="display:flex;gap:8px;margin-top:4px">
+                <button onClick="{{ selectedSeat.add10 }}" style="flex:1;font-weight:700;font-size:13px;padding:10px 0;border-radius:9px;border:1px solid oklch(88% 0.01 80);background:oklch(97% 0.01 80);cursor:pointer">+₹10K</button>
+                <button onClick="{{ selectedSeat.add25 }}" style="flex:1;font-weight:700;font-size:13px;padding:10px 0;border-radius:9px;border:1px solid oklch(88% 0.01 80);background:oklch(97% 0.01 80);cursor:pointer">+₹25K</button>
+                <button onClick="{{ selectedSeat.add50 }}" style="flex:1;font-weight:700;font-size:13px;padding:10px 0;border-radius:9px;border:1px solid oklch(88% 0.01 80);background:oklch(97% 0.01 80);cursor:pointer">+₹50K</button>
+                <sc-if value="{{ selectedSeat.hasDraft }}"><button onClick="{{ selectedSeat.clear }}" style="font-weight:700;font-size:13px;padding:10px 12px;border-radius:9px;border:1px solid oklch(88% 0.01 80);background:white;cursor:pointer">Clear</button></sc-if>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isWaitingOverlay }}">
+      <div style="position:absolute;inset:0;background:oklch(97% 0.01 80 / 0.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:1500">
+        <div style="width:36px;height:36px;border-radius:50%;border:4px solid oklch(88% 0.01 80);border-top-color:oklch(26% 0.04 260);animation:dvsSpin 0.8s linear infinite"></div>
+        <div style="font-family:'Poppins',Helvetica,sans-serif;font-weight:800;font-size:18px">Waiting for other campaigns…</div>
+        <div style="color:oklch(50% 0.01 80);font-size:13px">{{ notReadyLabel }}</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isSummaryVisible }}">
+      <div style="position:absolute;inset:0;background:oklch(20% 0.01 80 / 0.55);display:flex;align-items:center;justify-content:center;z-index:1500">
+        <div style="width:520px;max-height:82vh;overflow-y:auto;background:white;border-radius:18px;padding:24px 26px">
+          <div style="font-family:'Poppins',Helvetica,sans-serif;font-weight:800;font-size:22px;color:oklch(26% 0.04 260);margin-bottom:14px">End of Turn {{ summaryTurnNumber }}</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ summaryRows }}" as="s" hint-placeholder-count="2">
+              <div style="border:1.5px solid oklch(88% 0.01 80);border-radius:12px;padding:12px 14px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                  <div style="width:12px;height:12px;border-radius:50%;background:{{ s.color }}"></div>
+                  <div style="font-weight:700;font-size:14px">{{ s.partyName }}</div>
+                  <div style="font-size:12px;color:oklch(50% 0.01 80);margin-left:auto">spent ₹{{ s.spent }}K</div>
+                </div>
+                <sc-if value="{{ s.locksText }}"><div style="font-size:12.5px">Won: {{ s.locksText }}</div></sc-if>
+                <sc-if value="{{ s.groupsText }}"><div style="font-size:12.5px;color:oklch(55% 0.14 145)">Group secured: {{ s.groupsText }}</div></sc-if>
+                <sc-if value="{{ s.conflictText }}"><div style="font-size:12.5px;color:oklch(55% 0.18 25)">{{ s.conflictText }}</div></sc-if>
+                <sc-if value="{{ s.nothingText }}"><div style="font-size:12.5px;color:oklch(50% 0.01 80)">{{ s.nothingText }}</div></sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <button onClick="{{ dismissSummary }}" style="width:100%;margin-top:16px;font-family:'Poppins',Helvetica,sans-serif;font-weight:700;font-size:15px;padding:14px;border-radius:12px;border:none;background:oklch(26% 0.04 260);color:white;cursor:pointer">{{ summaryButtonLabel }}</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isResultsVisible }}">
+      <div style="position:absolute;inset:0;background:oklch(97% 0.01 80);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:1500;padding:24px">
+        <div style="font-family:'Poppins',Helvetica,sans-serif;font-weight:800;font-size:30px;color:oklch(26% 0.04 260)">Final Result — 70 Seats</div>
+        <div style="font-family:'Poppins',Helvetica,sans-serif;font-weight:800;font-size:17px;padding:10px 20px;border-radius:999px;background:{{ resultBannerBg }};color:white">{{ resultBannerText }}</div>
+        <div style="width:100%;max-width:520px;display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ finalStandings }}" as="f" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:120px;font-size:13px;font-weight:700;text-align:right;flex-shrink:0">{{ f.partyName }}</div>
+              <div style="flex:1;height:22px;background:oklch(93% 0.005 80);border-radius:6px;overflow:hidden">
+                <div style="height:100%;background:{{ f.color }};width:{{ f.pct }};display:flex;align-items:center;justify-content:flex-end;padding-right:8px">
+                  <span style="color:white;font-size:11px;font-weight:700">{{ f.seatsWon }}</span>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <button onClick="{{ playAgain }}" style="font-family:'Poppins',Helvetica,sans-serif;font-weight:700;font-size:15px;padding:14px 28px;border-radius:12px;border:none;background:oklch(26% 0.04 260);color:white;cursor:pointer">New Game</button>
+      </div>
+    </sc-if>
+
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    step: 'landing',
+    joinCodeInput: '', nameInput: '', partyNameInput: '', colorChoice: 0, symbolDataUrl: null,
+    pendingMode: null, pendingCode: null, error: null,
+    room: null, seatsLoaded: false,
+    selectedSeatAcNo: null,
+    draftSeatSpends: {}, draftGroupSpends: {},
+    summarySeenForTurn: 0
+  };
+
+  safeGet(kind, key) { try { return (kind === 'session' ? sessionStorage : localStorage).getItem(key); } catch (e) { return null; } }
+  safeSet(kind, key, val) { try { (kind === 'session' ? sessionStorage : localStorage).setItem(key, val); } catch (e) { console.warn('storage unavailable', e); } }
+  safeRemove(kind, key) { try { (kind === 'session' ? sessionStorage : localStorage).removeItem(key); } catch (e) {} }
+
+  async componentDidMount() {
+    try {
+      this.mod = await import('./delhi-game-data.js');
+      this.geoSeats = await this.mod.loadSeats();
+    } catch (err) {
+      console.error('Failed to load game data', err);
+      this.setState({ seatsLoaded: true, step: 'landing', error: 'Could not load constituency data. Please refresh.' });
+      return;
+    }
+    try {
+      this.myPlayerId = this.safeGet('session', 'dvs_player_id');
+      this.myRoomCode = this.safeGet('session', 'dvs_room_code');
+      let step = 'landing';
+      if (this.myRoomCode && this.myPlayerId) {
+        const room = this.readRoom(this.myRoomCode);
+        if (room && room.players[this.myPlayerId]) step = 'in-room';
+        else { this.safeRemove('session', 'dvs_player_id'); this.safeRemove('session', 'dvs_room_code'); this.myPlayerId = null; this.myRoomCode = null; }
+      }
+      this.setState({ seatsLoaded: true, step, room: this.myRoomCode ? this.readRoom(this.myRoomCode) : null });
+    } catch (err) {
+      console.error('Session/storage error', err);
+      this.setState({ seatsLoaded: true, step: 'landing' });
+    }
+    window.addEventListener('storage', this.onStorageEvent);
+    this._poll = setInterval(this.pollRoom, 1000);
+  }
+  componentWillUnmount() { window.removeEventListener('storage', this.onStorageEvent); clearInterval(this._poll); }
+  componentDidUpdate(pp, ps) { if (!ps || ps.room !== this.state.room) this.syncMapColors(); }
+
+  roomKey(code) { return 'dvs_room_' + code; }
+  readRoom(code) { const raw = this.safeGet('local', this.roomKey(code)); return raw ? JSON.parse(raw) : null; }
+  writeRoom = (room) => { this.safeSet('local', this.roomKey(room.code), JSON.stringify(room)); this.setState({ room }); };
+  onStorageEvent = (e) => { if (this.myRoomCode && e.key === this.roomKey(this.myRoomCode)) this.refreshRoom(); };
+  pollRoom = () => { if (this.myRoomCode) this.refreshRoom(); };
+  refreshRoom = () => { const room = this.readRoom(this.myRoomCode); if (room) this.setState({ room }); };
+
+  generateRoomCode() {
+    const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    for (let tries = 0; tries < 8; tries++) {
+      let code = '';
+      for (let i = 0; i < 4; i++) code += letters[Math.floor(Math.random() * letters.length)];
+      if (!this.readRoom(code)) return code;
+    }
+    return 'R' + Math.floor(Math.random() * 900 + 100);
+  }
+
+  goCreate = () => this.setState({ step: 'setup', pendingMode: 'create', error: null });
+  onJoinCodeChange = (e) => this.setState({ joinCodeInput: e.target.value.toUpperCase() });
+  goJoin = () => {
+    const code = (this.state.joinCodeInput || '').trim().toUpperCase();
+    if (!code) return this.setState({ error: 'Enter a room code' });
+    const room = this.readRoom(code);
+    if (!room) return this.setState({ error: 'Room not found. Check the code.' });
+    if (room.phase !== 'lobby') return this.setState({ error: 'That game already started.' });
+    if (Object.keys(room.players).length >= 5) return this.setState({ error: 'Room is full (5 players).' });
+    this.setState({ step: 'setup', pendingMode: 'join', pendingCode: code, error: null });
+  };
+
+  onNameChange = (e) => this.setState({ nameInput: e.target.value });
+  onPartyNameChange = (e) => this.setState({ partyNameInput: e.target.value });
+  pickColor = (i) => this.setState({ colorChoice: i });
+  onSymbolFile = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const s = Math.min(img.width, img.height);
+        const canvas = document.createElement('canvas');
+        canvas.width = 96; canvas.height = 96;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 96, 96);
+        this.setState({ symbolDataUrl: canvas.toDataURL('image/png') });
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  submitSetup = () => {
+    const { pendingMode, pendingCode, nameInput, partyNameInput, colorChoice, symbolDataUrl } = this.state;
+    if (!nameInput.trim() || !partyNameInput.trim()) return this.setState({ error: 'Enter your name and party name' });
+    const playerId = 'p_' + Math.random().toString(36).slice(2, 9);
+    const player = {
+      id: playerId, name: nameInput.trim(), partyName: partyNameInput.trim(),
+      color: this.mod.PARTY_COLOR_SWATCHES[colorChoice || 0], symbol: symbolDataUrl || null,
+      seatsWon: 0, totalSpent: 0, ready: false, budgetThisTurn: this.mod.BUDGET_PER_TURN_DEFAULT, pendingBonus: 0
+    };
+    let room;
+    if (pendingMode === 'create') {
+      const code = this.generateRoomCode();
+      const seats = {};
+      Object.values(this.geoSeats).forEach(s => { seats[s.acNo] = { acNo: s.acNo, name: s.name, pcName: s.pcName, electors: s.electors, threshold: s.threshold, locked: null, progress: {} }; });
+      room = {
+        code, phase: 'lobby', turn: 1, maxTurns: this.mod.MAX_TURNS_DEFAULT, budgetPerTurn: this.mod.BUDGET_PER_TURN_DEFAULT,
+        hostId: playerId, players: { [playerId]: player }, seats,
+        groups: this.mod.GROUPS.map(g => ({ ...g, claimedBy: null, progress: {} })),
+        pendingTurn: { turnNumber: 1, submissions: {} }, turnLog: []
+      };
+    } else {
+      room = this.readRoom(pendingCode);
+      if (!room) return this.setState({ error: 'Room disappeared, try again' });
+      room.players[playerId] = player;
+    }
+    this.safeSet('session', 'dvs_player_id', playerId);
+    this.safeSet('session', 'dvs_room_code', room.code);
+    this.myPlayerId = playerId; this.myRoomCode = room.code;
+    this.writeRoom(room);
+    this.setState({ step: 'in-room', error: null });
+  };
+
+  startGame = () => {
+    const room = JSON.parse(JSON.stringify(this.state.room));
+    room.phase = 'playing';
+    this.writeRoom(room);
+  };
+
+  getMe(room) { room = room || this.state.room; return room && room.players[this.myPlayerId]; }
+  getRemaining() {
+    const me = this.getMe();
+    if (!me) return 0;
+    const sSum = Object.values(this.state.draftSeatSpends).reduce((a, b) => a + b, 0);
+    const gSum = Object.values(this.state.draftGroupSpends).reduce((a, b) => a + b, 0);
+    return me.budgetThisTurn - sSum - gSum;
+  }
+
+  selectSeat = (acNo) => this.setState({ selectedSeatAcNo: acNo });
+  closeSeat = () => this.setState({ selectedSeatAcNo: null });
+  addSeatSpend = (acNo, amt) => {
+    const seat = this.state.room.seats[acNo];
+    if (!seat || seat.locked || this.getRemaining() < amt) return;
+    this.setState(s => ({ draftSeatSpends: { ...s.draftSeatSpends, [acNo]: (s.draftSeatSpends[acNo] || 0) + amt } }));
+  };
+  clearSeatDraft = (acNo) => this.setState(s => { const d = { ...s.draftSeatSpends }; delete d[acNo]; return { draftSeatSpends: d }; });
+  addGroupSpend = (gid, amt) => {
+    const group = this.state.room.groups.find(g => g.id === gid);
+    if (!group || group.claimedBy || this.getRemaining() < amt) return;
+    this.setState(s => ({ draftGroupSpends: { ...s.draftGroupSpends, [gid]: (s.draftGroupSpends[gid] || 0) + amt } }));
+  };
+  clearGroupDraft = (gid) => this.setState(s => { const d = { ...s.draftGroupSpends }; delete d[gid]; return { draftGroupSpends: d }; });
+
+  submitTurn = () => {
+    const room = JSON.parse(JSON.stringify(this.state.room));
+    room.pendingTurn.submissions[this.myPlayerId] = { seatSpends: { ...this.state.draftSeatSpends }, groupSpends: { ...this.state.draftGroupSpends } };
+    room.players[this.myPlayerId].ready = true;
+    const allReady = Object.values(room.players).every(p => p.ready);
+    if (allReady) {
+      const resolvedTurn = room.turn;
+      const { events, perPlayerSpend } = this.mod.resolveTurn(room);
+      room.turnLog.push({ turn: resolvedTurn, events, perPlayerSpend });
+      if (resolvedTurn >= room.maxTurns) room.phase = 'gameover';
+      else { room.turn = resolvedTurn + 1; room.pendingTurn = { turnNumber: room.turn, submissions: {} }; }
+    }
+    this.writeRoom(room);
+    this.setState({ draftSeatSpends: {}, draftGroupSpends: {}, selectedSeatAcNo: null });
+  };
+
+  dismissSummary = () => {
+    const room = this.state.room;
+    const last = room.turnLog[room.turnLog.length - 1];
+    this.setState({ summarySeenForTurn: last ? last.turn : this.state.summarySeenForTurn });
+  };
+
+  playAgain = () => {
+    this.safeRemove('session', 'dvs_player_id'); this.safeRemove('session', 'dvs_room_code');
+    this.myPlayerId = null; this.myRoomCode = null;
+    if (this.leafletMap) { this.leafletMap.remove(); this.leafletMap = null; this.layers = null; }
+    this.setState({ step: 'landing', room: null, nameInput: '', partyNameInput: '', symbolDataUrl: null, colorChoice: 0, draftSeatSpends: {}, draftGroupSpends: {}, summarySeenForTurn: 0, selectedSeatAcNo: null, error: null });
+  };
+
+  setMapEl = (el) => { this.mapEl = el; if (el && !this.leafletMap) this.initMap(); };
+  initMap() {
+    if (!this.geoSeats || !this.mapEl) return;
+    this.leafletMap = L.map(this.mapEl, { attributionControl: false, zoomControl: true }).setView([28.65, 77.12], 10);
+    this.layers = {};
+    const bounds = [];
+    Object.values(this.geoSeats).forEach(seat => {
+      const layer = L.geoJSON({ type: 'Feature', geometry: seat.geometry, properties: {} }, { style: () => this.styleForSeat(seat.acNo) }).addTo(this.leafletMap);
+      layer.on('click', () => this.selectSeat(seat.acNo));
+      layer.on('mouseover', (e) => e.target.setStyle({ weight: 2.5 }));
+      layer.on('mouseout', () => this.syncMapColors());
+      this.layers[seat.acNo] = layer;
+      try { bounds.push(layer.getBounds()); } catch (e) {}
+    });
+    if (bounds.length) { let b = bounds[0]; bounds.forEach(x => b = b.extend(x)); this.leafletMap.fitBounds(b, { padding: [10, 10] }); }
+    this.syncMapColors();
+  }
+  styleForSeat(acNo) {
+    const room = this.state.room;
+    const seat = room && room.seats[acNo];
+    if (!seat) return { color: '#999', weight: 1, fillColor: 'oklch(93% 0.005 80)', fillOpacity: 0.7 };
+    if (seat.locked === 'INDEPENDENT') return { color: '#999', weight: 1, fillColor: '#cfcfcf', fillOpacity: 0.6 };
+    if (seat.locked) {
+      const p = room.players[seat.locked];
+      return { color: 'white', weight: 1.5, fillColor: p ? p.color : '#999', fillOpacity: 0.9 };
+    }
+    const entries = Object.entries(seat.progress || {});
+    if (!entries.length) return { color: '#b8b3a8', weight: 1, fillColor: '#ffffff', fillOpacity: 0.4 };
+    entries.sort((a, b) => b[1] - a[1]);
+    const leader = room.players[entries[0][0]];
+    return { color: '#b8b3a8', weight: 1, fillColor: leader ? leader.color : 'oklch(93% 0.005 80)', fillOpacity: 0.35 };
+  }
+  syncMapColors() { if (!this.layers) return; Object.keys(this.layers).forEach(acNo => this.layers[acNo].setStyle(this.styleForSeat(acNo))); }
+
+  renderVals() {
+    if (!this.state.seatsLoaded || !this.mod) return { isLoading: true, isLanding: false, isSetup: false, isLobby: false, isInGame: false };
+    const mod = this.mod;
+    const room = this.state.room;
+
+    if (this.state.step === 'landing' || (this.state.step !== 'setup' && !room)) {
+      return {
+        isLoading: false, isLanding: this.state.step === 'landing', isSetup: false, isLobby: false, isInGame: false,
+        joinCodeInput: this.state.joinCodeInput, onJoinCodeChange: this.onJoinCodeChange,
+        goCreate: this.goCreate, goJoin: this.goJoin, error: this.state.error
+      };
+    }
+
+    if (this.state.step === 'setup') {
+      const colorSwatches = mod.PARTY_COLOR_SWATCHES.map((c, i) => ({
+        value: c, borderStyle: i === this.state.colorChoice ? '3px solid oklch(22% 0.01 80)' : '3px solid transparent',
+        onClick: () => this.pickColor(i)
+      }));
+      return {
+        isLoading: false, isLanding: false, isSetup: true, isLobby: false, isInGame: false,
+        nameInput: this.state.nameInput, onNameChange: this.onNameChange,
+        partyNameInput: this.state.partyNameInput, onPartyNameChange: this.onPartyNameChange,
+        colorSwatches, symbolDataUrl: this.state.symbolDataUrl, onSymbolFile: this.onSymbolFile,
+        submitSetup: this.submitSetup, setupButtonLabel: this.state.pendingMode === 'create' ? 'Create Room & Join' : 'Join Room',
+        error: this.state.error
+      };
+    }
+
+    const me = this.getMe(room);
+    const players = Object.values(room.players);
+
+    if (room.phase === 'lobby') {
+      const lobbyPlayers = players.map(p => ({ ...p, isMe: p.id === this.myPlayerId, isHost: p.id === room.hostId }));
+      return {
+        isLoading: false, isLanding: false, isSetup: false, isLobby: true, isInGame: false,
+        roomCode: room.code, lobbyPlayers, playerCountLabel: players.length + ' / 5 players joined',
+        isHost: room.hostId === this.myPlayerId, canStart: players.length >= 2,
+        startButtonBg: players.length >= 2 ? 'oklch(26% 0.04 260)' : 'oklch(80% 0.01 80)',
+        startGame: this.startGame, maxTurns: room.maxTurns
+      };
+    }
+
+    // in game: playing or gameover
+    const turnLabel = room.phase === 'gameover' ? 'FINAL RESULTS' : 'TURN ' + room.turn + ' / ' + room.maxTurns;
+    const remaining = this.getRemaining();
+
+    const groupRows = room.groups.map(g => {
+      const total = Object.values(g.progress || {}).reduce((a, b) => a + b, 0) + (this.state.draftGroupSpends[g.id] || 0);
+      const pct = Math.min(100, Math.round((total / g.ask) * 100)) + '%';
+      const claimedPlayer = g.claimedBy ? room.players[g.claimedBy] : null;
+      return {
+        id: g.id, name: g.name, ask: g.ask, pct, barColor: claimedPlayer ? claimedPlayer.color : 'oklch(72% 0.15 55)',
+        claimedName: claimedPlayer ? claimedPlayer.partyName : null,
+        canContribute: !g.claimedBy && room.phase === 'playing' && !(me && me.ready),
+        hasDraft: !!this.state.draftGroupSpends[g.id],
+        add10: () => this.addGroupSpend(g.id, 10), add25: () => this.addGroupSpend(g.id, 25),
+        clear: () => this.clearGroupDraft(g.id)
+      };
+    });
+
+    const scoreboard = players.slice().sort((a, b) => b.seatsWon - a.seatsWon).map(p => ({
+      ...p, chipBg: p.id === this.myPlayerId ? 'oklch(97% 0.01 80)' : 'white',
+      readyTag: room.phase === 'playing' ? (p.ready ? ' · ready' : ' · deciding') : ''
+    }));
+
+    let selectedSeat = null;
+    if (this.state.selectedSeatAcNo) {
+      const seat = room.seats[this.state.selectedSeatAcNo];
+      if (seat) {
+        const rows = players.map(p => {
+          const committed = seat.progress[p.id] || 0;
+          const pending = p.id === this.myPlayerId ? (this.state.draftSeatSpends[seat.acNo] || 0) : 0;
+          const total = committed + pending;
+          return { partyName: p.partyName, color: p.color, total, mineTag: p.id === this.myPlayerId ? ' (you)' : '', pendingLabel: pending ? '(+' + pending + 'K pending)' : '', pct: Math.min(100, Math.round((total / seat.threshold) * 100)) + '%' };
+        }).sort((a, b) => b.total - a.total);
+        const lockedPlayer = seat.locked && seat.locked !== 'INDEPENDENT' ? room.players[seat.locked] : null;
+        selectedSeat = {
+          acNo: seat.acNo, name: seat.name, pcName: seat.pcName, electorsLabel: seat.electors.toLocaleString('en-IN'), threshold: seat.threshold,
+          rows,
+          lockedLabel: seat.locked === 'INDEPENDENT' ? 'No campaign contested this seat — stays independent' : (lockedPlayer ? lockedPlayer.partyName + ' has won this seat' : null),
+          lockedColor: lockedPlayer ? lockedPlayer.color : 'oklch(50% 0.01 80)',
+          editable: !seat.locked && room.phase === 'playing' && !(me && me.ready),
+          hasDraft: !!this.state.draftSeatSpends[seat.acNo],
+          add10: () => this.addSeatSpend(seat.acNo, 10), add25: () => this.addSeatSpend(seat.acNo, 25), add50: () => this.addSeatSpend(seat.acNo, 50),
+          clear: () => this.clearSeatDraft(seat.acNo)
+        };
+      }
+    }
+
+    const lastLog = room.turnLog[room.turnLog.length - 1];
+    const isSummaryVisible = !!lastLog && lastLog.turn > this.state.summarySeenForTurn;
+    let summaryRows = [], summaryTurnNumber = null, summaryButtonLabel = 'Continue';
+    if (isSummaryVisible) {
+      summaryTurnNumber = lastLog.turn;
+      summaryButtonLabel = (lastLog.turn >= room.maxTurns) ? 'See Final Results' : 'Continue to Turn ' + (lastLog.turn + 1);
+      summaryRows = players.map(p => {
+        const evs = lastLog.events.filter(e => e.playerId === p.id);
+        const locks = evs.filter(e => e.type === 'lock' || e.type === 'forced_lock').map(e => e.seatName);
+        const groupsWon = evs.filter(e => e.type === 'group_claim').map(e => e.groupName);
+        const conflicts = evs.filter(e => e.type === 'conflict');
+        return {
+          partyName: p.partyName, color: p.color,
+          spent: (lastLog.perPlayerSpend && lastLog.perPlayerSpend[p.id]) || 0,
+          locksText: locks.length ? locks.join(', ') : null,
+          groupsText: groupsWon.length ? groupsWon.join(', ') : null,
+          conflictText: conflicts.length ? ('Paid contest fees in ' + conflicts.length + ' seat(s)') : null,
+          nothingText: (!locks.length && !groupsWon.length && !conflicts.length) ? 'No seats or groups secured this turn' : null
+        };
+      });
+    }
+
+    const isResultsVisible = room.phase === 'gameover' && !isSummaryVisible;
+    let finalStandings = [], resultBannerText = '', resultBannerBg = 'oklch(26% 0.04 260)';
+    if (isResultsVisible) {
+      finalStandings = players.slice().sort((a, b) => b.seatsWon - a.seatsWon).map(p => ({ partyName: p.partyName, color: p.color, seatsWon: p.seatsWon, pct: Math.max(4, Math.round((p.seatsWon / 70) * 100)) + '%' }));
+      const top = finalStandings[0];
+      if (top && top.seatsWon >= 36) { resultBannerText = top.partyName + ' wins a majority — forms the government'; resultBannerBg = top.color; }
+      else if (top) { resultBannerText = top.partyName + ' leads with ' + top.seatsWon + ' seats — coalition needed for government'; resultBannerBg = top.color; }
+    }
+
+    return {
+      isLoading: false, isLanding: false, isSetup: false, isLobby: false, isInGame: true,
+      turnLabel, roomCode: room.code, groupRows, setMapEl: this.setMapEl,
+      scoreboard, remainingBudget: remaining, myReadyLocked: !!(me && me.ready),
+      submitButtonBg: (me && me.ready) ? 'oklch(80% 0.01 80)' : 'oklch(26% 0.04 260)',
+      submitButtonLabel: (me && me.ready) ? 'Submitted' : 'Submit Turn',
+      submitTurn: this.submitTurn,
+      selectedSeat, closeSeat: this.closeSeat,
+      isWaitingOverlay: !!(me && me.ready) && room.phase === 'playing' && !isSummaryVisible,
+      notReadyLabel: players.filter(p => !p.ready).map(p => p.partyName).join(', ') + ' still deciding',
+      isSummaryVisible, summaryTurnNumber, summaryRows, summaryButtonLabel, dismissSummary: this.dismissSummary,
+      isResultsVisible, finalStandings, resultBannerText, resultBannerBg, playAgain: this.playAgain
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "vidhan-sabha-showdown",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "client"
+  ],
+  "scripts": {
+    "dev:client": "npm run dev --workspace=client",
+    "build:client": "npm run build --workspace=client",
+    "build": "npm run build:client"
+  }
+}

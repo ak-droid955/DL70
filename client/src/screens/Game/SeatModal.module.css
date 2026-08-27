@@ -1,0 +1,173 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500;
+  animation: dvsPop 0.15s ease-out;
+}
+
+.card {
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  max-height: 80vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 18px;
+  padding: 0;
+  box-shadow: var(--modal-shadow);
+}
+
+.header {
+  padding: 18px 22px;
+  background: var(--navy);
+  color: white;
+  border-radius: 18px 18px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.seatName {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.seatSub {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 2px;
+}
+
+.closeBtn {
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  opacity: 0.8;
+  background: none;
+  border: none;
+  color: inherit;
+}
+
+.stats {
+  display: flex;
+  padding: 14px 22px;
+  gap: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.statLabel {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.statValue {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.voteBankRow {
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  align-items: baseline;
+}
+
+.voteBankLabel {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.voteBankPrimary {
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.voteBankSecondary {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.body {
+  padding: 16px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+}
+
+.rowTop {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  margin-bottom: 4px;
+}
+
+.rowParty {
+  font-weight: 700;
+}
+
+.rowTotal {
+  color: var(--text-muted);
+}
+
+.progressTrack {
+  height: 9px;
+  border-radius: 5px;
+  background: var(--track);
+  overflow: hidden;
+  position: relative;
+}
+
+.progressFill {
+  height: 100%;
+}
+
+.lockedPill {
+  text-align: center;
+  font-weight: 700;
+  padding: 8px;
+  background: var(--bg);
+  border-radius: 10px;
+}
+
+.spendRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.spendBtn {
+  flex: 1;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 0;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+}
+.spendBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.clearBtn {
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: white;
+  cursor: pointer;
+}
