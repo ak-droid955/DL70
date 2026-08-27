@@ -20,13 +20,11 @@ export default function SeatModal() {
       const pending = p.id === state.myPlayerId ? state.draftSeatSpends[seat.acNo] || 0 : 0;
       const total = committed + pending;
       const rungs = Math.min(TOTAL_RUNGS, Math.floor(total / perRung));
-      const pendingRungs = Math.floor(pending / perRung);
       return {
         partyName: p.partyName,
         color: p.color,
         rungs,
         mineTag: p.id === state.myPlayerId ? ' (you)' : '',
-        pendingLabel: pendingRungs ? `(+${pendingRungs} rung${pendingRungs > 1 ? 's' : ''} pending)` : '',
         pct: Math.round((rungs / TOTAL_RUNGS) * 100)
       };
     })
@@ -101,7 +99,6 @@ export default function SeatModal() {
                 </div>
                 <div className={styles.rowTotal}>
                   Rung {row.rungs}/{TOTAL_RUNGS}
-                  {row.pendingLabel ? ` ${row.pendingLabel}` : ''}
                 </div>
               </div>
               <div className={styles.progressTrack}>
@@ -117,31 +114,20 @@ export default function SeatModal() {
           )}
 
           {editable && (
-            <>
-              <div className={styles.spendRow}>
-                <button
-                  className={styles.spendBtn}
-                  disabled={!canAddRung}
-                  onClick={() => addSeatSpend(seat.acNo, perRung)}
-                >
-                  +1 Rung (₹{perRung}K)
+            <div className={styles.spendRow}>
+              <button
+                className={styles.spendBtn}
+                disabled={!canAddRung}
+                onClick={() => addSeatSpend(seat.acNo, perRung)}
+              >
+                +1 Rung (₹{perRung}K)
+              </button>
+              {hasDraft && (
+                <button className={styles.clearBtn} onClick={() => clearSeatDraft(seat.acNo)}>
+                  Clear
                 </button>
-                {hasDraft && (
-                  <button className={styles.clearBtn} onClick={() => clearSeatDraft(seat.acNo)}>
-                    Clear
-                  </button>
-                )}
-              </div>
-              <div className={styles.spendHint}>
-                {atTop
-                  ? 'Ready to take the final rung — win this seat.'
-                  : firstEntry
-                    ? `First move here: up to ${FIRST_ENTRY_MAX_RUNGS} rungs this turn.`
-                    : !canAffordRung
-                      ? 'Not enough budget left for another rung.'
-                      : `Each rung costs ₹${perRung}K. Reach rung ${TOTAL_RUNGS} to win the seat.`}
-              </div>
-            </>
+              )}
+            </div>
           )}
         </div>
       </div>
