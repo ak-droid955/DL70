@@ -23,7 +23,7 @@ import {
 } from './voteBanks.ts';
 
 const DELHI_AC_GEOJSON_URL =
-  'https://raw.githubusercontent.com/ak-droid955/DL70/claude/delhi-election-game-multiplayer-9wddq3/supabase/functions/_shared/data/delhi_AC.json';
+  'https://raw.githubusercontent.com/ak-droid955/DL70/main/supabase/functions/_shared/data/delhi_AC.json';
 
 export const MAX_TURNS_DEFAULT = 10;
 export const BUDGET_PER_TURN_DEFAULT = 300; // in ₹ thousands
