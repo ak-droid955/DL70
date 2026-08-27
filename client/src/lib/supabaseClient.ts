@@ -23,6 +23,13 @@ export function call<T = Record<string, never>>(action: string, payload: unknown
   });
 }
 
+// jsonb columns can arrive as raw JSON text rather than parsed objects
+// (observed from postgres.js via the Edge Function; defensive here too since
+// Realtime's own encoding isn't guaranteed either).
+function asJson<T>(value: T | string): T {
+  return typeof value === 'string' ? (JSON.parse(value) as T) : value;
+}
+
 // Maps a raw `rooms` table row (snake_case columns, as delivered by Postgres
 // Changes) into the client's Room shape (camelCase, matching what the game
 // Edge Function already returns from call()).
@@ -36,12 +43,12 @@ export function rowToRoom(row: Record<string, any>): Room {
     turnTimerSeconds: row.turn_timer_seconds,
     turnDeadline: row.turn_deadline ? new Date(row.turn_deadline).getTime() : null,
     hostId: row.host_id,
-    players: row.players,
-    seats: row.seats,
-    voteBankInfluence: row.vote_bank_influence,
-    voteBankLeaders: row.vote_bank_leaders,
-    pendingTurn: row.pending_turn,
-    turnLog: row.turn_log
+    players: asJson(row.players),
+    seats: asJson(row.seats),
+    voteBankInfluence: asJson(row.vote_bank_influence),
+    voteBankLeaders: asJson(row.vote_bank_leaders),
+    pendingTurn: asJson(row.pending_turn),
+    turnLog: asJson(row.turn_log)
   };
 }
 

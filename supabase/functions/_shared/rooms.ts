@@ -133,6 +133,13 @@ function settleTurn(room: Room): TurnLogEntry {
   return entry;
 }
 
+// postgres.js doesn't reliably auto-parse jsonb columns back into objects
+// through the Supavisor pooler (they can come back as raw JSON text), so
+// every jsonb column is parsed explicitly here rather than trusted as-is.
+function asJson<T>(value: T | string): T {
+  return typeof value === 'string' ? (JSON.parse(value) as T) : value;
+}
+
 function rowToRoom(row: Record<string, any>): Room {
   return {
     code: row.code,
@@ -143,12 +150,12 @@ function rowToRoom(row: Record<string, any>): Room {
     turnTimerSeconds: row.turn_timer_seconds,
     turnDeadline: row.turn_deadline ? new Date(row.turn_deadline).getTime() : null,
     hostId: row.host_id,
-    players: row.players,
-    seats: row.seats,
-    voteBankInfluence: row.vote_bank_influence,
-    voteBankLeaders: row.vote_bank_leaders,
-    pendingTurn: row.pending_turn,
-    turnLog: row.turn_log,
+    players: asJson(row.players),
+    seats: asJson(row.seats),
+    voteBankInfluence: asJson(row.vote_bank_influence),
+    voteBankLeaders: asJson(row.vote_bank_leaders),
+    pendingTurn: asJson(row.pending_turn),
+    turnLog: asJson(row.turn_log),
     createdAt: new Date(row.created_at).getTime(),
     updatedAt: new Date(row.updated_at).getTime()
   };
@@ -245,12 +252,15 @@ class RoomStore {
   async listOpenRooms(): Promise<OpenRoomSummary[]> {
     const rows = await sql`select code, players, host_id, created_at from rooms where phase = 'lobby'`;
     return rows
-      .map((row) => ({
-        code: row.code as string,
-        playerCount: Object.keys(row.players).length,
-        hostPartyName: row.players[row.host_id]?.partyName || 'Unknown',
-        createdAt: new Date(row.created_at).getTime()
-      }))
+      .map((row) => {
+        const players = asJson<Record<string, Player>>(row.players);
+        return {
+          code: row.code as string,
+          playerCount: Object.keys(players).length,
+          hostPartyName: players[row.host_id]?.partyName || 'Unknown',
+          createdAt: new Date(row.created_at).getTime()
+        };
+      })
       .filter((r) => r.playerCount < MAX_PLAYERS)
       .sort((a, b) => b.createdAt - a.createdAt);
   }
@@ -259,7 +269,7 @@ class RoomStore {
     const rows = await sql`select code, phase, players from rooms where code = ${code.toUpperCase()}`;
     if (!rows.length) throw new RoomError('Room not found. Check the code.');
     const row = rows[0];
-    const playerCount = Object.keys(row.players).length;
+    const playerCount = Object.keys(asJson<Record<string, Player>>(row.players)).length;
     if (row.phase !== 'lobby') throw new RoomError('That game already started.');
     if (playerCount >= MAX_PLAYERS) throw new RoomError('Room is full (5 players).');
     return { code: row.code, phase: row.phase, playerCount };
@@ -280,10 +290,12 @@ class RoomStore {
 
   async rejoin(code: string, playerId: string, token: string): Promise<Room> {
     const rows = await sql`select * from rooms where code = ${code.toUpperCase()}`;
-    if (!rows.length || !rows[0].players[playerId]) throw new RoomError('Room not found.');
+    if (!rows.length) throw new RoomError('Room not found.');
+    const room = rowToRoom(rows[0]);
+    if (!room.players[playerId]) throw new RoomError('Room not found.');
     const tokenRows = await sql`select token from player_tokens where player_id = ${playerId}`;
     if (!tokenRows.length || tokenRows[0].token !== token) throw new RoomError('Invalid session.');
-    return rowToRoom(rows[0]);
+    return room;
   }
 
   async startGame(code: string, playerId: string): Promise<Room> {
