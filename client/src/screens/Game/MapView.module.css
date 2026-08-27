@@ -1,0 +1,11 @@
+.wrap {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+}
