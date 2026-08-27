@@ -1,6 +1,6 @@
-// Where the Socket.IO/REST server lives. In dev, the client (Vite on :5173) and
-// server (:8787) run separately, so default to localhost:8787. In a production
-// build with no VITE_SERVER_URL set, assume the server is serving this very
-// page (the single-service deploy: Express serves client/dist itself), so
-// talk to the same origin the page was loaded from.
-export const SERVER_URL = import.meta.env.VITE_SERVER_URL || (import.meta.env.DEV ? 'http://localhost:8787' : window.location.origin);
+// Supabase project this client talks to. Defaults point at the project this
+// game was set up against so it works out of the box; override via env vars
+// to point a build at a different project.
+export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://rgmpqnaxqjrtlguhwwgq.supabase.co';
+export const SUPABASE_PUBLISHABLE_KEY =
+  import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_KFfG0LQBHS5GvzvCBrUuNw_kdoFWR0X';

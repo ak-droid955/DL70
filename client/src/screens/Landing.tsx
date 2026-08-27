@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { call } from '../lib/socket';
+import { call } from '../lib/supabaseClient';
 import type { OpenRoomSummary } from '../lib/types';
 import { useGame } from '../state/GameProvider';
 import styles from './Landing.module.css';

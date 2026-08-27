@@ -1,4 +1,7 @@
-import type { VoteBankId } from './voteBanks.js';
+// Mirrors server/src/types.ts (Node/Socket.IO version) exactly — this is a
+// transport/persistence migration, not a rules change. Keep both in sync if
+// the game's data shape ever changes on either side.
+import type { VoteBankId } from './voteBanks.ts';
 
 export interface Player {
   id: string;

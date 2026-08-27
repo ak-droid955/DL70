@@ -2,9 +2,8 @@
 
 A real-time multiplayer party game where 2–5 players each run a fictional political party campaigning for
 Delhi's 70 real Vidhan Sabha (assembly) seats over 10 blind-bidding turns. Each turn, players secretly
-allocate a budget to specific constituencies and/or interest groups; allocations are revealed and resolved
-simultaneously, seats lock once a leader clears a win threshold with a big enough margin, and the game ends
-with a seat-count results screen.
+allocate a budget to specific constituencies; allocations are revealed and resolved simultaneously, seats
+lock once a player reaches the final Campaign Rung, and the game ends with a seat-count results screen.
 
 This is a real networked multiplayer implementation — any number of players can join a room from separate
 devices/browsers. It was built from a single-machine/localStorage HTML+JS design prototype (in
@@ -14,34 +13,47 @@ turn resolution was moved server-side so the server — not any one client — i
 
 ## Architecture
 
-- **`server/`** — Node.js + TypeScript + Express + Socket.IO. Holds all room state in memory, is the sole
-  place `resolveTurn()` runs, and broadcasts the updated room to every player in it after each turn. Also
-  serves `GET /api/seats`, the static per-constituency reference data (name, electors, geometry) computed
-  once at startup from the Delhi assembly GeoJSON.
-- **`client/`** — React + TypeScript (Vite). Talks to the server over Socket.IO (room create/join/rejoin,
-  start game, submit turn) and renders the game's screens: Landing, Setup, Lobby, the main game screen
-  (interest-group sidebar, Leaflet constituency map, scoreboard), the seat detail modal, waiting overlay,
+- **Postgres** (Supabase) is the source of truth: one row per room in the `rooms` table, holding the entire
+  live game state (players, seats, Vote Bank influence, turn log) as JSONB. Rejoin tokens live in a separate
+  `player_tokens` table, locked down from anonymous access.
+- **Edge Functions** (`supabase/functions/`) replace a persistent Node server. `game/` dispatches every game
+  action (create/join/rejoin/start/submitTurn/endMatch/checkExpiry) against the `rooms` table, taking a row
+  lock per action so concurrent players can't race each other. `seats/` serves the static per-constituency
+  reference data (electors, geometry, Vote Bank assignments). `supabase/functions/_shared/gameData.ts` is a
+  line-for-line port of the design prototype's `delhi-game-data.js` — same constants, same `resolveTurn()`
+  algorithm (blind bidding, Campaign Rungs, Vote Bank influence/leadership) — so the rules are unchanged from
+  the original spec, just running in Postgres-backed Edge Functions instead of an in-memory Node process.
+- **Realtime**: the client subscribes to Postgres Changes on `rooms` (filtered to its own room code) instead
+  of a WebSocket broadcast, so every player sees the resolved state the moment an action commits.
+- **`client/`** — React + TypeScript (Vite). Talks to Supabase (Edge Functions for actions, `@supabase/supabase-js`
+  Realtime for live updates) and renders the game's screens: Landing, Setup, Lobby, the main game screen
+  (Vote Bank sidebar, Leaflet constituency map, scoreboard), the seat detail modal, waiting overlay,
   end-of-turn summary, and final results.
 
-`server/src/gameData.ts` is a line-for-line TypeScript port of the design prototype's
-`delhi-game-data.js` — same constants, same `resolveTurn()` algorithm — so the blind-bidding rules (conflict
-fees, interest-group claims, seat locking, forced locks on the final turn) are unchanged from the original
-spec, just running server-side against the authoritative room instead of a client's local copy.
+Because there's no persistent Node process to host, `client/` is a plain static site — it can be deployed
+anywhere (Vercel, Netlify, etc.) as long as it can reach the Supabase project.
 
 ## Running locally
 
 ```bash
-npm install          # installs both workspaces
-npm run dev:server   # starts the Socket.IO/API server on :8787
-npm run dev:client   # in another terminal, starts the Vite dev server on :5173
+npm install                 # installs the client workspace
+npm run dev:client          # starts the Vite dev server on :5173
 ```
 
-Open `http://localhost:5173` in multiple browser tabs/windows (or devices, once `VITE_SERVER_URL` points at
-a reachable server) — each is a separate player. Copy `client/.env.example` to `client/.env.local` and
-`server/.env.example` to `server/.env` to point the client at a non-default server URL or restrict CORS.
+The client talks directly to the deployed Supabase project by default (see `client/src/lib/config.ts`); set
+`VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` in `client/.env.local` to point it at a different project.
+
+To work on the Edge Functions themselves, use the Supabase CLI from the project root:
+
+```bash
+supabase functions serve     # runs game/ and seats/ locally
+```
 
 ## Building
 
 ```bash
-npm run build   # builds server (tsc) and client (vite build) into server/dist and client/dist
+npm run build   # builds the client (vite build) into client/dist
 ```
+
+Deploy Edge Function changes with `supabase functions deploy game` / `supabase functions deploy seats` (or
+via the Supabase MCP tools).

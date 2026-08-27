@@ -1,8 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { SERVER_URL } from '../lib/config';
-import { call, socket } from '../lib/socket';
+import { call, supabase, subscribeToRoom } from '../lib/supabaseClient';
 import { TURN_TIMER_OPTIONS } from '../lib/types';
 import type { Player, Room, StaticSeat } from '../lib/types';
+
+// How often any client with an active turn timer pings the server to check
+// whether the deadline has passed — see the checkExpiry effect below.
+// Replaces the Node/Socket.IO version's server-side setTimeout, which an
+// Edge Function can't hold across invocations.
+const CHECK_EXPIRY_INTERVAL_MS = 2000;
 
 const LS_PLAYER_ID = 'dvs_player_id';
 const LS_ROOM_CODE = 'dvs_room_code';
@@ -121,8 +126,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`${SERVER_URL}/api/seats`);
-        const seatsArr: StaticSeat[] = await res.json();
+        const { data, error } = await supabase.functions.invoke<StaticSeat[]>('seats', { method: 'GET' });
+        if (error) throw error;
+        const seatsArr = data || [];
         const staticSeats: Record<string, StaticSeat> = {};
         seatsArr.forEach((s) => (staticSeats[s.acNo] = s));
         if (cancelled) return;
@@ -155,17 +161,38 @@ export function GameProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Live updates from the server-authoritative room (broadcast to everyone in the room channel).
+  // Live updates from the server-authoritative room, via Postgres Changes on
+  // the `rooms` table (replaces the old socket.on('room:update') broadcast).
+  // Resubscribes only when the room code itself changes (create/join/rejoin),
+  // not on every room update.
+  const roomCode = state.room?.code ?? null;
   useEffect(() => {
-    const onUpdate = (room: Room) => {
+    if (!roomCode) return;
+    const unsubscribe = subscribeToRoom(roomCode, (room) => {
       if (stateRef.current.room && room.code !== stateRef.current.room.code) return;
       patch({ room });
-    };
-    socket.on('room:update', onUpdate);
-    return () => {
-      socket.off('room:update', onUpdate);
-    };
-  }, [patch]);
+    });
+    return unsubscribe;
+  }, [roomCode, patch]);
+
+  // Pings the server to force-resolve a timed turn once its deadline has
+  // passed. Every client in the room does this on an interval while a
+  // deadline is active; the check is idempotent (a resolved turn's phase/turn
+  // guard means a redundant ping is a no-op), so concurrent pings from
+  // multiple players are harmless. Replaces the old server-side setTimeout.
+  const roomPhase = state.room?.phase ?? null;
+  const hasTurnTimer = state.room?.turnTimerSeconds != null;
+  useEffect(() => {
+    if (!roomCode || roomPhase !== 'playing' || !hasTurnTimer) return;
+    const id = setInterval(() => {
+      const current = stateRef.current.room;
+      if (!current || current.phase !== 'playing' || current.turnDeadline == null) return;
+      call('game:checkExpiry', { code: current.code }).catch(() => {
+        /* transient — another client's ping (or the next tick) will catch it */
+      });
+    }, CHECK_EXPIRY_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [roomCode, roomPhase, hasTurnTimer]);
 
   const persistSession = (code: string, playerId: string, token: string) => {
     safeSet('local', LS_ROOM_CODE, code);

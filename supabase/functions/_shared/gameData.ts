@@ -1,11 +1,18 @@
-// Ported 1:1 from the design handoff's delhi-game-data.js.
-// This is the authoritative, server-side copy of the game's pure logic —
-// same constants and same resolveTurn() algorithm, only the seat-loading
-// I/O (fetch -> fs.readFileSync) and typings changed.
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-import type { Player, Room, Seat, TurnEvent } from './types.js';
+// Ported from server/src/gameData.ts (the Node/Socket.IO version), which was
+// itself ported 1:1 from the design handoff's delhi-game-data.js. This copy
+// changes only the seat-loading I/O — every constant and the resolveTurn()
+// algorithm are byte-for-byte the same. Keep both copies in sync if the rules
+// ever change.
+//
+// The raw constituency GeoJSON (delhi_AC.json, ~75KB of polygon coordinates)
+// is fetched over HTTP from this same repo rather than bundled as a local
+// import: Edge Functions here are deployed by pasting file contents through
+// an MCP tool call, and that's not a safe way to move ~2000 floating-point
+// coordinate pairs verbatim — a single transcribed digit would silently
+// corrupt a seat's shape without erroring. Fetching the file this repo
+// already carries at a known path sidesteps that entirely. It's fetched once
+// per warm instance and cached, same lifetime as the old singleton below.
+import type { Player, Room, Seat, TurnEvent } from './types.ts';
 import {
   VOTE_BANKS,
   VOTE_BANK_IDS,
@@ -13,9 +20,10 @@ import {
   validateConstituencyVoteBanks,
   type ConstituencyVoteBanks,
   type VoteBankId
-} from './voteBanks.js';
+} from './voteBanks.ts';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const DELHI_AC_GEOJSON_URL =
+  'https://raw.githubusercontent.com/ak-droid955/DL70/claude/delhi-election-game-multiplayer-9wddq3/supabase/functions/_shared/data/delhi_AC.json';
 
 export const MAX_TURNS_DEFAULT = 10;
 export const BUDGET_PER_TURN_DEFAULT = 300; // in ₹ thousands
@@ -173,11 +181,30 @@ export interface StaticSeat {
 }
 
 let cachedStaticSeats: Record<string, StaticSeat> | null = null;
+let warmPromise: Promise<void> | null = null;
 
-export function loadStaticSeats(): Record<string, StaticSeat> {
-  if (cachedStaticSeats) return cachedStaticSeats;
-  const raw = readFileSync(join(__dirname, 'data', 'delhi_AC.json'), 'utf-8');
-  const data = JSON.parse(raw) as GeoJSON.FeatureCollection;
+// Fetches and computes the static seat table, if not already cached. Call
+// this once at the top of each Edge Function's request handler, before any
+// code path that might take a Postgres row lock — resolveTurn() and the rest
+// of the room-mutation logic call the synchronous loadStaticSeats() below,
+// which assumes the cache is already warm and throws if it isn't.
+export async function warmStaticSeatsCache(): Promise<void> {
+  if (cachedStaticSeats) return;
+  if (!warmPromise) {
+    warmPromise = (async () => {
+      const res = await fetch(DELHI_AC_GEOJSON_URL);
+      if (!res.ok) throw new Error(`Failed to fetch constituency data: ${res.status}`);
+      const data = (await res.json()) as GeoJSON.FeatureCollection;
+      computeStaticSeats(data);
+    })().catch((err) => {
+      warmPromise = null; // allow a retry on the next call after a transient failure
+      throw err;
+    });
+  }
+  return warmPromise;
+}
+
+function computeStaticSeats(data: GeoJSON.FeatureCollection): void {
   const electors = estimateElectors(data.features);
   const acNos = data.features.map((f) => String((f.properties as any).AC_NO));
   validateConstituencyVoteBanks(acNos);
@@ -202,7 +229,16 @@ export function loadStaticSeats(): Record<string, StaticSeat> {
     };
   });
   cachedStaticSeats = seats;
-  return seats;
+}
+
+// Synchronous accessor used by resolveTurn() and the room store — assumes
+// warmStaticSeatsCache() has already been awaited once at the top of the
+// request handler (see index.ts for both Edge Functions).
+export function loadStaticSeats(): Record<string, StaticSeat> {
+  if (!cachedStaticSeats) {
+    throw new Error('Static seat data not loaded — call warmStaticSeatsCache() first.');
+  }
+  return cachedStaticSeats;
 }
 
 // Locks every still-unlocked seat to whoever's currently leading it (or 'INDEPENDENT'
