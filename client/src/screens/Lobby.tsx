@@ -1,59 +1,95 @@
+import { useEffect, useState } from 'react';
 import { TURN_TIMER_OPTIONS } from '../lib/types';
 import { useGame } from '../state/GameProvider';
+import RoomShell, { shellStyles } from './RoomShell';
 import styles from './Lobby.module.css';
+
+const MAX_PLAYERS = 5;
+const COPIED_MS = 1600;
 
 function timerLabel(seconds: number | null): string {
   const opt = TURN_TIMER_OPTIONS.find((o) => o.seconds === seconds);
-  return `${opt ? opt.label : `${seconds ?? 60}s`} per turn`;
+  return opt ? opt.label : `${seconds ?? 60}s`;
 }
 
 export default function Lobby() {
   const { state, startGame } = useGame();
+  const [copied, setCopied] = useState(false);
   const room = state.room!;
   const players = Object.values(room.players);
   const isHost = room.hostId === state.myPlayerId;
   const canStart = players.length >= 2;
+  const emptySlots = Math.max(0, MAX_PLAYERS - players.length);
+
+  useEffect(() => {
+    if (!copied) return;
+    const id = setTimeout(() => setCopied(false), COPIED_MS);
+    return () => clearTimeout(id);
+  }, [copied]);
+
+  const copyCode = () => {
+    navigator.clipboard?.writeText(room.code).catch(() => {
+      /* clipboard blocked — the code is on screen anyway */
+    });
+    setCopied(true);
+  };
 
   return (
-    <div className={styles.screen}>
-      <div className={styles.roomCodeLabel}>ROOM CODE</div>
-      <div className={styles.roomCode}>{room.code}</div>
-      <div className={styles.timerBadge}>⏱ {timerLabel(room.turnTimerSeconds)}</div>
-
-      <div className={styles.playerList}>
-        {players.map((p) => (
-          <div className={styles.playerRow} key={p.id}>
-            <div className={styles.dot} style={{ background: p.color }} />
-            {p.symbol && <div className={styles.symbol} style={{ backgroundImage: `url(${p.symbol})` }} />}
-            <div style={{ flex: 1 }}>
-              <div className={styles.partyName}>
-                {p.partyName}
-                {p.partyCode ? <span className={styles.partyCode}>{p.partyCode}</span> : null}
-                {p.id === room.hostId ? ' · Host' : ''}
-              </div>
-              <div className={styles.playerName}>
-                {p.name}
-                {p.id === state.myPlayerId ? ' (you)' : ''}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className={styles.countLabel}>{players.length} / 5 players joined</div>
-
-      {isHost ? (
-        <button
-          className={styles.startBtn}
-          disabled={!canStart || state.busy}
-          onClick={startGame}
-          style={{ background: canStart && !state.busy ? 'var(--navy)' : 'var(--disabled)' }}
-        >
-          {state.busy ? 'Starting…' : `Start Campaign (${room.maxTurns} turns)`}
+    <RoomShell variant="stage" showBack={false}>
+      <div className={`${shellStyles.card} ${styles.card}`}>
+        <div className={styles.codeLabel}>Room Code</div>
+        <div className={styles.code}>{room.code}</div>
+        <div className={styles.timerBadge}>⏱ {timerLabel(room.turnTimerSeconds)} per turn</div>
+        <button type="button" className={styles.copyBtn} onClick={copyCode}>
+          {copied ? 'Copied ✓' : 'Copy Code'}
         </button>
-      ) : (
-        <div className={styles.waitingLabel}>Waiting for the host to start…</div>
-      )}
-    </div>
+
+        <div className={styles.roster}>
+          {players.map((p) => (
+            <div className={styles.playerRow} key={p.id}>
+              <span
+                className={styles.avatar}
+                style={{
+                  background: p.color,
+                  backgroundImage: p.symbol ? `url(${p.symbol})` : undefined
+                }}
+              />
+              <span className={styles.playerIdentity}>
+                <span className={styles.partyLine}>
+                  <span className={styles.partyName}>{p.partyName}</span>
+                  {p.partyCode && <span className={styles.partyCode}>{p.partyCode}</span>}
+                  {p.id === room.hostId && <span className={styles.hostTag}>Host</span>}
+                </span>
+                <span className={styles.playerName}>
+                  {p.name}
+                  {p.id === state.myPlayerId ? ' (you)' : ''}
+                </span>
+              </span>
+            </div>
+          ))}
+          {Array.from({ length: emptySlots }, (_, i) => (
+            <div className={`${styles.playerRow} ${styles.emptyRow}`} key={`empty-${i}`}>
+              <span className={styles.emptyAvatar} />
+              <span className={styles.emptyLabel}>Open slot</span>
+            </div>
+          ))}
+        </div>
+
+        <p className={styles.countLabel}>
+          {players.length} / {MAX_PLAYERS} players joined
+          {!canStart ? ' — at least 2 needed to start' : ''}
+        </p>
+
+        {state.error && <p className={styles.error}>{state.error}</p>}
+
+        {isHost ? (
+          <button className={styles.startBtn} disabled={!canStart || state.busy} onClick={startGame}>
+            {state.busy ? 'Starting…' : `Start Campaign (${room.maxTurns} turns)`}
+          </button>
+        ) : (
+          <p className={styles.waitingLabel}>Waiting for the host to start…</p>
+        )}
+      </div>
+    </RoomShell>
   );
 }

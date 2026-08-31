@@ -74,22 +74,30 @@ export const VOTE_BANK_BONUS_MIN_MULTIPLIER = 0.4; // floor multiplier when spen
 // NOTE: order and length must stay identical to PARTY_COLOR_SWATCHES in
 // client/src/lib/types.ts — a colour is stored by its index in this array.
 export const PARTY_COLOR_SWATCHES = [
-  'oklch(62% 0.19 25)', // red
-  'oklch(64% 0.2 15)', // crimson
-  'oklch(66% 0.17 55)', // orange
-  'oklch(68% 0.16 40)', // burnt orange
+  'oklch(58% 0.19 25)', // red
+  'oklch(62% 0.22 355)', // crimson
+  'oklch(65% 0.18 45)', // orange
+  'oklch(68% 0.15 35)', // burnt orange
   'oklch(72% 0.15 95)', // gold
-  'oklch(74% 0.14 75)', // amber
-  'oklch(64% 0.15 140)', // green
-  'oklch(66% 0.16 120)', // lime
-  'oklch(60% 0.13 195)', // teal
-  'oklch(62% 0.13 165)', // emerald
-  'oklch(58% 0.16 250)', // blue
-  'oklch(62% 0.14 220)', // sky
-  'oklch(60% 0.18 300)', // purple
-  'oklch(58% 0.17 275)', // indigo
-  'oklch(62% 0.19 340)', // magenta
-  'oklch(64% 0.18 320)' // pink
+  'oklch(70% 0.14 65)', // amber
+  'oklch(55% 0.15 145)', // green
+  'oklch(60% 0.14 120)', // lime
+  'oklch(55% 0.09 190)', // teal
+  'oklch(55% 0.13 165)', // emerald
+  'oklch(55% 0.16 260)', // blue
+  'oklch(60% 0.12 220)', // sky
+  'oklch(55% 0.20 295)', // purple
+  'oklch(55% 0.18 275)', // indigo
+  'oklch(55% 0.20 340)', // magenta
+  'oklch(55% 0.20 310)', // pink
+  'oklch(45% 0.16 25)', // maroon
+  'oklch(78% 0.16 55)', // marigold
+  'oklch(50% 0.13 145)', // forest
+  'oklch(40% 0.10 220)', // navy
+  'oklch(85% 0.10 95)', // cream
+  'oklch(35% 0.05 40)', // ink brown
+  'oklch(80% 0.03 75)', // stone
+  'oklch(70% 0.20 15)' // rose
 ];
 
 export { VOTE_BANKS, VOTE_BANK_IDS };

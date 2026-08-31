@@ -20,6 +20,33 @@
 
   --font-heading: 'Poppins', Helvetica, Arial, sans-serif;
   --font-body: Helvetica, Arial, sans-serif;
+
+  /* DL-70 design system — landing / create-room / join-room screens.
+     Kept alongside the older game-screen variables above rather than
+     replacing them, so the in-game screens are untouched by the redesign. */
+  --paper: oklch(97% 0.014 75);
+  --card-paper: oklch(99% 0.006 75);
+  --ink: oklch(18% 0.02 40);
+  --ink-deep: oklch(10% 0.015 40);
+  --saffron: oklch(68% 0.19 48);
+  --saffron-deep: oklch(50% 0.17 48);
+  --brick: oklch(42% 0.16 22);
+  --ink-muted: oklch(45% 0.02 40);
+  --paper-muted: oklch(55% 0.015 75);
+  --paper-border: oklch(85% 0.02 75);
+  --paper-border-soft: oklch(88% 0.015 75);
+  --error-ink: oklch(55% 0.19 25);
+  --ready-green: oklch(50% 0.14 145);
+  --ready-green-deep: oklch(38% 0.12 145);
+  --info-blue: oklch(55% 0.12 200);
+  --footer-orange: #f16a00;
+
+  --font-display: 'Baloo 2', 'Poppins', Helvetica, Arial, sans-serif;
+  --font-ui: 'Work Sans', Helvetica, Arial, sans-serif;
+  --font-label: 'Nunito', 'Work Sans', Helvetica, Arial, sans-serif;
+  --font-serif-hi: 'Noto Serif Devanagari', Georgia, serif;
+  --font-serif-en: 'Playfair Display', Georgia, serif;
+  --font-tagline: 'Lora', Georgia, serif;
 }
 
 html,
@@ -70,4 +97,29 @@ input {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+/* Shared motion for the redesigned landing / room screens. */
+@keyframes dl70Marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes dl70Fade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+::selection {
+  background: var(--saffron);
+  color: #fff;
 }
