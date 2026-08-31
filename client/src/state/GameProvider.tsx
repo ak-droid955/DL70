@@ -14,7 +14,7 @@ const LS_ROOM_CODE = 'dvs_room_code';
 const LS_TOKEN = 'dvs_token';
 const LS_SUMMARY_SEEN = 'dvs_summary_seen';
 
-export type Step = 'landing' | 'setup' | 'in-room';
+export type Step = 'landing' | 'join' | 'setup' | 'in-room';
 export type PendingMode = 'create' | 'join' | null;
 
 interface State {
@@ -97,6 +97,8 @@ interface Ctx {
   getMe: () => Player | null;
   getRemaining: () => number;
   goCreate: () => void;
+  goToJoin: () => void;
+  goHome: () => void;
   goJoin: () => Promise<void>;
   joinRoomByCode: (code: string) => Promise<void>;
   onJoinCodeChange: (v: string) => void;
@@ -245,6 +247,22 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [getMe]);
 
   const goCreate = () => patch({ step: 'setup', pendingMode: 'create', error: null });
+
+  // The join flow is its own page (room-code entry + open-room list) before
+  // the setup form, mirroring the design's lobby -> setup progression.
+  const goToJoin = () => patch({ step: 'join', error: null, pendingMode: null, pendingCode: null });
+
+  // "Back" out of the join/setup pages to the landing page. From the setup
+  // form of a join we step back to the room list rather than all the way home.
+  const goHome = () => {
+    const backToRoomList = stateRef.current.step === 'setup' && stateRef.current.pendingMode === 'join';
+    patch({
+      step: backToRoomList ? 'join' : 'landing',
+      error: null,
+      pendingMode: null,
+      pendingCode: backToRoomList ? null : stateRef.current.pendingCode
+    });
+  };
 
   const onJoinCodeChange = (v: string) => patch({ joinCodeInput: v.toUpperCase() });
 
@@ -409,6 +427,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       getMe,
       getRemaining,
       goCreate,
+      goToJoin,
+      goHome,
       goJoin,
       joinRoomByCode,
       onJoinCodeChange,

@@ -1,0 +1,171 @@
+.card {
+  max-width: 660px;
+  text-align: center;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(28px, 5vw, 40px);
+  color: var(--ink);
+  margin: 0 0 16px;
+  letter-spacing: -0.5px;
+}
+
+.blurb {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+  margin: 0 auto 34px;
+  max-width: 520px;
+}
+
+.joinRow {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 30px;
+}
+
+.codeInput {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 19px 12px;
+  border-radius: 16px;
+  border: 2px solid var(--paper-border);
+  background: var(--card-paper);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 2px;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--ink);
+  outline: none;
+}
+.codeInput::placeholder {
+  color: oklch(62% 0.015 75);
+}
+.codeInput:focus {
+  border-color: var(--ink);
+}
+
+.joinBtn {
+  flex: 1;
+  padding: 19px 12px;
+  border-radius: 16px;
+  border: 2px solid var(--ink);
+  background: var(--card-paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 17px;
+  cursor: pointer;
+}
+.joinBtn:disabled {
+  border-color: var(--paper-border);
+  color: var(--paper-muted);
+  cursor: not-allowed;
+}
+
+.error {
+  font-size: 14px;
+  color: var(--error-ink);
+  font-weight: 600;
+  margin: -18px 0 24px;
+}
+
+.openRoomsLabel {
+  font-family: var(--font-label);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.emptyNote {
+  font-size: 14px;
+  color: var(--paper-muted);
+  margin: 0;
+}
+
+.roomList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.roomRow {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  border: 2px solid var(--paper-border);
+  background: var(--card-paper);
+  font-family: var(--font-ui);
+  cursor: pointer;
+}
+.roomRow:hover {
+  border-color: var(--ink);
+}
+.roomRowFull {
+  border-color: oklch(90% 0.015 75);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.roomRowFull:hover {
+  border-color: oklch(90% 0.015 75);
+}
+
+.roomIdentity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.roomCode {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 1.5px;
+  color: var(--brick);
+  flex: none;
+}
+
+.roomName {
+  font-size: 16px;
+  color: oklch(22% 0.02 40);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roomCount {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  flex: none;
+}
+.roomCountFull {
+  color: var(--error-ink);
+}
+
+@media (max-width: 640px) {
+  .joinRow {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .roomRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}

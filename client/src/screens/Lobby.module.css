@@ -1,110 +1,183 @@
-.screen {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  background: var(--bg);
-  padding: 24px;
+.card {
+  max-width: 560px;
+  text-align: center;
 }
 
-.roomCodeLabel {
-  font-size: 13px;
+.codeLabel {
+  font-family: var(--font-label);
+  font-size: 15px;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
 }
 
-.roomCode {
-  font-family: var(--font-heading);
+.code {
+  font-family: var(--font-display);
   font-weight: 800;
-  font-size: 48px;
-  letter-spacing: 0.1em;
-  color: var(--navy);
+  font-size: clamp(48px, 12vw, 72px);
+  line-height: 1.1;
+  letter-spacing: 8px;
+  color: var(--ink);
+  margin-top: 6px;
 }
 
-.playerList {
-  width: 100%;
-  max-width: 420px;
+.timerBadge {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.copyBtn {
+  margin: 18px 0 4px;
+  padding: 12px 26px;
+  border-radius: 100px;
+  border: 2px solid var(--ink);
+  background: var(--card-paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+.copyBtn:hover {
+  background: var(--saffron);
+}
+
+.roster {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin: 28px 0 18px;
+  text-align: left;
 }
 
 .playerRow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: var(--panel);
-  border: 1.5px solid var(--border);
-  border-radius: 14px;
+  gap: 14px;
   padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--card-paper);
+  border: 2px solid var(--paper-border-soft);
 }
 
-.dot {
-  width: 14px;
-  height: 14px;
+.avatar {
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.symbol {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  flex-shrink: 0;
+  flex: none;
+  border: 2px solid var(--ink);
   background-size: cover;
   background-position: center;
 }
 
-.partyName {
-  font-weight: 700;
-  font-size: 14px;
+.playerIdentity {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.timerBadge {
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 600;
-  margin-top: -4px;
+.partyLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.partyName {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ink);
 }
 
 .partyCode {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 1px 6px;
+  padding: 1px 7px;
   border-radius: 6px;
-  background: var(--border);
-  color: var(--text-muted);
+  background: oklch(92% 0.012 75);
+  color: var(--ink-muted);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  vertical-align: middle;
+  letter-spacing: 1px;
+}
+
+.hostTag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--saffron);
 }
 
 .playerName {
-  font-size: 12px;
-  color: var(--text-muted);
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.emptyRow {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.emptyAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex: none;
+  border: 2px dashed oklch(75% 0.02 75);
+}
+
+.emptyLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--paper-muted);
 }
 
 .countLabel {
-  color: var(--text-muted);
-  font-size: 13px;
+  font-size: 14px;
+  color: var(--ink-muted);
+  margin: 0 0 18px;
+}
+
+.error {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--error-ink);
+  margin: 0 0 14px;
 }
 
 .startBtn {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 16px;
-  padding: 16px 32px;
-  border-radius: 14px;
+  width: 100%;
+  padding: 19px;
+  border-radius: 100px;
   border: none;
-  color: white;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 17px;
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 0 4px 0 var(--ink-deep);
   cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.startBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+.startBtn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.startBtn:disabled {
+  background: oklch(90% 0.01 75);
+  color: oklch(60% 0.015 75);
+  box-shadow: none;
+  cursor: not-allowed;
 }
 
 .waitingLabel {
-  color: var(--text-muted);
-  font-size: 13px;
+  font-size: 15px;
+  color: var(--ink-muted);
+  margin: 0;
 }

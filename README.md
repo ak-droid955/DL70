@@ -30,6 +30,16 @@ turn resolution was moved server-side so the server — not any one client — i
   (Vote Bank sidebar, Leaflet constituency map, scoreboard), the seat detail modal, waiting overlay,
   end-of-turn summary, and final results.
 
+## Landing / room screens
+
+The landing page and the create-room and join-room flows follow the DL-70 design handoff (Baloo 2 display
+type, saffron/ink/paper palette, pill buttons with flat offset shadows, the arch-frieze motif, frosted cards).
+Two things in that handoff have no counterpart in this repo and are approximated in CSS until the assets
+land: the logo lockup PNGs (drawn as a CSS wordmark in `client/src/components/Brand.tsx`) and the rally/
+building photographs behind the hero and the room pages (gradient washes plus a drawn silhouette). The
+landing page's constituency map is inline SVG rendered from the seat geometry the app already loads, rather
+than the handoff's iframed Leaflet map.
+
 Because there's no persistent Node process to host, `client/` is a plain static site — it can be deployed
 anywhere (Vercel, Netlify, etc.) as long as it can reach the Supabase project.
 
