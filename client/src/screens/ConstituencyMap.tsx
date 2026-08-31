@@ -13,6 +13,10 @@ type Ring = number[][];
 function ringsOf(geometry: GeoJSON.Geometry): Ring[] {
   if (geometry.type === 'Polygon') return geometry.coordinates as Ring[];
   if (geometry.type === 'MultiPolygon') return (geometry.coordinates as Ring[][]).flat();
+  // Delhi Cantt (AC 38) is a GeometryCollection of two polygons in the source
+  // data — without this it renders as a hole in the middle of the map. The
+  // server's extractPolys() recurses the same way.
+  if (geometry.type === 'GeometryCollection') return geometry.geometries.flatMap(ringsOf);
   return [];
 }
 
