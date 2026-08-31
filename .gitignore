@@ -7,3 +7,6 @@ build/
 .env.local
 .env.*.local
 *.tsbuildinfo
+
+# Supabase CLI scratch state (e.g. .temp/cli-latest), not project content
+supabase/.temp/
