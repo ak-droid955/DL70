@@ -15,61 +15,37 @@
   border-radius: 0 0 60px 60px;
 }
 
-/* Wordmark stands in for the design's logo lockup PNG, which isn't in the
-   repo — same placement and weight, drawn in CSS. */
-.wordmark {
+/* Logo lockup (assets/dl70-logo-combined.png). */
+.logo {
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+.logoMd {
+  height: 56px;
+}
+.logoLg {
+  height: 80px;
+}
+
+/* Footer: icon mark + wordmark, on the flat orange band. */
+.footerMark {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: var(--ink);
 }
 
-.mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--saffron);
-  border: 2.5px solid var(--ink);
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-weight: 800;
-  line-height: 1;
-  box-shadow: 0 3px 0 var(--ink);
-}
-
-.markSm {
+.footerMarkIcon {
   width: 38px;
   height: 38px;
-  border-radius: 11px;
-  font-size: 15px;
-}
-.markMd {
-  width: 52px;
-  height: 52px;
-  border-radius: 15px;
-  font-size: 20px;
+  object-fit: contain;
 }
 
-.wordmarkText {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.05;
-}
-
-.wordmarkName {
-  font-size: 24px;
-}
-
-.wordmarkTag {
-  font-family: var(--font-ui);
-  font-weight: 600;
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--ink-muted);
+.footerMarkText {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 25px;
+  color: #000;
 }
 
 /* Header shared by the create-room and join-room pages: back link + wordmark. */
@@ -113,7 +89,10 @@
   .backLink {
     font-size: 15px;
   }
-  .wordmarkName {
-    font-size: 19px;
+  .logoMd {
+    height: 42px;
+  }
+  .logoLg {
+    height: 54px;
   }
 }

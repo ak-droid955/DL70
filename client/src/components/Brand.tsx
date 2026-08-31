@@ -1,3 +1,5 @@
+import logoCombined from '../assets/dl70-logo-combined.png';
+import logoSmall from '../assets/dl70-logo-small.png';
 import styles from './Brand.module.css';
 
 const FRIEZE_BARS = 14;
@@ -15,16 +17,24 @@ export function ArchFrieze({ arched = false }: { arched?: boolean }) {
   );
 }
 
-/** DL-70 lockup. The design's logo PNGs aren't part of this repo, so the
- *  wordmark is drawn in CSS at the same sizes/placement. */
-export function Wordmark({ size = 'md' }: { size?: 'sm' | 'md' }) {
+/** The DL-70 logo lockup used in the page headers. `lg` is the landing
+ *  page's size, `md` the one on the create/join room headers. */
+export function Logo({ size = 'md' }: { size?: 'md' | 'lg' }) {
   return (
-    <span className={styles.wordmark}>
-      <span className={`${styles.mark} ${size === 'sm' ? styles.markSm : styles.markMd}`}>70</span>
-      <span className={styles.wordmarkText}>
-        <span className={styles.wordmarkName}>DL-70</span>
-        <span className={styles.wordmarkTag}>Vidhan Sabha Showdown</span>
-      </span>
+    <img
+      src={logoCombined}
+      alt="DL-70"
+      className={`${styles.logo} ${size === 'lg' ? styles.logoLg : styles.logoMd}`}
+    />
+  );
+}
+
+/** Footer mark: the icon-only logo beside the wordmark. */
+export function FooterMark() {
+  return (
+    <span className={styles.footerMark}>
+      <img src={logoSmall} alt="" className={styles.footerMarkIcon} />
+      <span className={styles.footerMarkText}>DL-70</span>
     </span>
   );
 }
@@ -42,7 +52,7 @@ export function PageHeader({ onBack }: { onBack?: () => void }) {
       ) : (
         <span />
       )}
-      <Wordmark />
+      <Logo />
     </div>
   );
 }

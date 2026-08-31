@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArchFrieze, Wordmark } from '../components/Brand';
+import heroBuilding from '../assets/hero-building.jpg';
+import { ArchFrieze, FooterMark, Logo } from '../components/Brand';
 import { useGame } from '../state/GameProvider';
 import ConstituencyMap from './ConstituencyMap';
 import styles from './Landing.module.css';
@@ -33,12 +34,19 @@ const FEATURES = [
   }
 ];
 
+// Paper-toned wash over the hero photograph, per the design.
+const HERO_OVERLAY =
+  'linear-gradient(180deg, oklch(97% 0.01 75 / .85) 0%, oklch(97% 0.01 75 / .45) 50%, oklch(97% 0.01 75 / .8) 100%)';
+
 const SLIDE_COUNT = 3;
 const SLIDE_MS = 6000;
 
 export default function Landing() {
   const { state, goCreate, goToJoin } = useGame();
   const [slide, setSlide] = useState(0);
+  // The hero's three-stage fade is gated on the background photo being
+  // decoded, so the copy doesn't animate in over a blank hero.
+  const [heroReady, setHeroReady] = useState(false);
   // The carousel's timer is reset whenever a dot is clicked, so `tick` is
   // bumped to restart the interval effect rather than clearing it by hand.
   const [tick, setTick] = useState(0);
@@ -47,6 +55,12 @@ export default function Landing() {
     const id = setInterval(() => setSlide((s) => (s + 1) % SLIDE_COUNT), SLIDE_MS);
     return () => clearInterval(id);
   }, [tick]);
+
+  useEffect(() => {
+    const img = new Image();
+    img.onload = img.onerror = () => setHeroReady(true);
+    img.src = heroBuilding;
+  }, []);
 
   const goToSlide = (i: number) => {
     setSlide(i);
@@ -58,12 +72,11 @@ export default function Landing() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <Wordmark />
+        <Logo size="lg" />
       </header>
 
-      <section className={styles.hero}>
-        <div className={styles.heroSkyline} aria-hidden="true" />
-        <div className={styles.heroInner}>
+      <section className={styles.hero} style={{ backgroundImage: `${HERO_OVERLAY}, url(${heroBuilding})` }}>
+        <div className={`${styles.heroInner} ${heroReady ? styles.heroReady : ''}`}>
           <h1 className={styles.heroTitle}>
             दिल्ली <span className={styles.heroTitleAccent}>Ka Raja</span>
           </h1>
@@ -270,7 +283,7 @@ export default function Landing() {
       </section>
 
       <footer className={styles.footer}>
-        <Wordmark size="sm" />
+        <FooterMark />
         <span className={styles.footerNote}>© 2026 DL-70. A satirical browser game. Not affiliated with any real party.</span>
         <div className={styles.footerLinks}>
           <span>Privacy</span>
