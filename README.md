@@ -34,11 +34,19 @@ turn resolution was moved server-side so the server — not any one client — i
 
 The landing page and the create-room and join-room flows follow the DL-70 design handoff (Baloo 2 display
 type, saffron/ink/paper palette, pill buttons with flat offset shadows, the arch-frieze motif, frosted cards).
-Two things in that handoff have no counterpart in this repo and are approximated in CSS until the assets
-land: the logo lockup PNGs (drawn as a CSS wordmark in `client/src/components/Brand.tsx`) and the rally/
-building photographs behind the hero and the room pages (gradient washes plus a drawn silhouette). The
-landing page's constituency map is inline SVG rendered from the seat geometry the app already loads, rather
-than the handoff's iframed Leaflet map.
+The handoff's artwork lives in `client/src/assets/` and is imported from the components so Vite fingerprints
+it: `dl70-logo-combined.png` (page headers), `dl70-logo-small.png` (footer), `hero-building.jpg` (landing
+hero), `bg-rally-stage.jpg` (create-room and lobby backdrop) and `bg-rally-truck-join.jpg` (join-room
+backdrop). The newspaper and social-post photos in the landing carousel are still labelled placeholders,
+pending real campaign photography.
+
+The landing page's constituency map is inline SVG rendered from the seat geometry the app already loads
+(served by the `seats` Edge Function from `supabase/functions/_shared/data/delhi_AC.json`), rather than the
+handoff's iframed Leaflet map — no tiles and no second document, and the data is already in memory.
+
+One CSS-Modules gotcha worth knowing when adding animation: a module can only reference `@keyframes` declared
+in that same module. `animation-name` is scoped along with class names, so keyframes declared in global
+`tokens.css` silently never match from a `*.module.css` file.
 
 Because there's no persistent Node process to host, `client/` is a plain static site — it can be deployed
 anywhere (Vercel, Netlify, etc.) as long as it can reach the Supabase project.

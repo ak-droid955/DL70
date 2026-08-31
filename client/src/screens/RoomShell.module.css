@@ -1,3 +1,15 @@
+/* Scoped alongside its use — see the note in Landing.module.css. */
+@keyframes dl70Fade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .shell {
   min-height: 100vh;
   position: relative;
@@ -7,40 +19,29 @@
   color: var(--ink);
 }
 
-/* The design puts a fixed rally photograph behind these pages
-   (assets/bg-rally-stage.jpg / bg-rally-truck-join.jpg), which isn't in this
-   repo. The same dark-to-paper wash is built from gradients instead, so the
-   frosted cards still read against a deep top and a paper-toned bottom. */
-/* Absolute (not fixed) so the wash spans the whole document — the setup form
-   is taller than the viewport and a fixed layer would cut off mid-scroll. */
+/* Rally photograph behind the card (assets/bg-rally-stage.jpg on create and
+   in the lobby, bg-rally-truck-join.jpg on join), under the design's
+   dark-to-paper wash. Absolute rather than fixed so it spans the whole
+   document — the setup form is taller than the viewport and a fixed layer
+   would cut off mid-scroll. The photo URL comes in as --shell-photo from
+   RoomShell.tsx so the bundler can fingerprint it. */
 .backdrop {
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  background:
-    linear-gradient(180deg, oklch(18% 0.02 40 / 0.55), oklch(97% 0.014 75 / 0.5) 55%, oklch(97% 0.014 75 / 0.82)),
-    radial-gradient(90% 60% at 50% 0%, oklch(45% 0.09 48) 0%, oklch(18% 0.02 40) 70%);
-}
-
-.backdropStage {
-  --shell-accent: oklch(60% 0.14 48);
-}
-.backdropJoin {
-  --shell-accent: oklch(52% 0.12 22);
-}
-
-.backdrop::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0.35;
-  background-image: repeating-linear-gradient(
-    115deg,
-    var(--shell-accent, oklch(60% 0.14 48)) 0 2px,
-    transparent 2px 26px
-  );
-  mask-image: linear-gradient(180deg, oklch(0% 0 0 / 0.9), transparent 65%);
+  background-color: var(--ink);
+  background-image: linear-gradient(
+      180deg,
+      oklch(18% 0.02 40 / 0.55),
+      oklch(97% 0.014 75 / 0.5) 55%,
+      oklch(97% 0.014 75 / 0.82)
+    ),
+    var(--shell-photo);
+  background-position: center top;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: scroll;
 }
 
 .body {

@@ -1,3 +1,25 @@
+/* Keyframes live here rather than in tokens.css: CSS Modules scopes the
+   animation-name it sees, so a module can only reference keyframes
+   declared in the same module. */
+@keyframes dl70Fade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes dl70Marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 .page {
   min-height: 100vh;
   background: var(--paper);
@@ -20,45 +42,16 @@
 }
 
 /* ---------- hero ---------- */
-/* The design's hero sits on a photograph of the assembly building
-   (assets/hero-building.jpg), which isn't part of this repo. Until that asset
-   lands, the same warm paper-over-ink wash is built from gradients, with a
-   drawn dome-and-columns silhouette standing in for the building. */
+/* Background photograph (assets/hero-building.jpg) plus the design's
+   paper-toned gradient wash; both are set together in Landing.tsx so the
+   bundler can fingerprint the image URL. */
 .hero {
   position: relative;
   overflow: hidden;
-  background:
-    radial-gradient(120% 90% at 50% 0%, oklch(93% 0.05 75) 0%, oklch(97% 0.014 75) 62%),
-    linear-gradient(180deg, oklch(88% 0.07 68) 0%, oklch(97% 0.014 75) 70%);
-}
-
-.heroSkyline {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  width: min(1100px, 100%);
-  height: 62%;
-  opacity: 0.16;
+  background-color: var(--paper);
+  background-position: top center;
+  background-size: cover;
   background-repeat: no-repeat;
-  background-position: bottom center;
-  background-size: contain;
-  background-image: url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1100 400'>\
-<g fill='%236b4423'>\
-<rect x='60' y='250' width='980' height='150'/>\
-<rect x='120' y='210' width='860' height='45'/>\
-<path d='M470 210h160v-40a80 80 0 0 0-160 0z'/>\
-<rect x='534' y='90' width='32' height='40' rx='6'/>\
-<circle cx='550' cy='78' r='16'/>\
-<rect x='150' y='265' width='26' height='135'/><rect x='210' y='265' width='26' height='135'/>\
-<rect x='270' y='265' width='26' height='135'/><rect x='330' y='265' width='26' height='135'/>\
-<rect x='390' y='265' width='26' height='135'/><rect x='450' y='265' width='26' height='135'/>\
-<rect x='510' y='265' width='26' height='135'/><rect x='570' y='265' width='26' height='135'/>\
-<rect x='630' y='265' width='26' height='135'/><rect x='690' y='265' width='26' height='135'/>\
-<rect x='750' y='265' width='26' height='135'/><rect x='810' y='265' width='26' height='135'/>\
-<rect x='870' y='265' width='26' height='135'/><rect x='930' y='265' width='26' height='135'/>\
-</g></svg>");
 }
 
 .heroInner {
@@ -82,7 +75,7 @@
   color: var(--ink);
   margin: 0;
   text-shadow: 0 2px 24px oklch(97% 0.01 75 / 0.7);
-  animation: dl70Fade 0.8s ease 0.1s both;
+  opacity: 0;
 }
 
 .heroTitleAccent {
@@ -95,7 +88,7 @@
   flex-wrap: wrap;
   justify-content: center;
   margin-top: 44px;
-  animation: dl70Fade 0.8s ease 0.25s both;
+  opacity: 0;
 }
 
 .heroJoin,
@@ -142,6 +135,17 @@
   color: oklch(38% 0.02 40);
   text-shadow: 0 1px 12px oklch(97% 0.01 75 / 0.85);
   max-width: 1000px;
+  opacity: 0;
+}
+
+/* Staged fade-in, started only once the hero photo has decoded. */
+.heroReady .heroTitle {
+  animation: dl70Fade 0.8s ease 0.1s both;
+}
+.heroReady .heroActions {
+  animation: dl70Fade 0.8s ease 0.25s both;
+}
+.heroReady .heroTagline {
   animation: dl70Fade 0.8s ease 0.4s both;
 }
 
@@ -186,10 +190,11 @@
   .marqueeTrack {
     animation: none;
   }
-  .heroTitle,
-  .heroActions,
-  .heroTagline {
+  .heroReady .heroTitle,
+  .heroReady .heroActions,
+  .heroReady .heroTagline {
     animation: none;
+    opacity: 1;
   }
 }
 
