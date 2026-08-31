@@ -45,21 +45,32 @@
 /* Background photograph (assets/hero-building.jpg) plus the design's
    paper-toned gradient wash; both are set together in Landing.tsx so the
    bundler can fingerprint the image URL. */
+/* The hero box takes the artwork's own 1774x887 ratio, so `cover` fits the
+   photograph exactly and nothing is cropped off the bottom (the plaza and
+   the building's base). max-height keeps the fold reachable on a laptop; when
+   it bites, `center bottom` trims sky rather than the building. */
 .hero {
   position: relative;
   overflow: hidden;
+  /* The artwork is 1774x887 (2:1), so a full-bleed hero shows all of it at
+     half the viewport width; 78vh keeps the fold reachable on a laptop and
+     480px stops it collapsing on short windows. (aspect-ratio can't be used
+     here: paired with max-height it shrinks the box's width too.) */
+  height: clamp(480px, 50vw, 78vh);
   background-color: var(--paper);
-  background-position: top center;
-  background-size: cover;
+  /* Gradient wash stretched over the box; photo fitted to the full width and
+     anchored to the bottom, so a shorter box trims sky, never the plaza. */
+  background-size: 100% 100%, 100% auto;
+  background-position: center, center bottom;
   background-repeat: no-repeat;
 }
 
 .heroInner {
   position: relative;
+  height: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 120px 48px 90px;
-  min-height: 660px;
+  padding: 34px 48px 84px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -87,7 +98,7 @@
   gap: 24px;
   flex-wrap: wrap;
   justify-content: center;
-  margin-top: 44px;
+  margin-top: 36px;
   opacity: 0;
 }
 
@@ -126,8 +137,12 @@
 }
 
 .heroTagline {
-  margin: auto 0 0;
-  padding-top: 64px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 26px;
+  margin: 0 auto;
+  padding: 0 48px;
   font-family: var(--font-tagline);
   font-size: clamp(18px, 2.4vw, 30px);
   font-weight: 700;
@@ -753,9 +768,23 @@
   .header {
     padding: 14px 20px;
   }
-  .heroInner {
-    padding: 110px 20px 60px;
+  .hero {
+    /* Phones are far narrower than the artwork: fill the box and crop the
+       sides rather than leaving the photo a thin strip at the bottom. */
+    height: auto;
     min-height: 520px;
+    background-size: 100% 100%, cover;
+    background-position: center, center bottom;
+  }
+  .heroInner {
+    padding: 92px 20px 78px;
+    min-height: 520px;
+  }
+  .heroTagline {
+    /* Still pinned to the bottom, where the plaza gives it a clean ground to
+       sit on — over the facade it's unreadable. */
+    bottom: 18px;
+    padding: 0 20px;
   }
   .heroActions {
     gap: 14px;
