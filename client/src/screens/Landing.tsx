@@ -288,7 +288,7 @@ export default function Landing() {
         <div className={styles.footerLinks}>
           <span>Privacy</span>
           <span>Terms</span>
-          <span>Contact</span>
+          <span>Connect</span>
         </div>
       </footer>
     </div>
