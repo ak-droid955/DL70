@@ -140,14 +140,20 @@
   right: 0;
   bottom: 26px;
   margin: 0 auto;
-  padding: 0 48px;
+  padding: 0 24px;
   font-family: var(--font-tagline);
-  font-size: clamp(18px, 2.4vw, 30px);
+  /* One line, always. The string measures 31.4x its font-size in Lora +
+     Noto Serif Devanagari, so 2.8vw keeps it inside the viewport (less the
+     48px of padding) down to ~640px, capped at the design's 30px. */
+  white-space: nowrap;
+  font-size: min(30px, 2.8vw);
   font-weight: 700;
   line-height: 1.4;
   color: oklch(38% 0.02 40);
   text-shadow: 0 1px 12px oklch(97% 0.01 75 / 0.85);
-  max-width: 1000px;
+  /* 941px of text at the 30px cap — 1120 leaves room to spare rather than
+     the 11px the old 1000px cap allowed. */
+  max-width: 1120px;
   opacity: 0;
 }
 
@@ -780,9 +786,12 @@
   }
   .heroTagline {
     /* Still pinned to the bottom, where the plaza gives it a clean ground to
-       sit on — over the facade it's unreadable. */
+       sit on — over the facade it's unreadable. One line would mean ~11px
+       type at this width, so let it wrap here. */
     bottom: 18px;
     padding: 0 20px;
+    white-space: normal;
+    font-size: clamp(15px, 4.2vw, 20px);
   }
   .heroActions {
     gap: 14px;
