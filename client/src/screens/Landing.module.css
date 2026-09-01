@@ -52,15 +52,16 @@
 .hero {
   position: relative;
   overflow: hidden;
-  /* The artwork is 1774x887 (2:1), so a full-bleed hero shows all of it at
-     half the viewport width; 78vh keeps the fold reachable on a laptop and
-     480px stops it collapsing on short windows. (aspect-ratio can't be used
-     here: paired with max-height it shrinks the box's width too.) */
-  height: clamp(480px, 50vw, 78vh);
+  /* The artwork is 1774x887 (2:1). 56vw lets the hero stand taller than the
+     photo's own ratio, capped at 88vh so the marquee still peeks at the fold,
+     with 520px stopping it collapsing on short windows. (aspect-ratio can't be
+     used here: paired with max-height it shrinks the box's width too.) */
+  height: clamp(520px, 56vw, 88vh);
   background-color: var(--paper);
-  /* Gradient wash stretched over the box; photo fitted to the full width and
-     anchored to the bottom, so a shorter box trims sky, never the plaza. */
-  background-size: 100% 100%, 100% auto;
+  /* Gradient wash stretched over the box; photo covers it and is anchored to
+     the bottom, so whichever way the box is off the artwork's ratio it trims
+     sky or the outer edges — never the plaza and the building's base. */
+  background-size: 100% 100%, cover;
   background-position: center, center bottom;
   background-repeat: no-repeat;
 }
