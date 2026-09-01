@@ -45,18 +45,15 @@
 /* Background photograph (assets/hero-building.jpg) plus the design's
    paper-toned gradient wash; both are set together in Landing.tsx so the
    bundler can fingerprint the image URL. */
-/* The hero box takes the artwork's own 1774x887 ratio, so `cover` fits the
-   photograph exactly and nothing is cropped off the bottom (the plaza and
-   the building's base). max-height keeps the fold reachable on a laptop; when
-   it bites, `center bottom` trims sky rather than the building. */
 .hero {
   position: relative;
   overflow: hidden;
   /* The artwork is 1774x887 (2:1). 56vw lets the hero stand taller than the
-     photo's own ratio, capped at 88vh so the marquee still peeks at the fold,
-     with 520px stopping it collapsing on short windows. (aspect-ratio can't be
-     used here: paired with max-height it shrinks the box's width too.) */
-  height: clamp(520px, 56vw, 88vh);
+     photo's own ratio, capped at 90vh so a sliver of the marquee still shows
+     at the fold, with 520px stopping it collapsing on short windows.
+     (aspect-ratio can't be used here: paired with max-height it shrinks the
+     box's width too.) */
+  height: clamp(520px, 56vw, 90vh);
   background-color: var(--paper);
   /* Gradient wash stretched over the box; photo covers it and is anchored to
      the bottom, so whichever way the box is off the artwork's ratio it trims
