@@ -33,8 +33,9 @@
   height: 26px;
   border-radius: 7px;
   flex-shrink: 0;
-  background-size: cover;
+  background-size: contain;
   background-position: center;
+  background-repeat: no-repeat;
 }
 
 .chipParty {

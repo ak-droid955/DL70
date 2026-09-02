@@ -71,4 +71,6 @@
   flex: 1;
   display: flex;
   min-height: 0;
+  /* The Vote Bank rail and banner are positioned against this. */
+  position: relative;
 }

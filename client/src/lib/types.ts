@@ -53,6 +53,13 @@ export const VOTE_BANKS: VoteBankDef[] = [
   { id: 'community_religious', name: 'Community & Religious Groups', short: 'CR' }
 ];
 
+// Tiers of the server's per-seat Vote Bank strength values (see
+// supabase/functions/_shared/voteBanks.ts): a bank is a seat's PRIMARY at 85,
+// a listed secondary from 36 up, and carries only a baseline below that. The
+// map and the Vote Bank panel read strength through these.
+export const VOTE_BANK_PRIMARY_MIN = 85;
+export const VOTE_BANK_STRONG_MIN = 36;
+
 export type TurnEvent =
   | { type: 'conflict'; acNo: string; playerId: string; fee: number; seatName: string }
   | { type: 'lock'; acNo: string; seatName: string; playerId: string }

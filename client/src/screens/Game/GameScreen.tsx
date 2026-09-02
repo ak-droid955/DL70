@@ -5,8 +5,8 @@ import MapView from './MapView';
 import ResultsScreen from './ResultsScreen';
 import SeatModal from './SeatModal';
 import styles from './GameScreen.module.css';
-import Sidebar from './Sidebar';
 import SummaryModal from './SummaryModal';
+import VoteBankPanel from './VoteBankPanel';
 import WaitingOverlay from './WaitingOverlay';
 
 // Live per-turn countdown driven by the server-set deadline. Re-renders once a
@@ -65,8 +65,8 @@ export default function GameScreen() {
       </div>
 
       <div className={styles.body}>
-        <Sidebar />
         <MapView />
+        <VoteBankPanel />
       </div>
 
       <BottomBar />
