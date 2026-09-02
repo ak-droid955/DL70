@@ -119,8 +119,8 @@
 .heroSpotCreate {
   left: 71.5%;
   top: 80%;
-  /* 6px further right than the shared nudge, clearing the planter edge. */
-  transform: translate(calc(-50% + 9px), -50%);
+  /* 11px further right than the shared nudge, clearing the planter edge. */
+  transform: translate(calc(-50% + 14px), -50%);
 }
 
 .heroJoin,
