@@ -50,7 +50,11 @@ export default function Lobby() {
               <span
                 className={styles.avatar}
                 style={{
-                  background: p.color,
+                  // backgroundColor, not the `background` shorthand: the
+                  // shorthand would reset the class's background-size and
+                  // -position, dropping the symbol in at its natural 96px size
+                  // anchored to the top-left of a 34px circle.
+                  backgroundColor: p.color,
                   backgroundImage: p.symbol ? `url(${p.symbol})` : undefined
                 }}
               />

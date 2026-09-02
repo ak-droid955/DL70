@@ -163,8 +163,9 @@
   height: 38px;
   border-radius: 10px;
   border: 2px solid var(--paper-border);
-  background-size: cover;
+  background-size: contain;
   background-position: center;
+  background-repeat: no-repeat;
   flex: none;
 }
 

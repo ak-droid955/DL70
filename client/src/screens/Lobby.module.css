@@ -68,8 +68,11 @@
   border-radius: 50%;
   flex: none;
   border: 2px solid var(--ink);
-  background-size: cover;
+  /* Symbols are emoji/logo art on the party colour, so fit the whole mark
+     inside the circle instead of cropping it to fill. */
+  background-size: 72%;
   background-position: center;
+  background-repeat: no-repeat;
 }
 
 .playerIdentity {
