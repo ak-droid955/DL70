@@ -78,6 +78,16 @@
   color: var(--brick);
 }
 
+/* Same shape as the back link, in the warning colour: this one gives up the
+   player's seat in the room rather than just navigating. */
+.exitLink {
+  composes: backLink;
+  color: var(--brick);
+}
+.exitLink:hover {
+  color: var(--error-ink);
+}
+
 .backArrow {
   font-size: 16px;
 }
@@ -86,7 +96,8 @@
   .header {
     padding: 14px 20px;
   }
-  .backLink {
+  .backLink,
+  .exitLink {
     font-size: 15px;
   }
   .logoMd {

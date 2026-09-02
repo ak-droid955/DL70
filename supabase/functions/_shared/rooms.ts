@@ -306,6 +306,39 @@ class RoomStore {
     return room;
   }
 
+  // Leaving is only allowed from the lobby: once a campaign is underway a
+  // player's id is woven through every seat's progress and the Vote Bank
+  // influence tables, so pulling them out would corrupt the game state. The
+  // last player out takes the room with them, and a departing host hands the
+  // role to whoever joined next.
+  async leaveRoom(code: string, playerId: string, token: string): Promise<{ roomClosed: boolean }> {
+    const tokenRows = await sql`select token from player_tokens where player_id = ${playerId}`;
+    if (!tokenRows.length || tokenRows[0].token !== token) throw new RoomError('Invalid session.');
+
+    let roomClosed = false;
+    await sql.begin(async (tx) => {
+      const rows = await tx`select * from rooms where code = ${code.toUpperCase()} for update`;
+      if (!rows.length) throw new RoomError('Room not found.');
+      const room = rowToRoom(rows[0]);
+      if (!room.players[playerId]) throw new RoomError('You are not in this room.');
+      if (room.phase !== 'lobby') throw new RoomError('The campaign has already started.');
+
+      delete room.players[playerId];
+      const remaining = Object.keys(room.players);
+      if (!remaining.length) {
+        await tx`delete from rooms where code = ${room.code}`;
+        roomClosed = true;
+        return;
+      }
+      if (room.hostId === playerId) room.hostId = remaining[0];
+      room.updatedAt = Date.now();
+      await persistRoom(tx as unknown as typeof sql, room);
+    });
+
+    await sql`delete from player_tokens where player_id = ${playerId}`;
+    return { roomClosed };
+  }
+
   async startGame(code: string, playerId: string): Promise<Room> {
     return withRoomLock(code, (room) => {
       if (room.hostId !== playerId) throw new RoomError('Only the host can start the campaign.');

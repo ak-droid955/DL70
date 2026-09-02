@@ -13,7 +13,7 @@ function timerLabel(seconds: number | null): string {
 }
 
 export default function Lobby() {
-  const { state, startGame } = useGame();
+  const { state, startGame, leaveRoom } = useGame();
   const [copied, setCopied] = useState(false);
   const room = state.room!;
   const players = Object.values(room.players);
@@ -34,8 +34,15 @@ export default function Lobby() {
     setCopied(true);
   };
 
+  const handleExit = () => {
+    const message = isHost
+      ? 'Exit the match? Your slot is freed and, if nobody else is in the room, the room closes.'
+      : 'Exit the match? Your slot is freed and you will need the room code to join again.';
+    if (window.confirm(message)) leaveRoom();
+  };
+
   return (
-    <RoomShell variant="stage" showBack={false}>
+    <RoomShell variant="stage" showBack={false} onExit={handleExit}>
       <div className={`${shellStyles.card} ${styles.card}`}>
         <div className={styles.codeLabel}>Room Code</div>
         <div className={styles.code}>{room.code}</div>

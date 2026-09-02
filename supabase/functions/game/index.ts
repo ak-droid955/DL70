@@ -57,6 +57,10 @@ Deno.serve(async (req: Request) => {
         const room = await roomStore.rejoin(payload.code, payload.playerId, payload.token);
         return json({ ok: true, room });
       }
+      case 'room:leave': {
+        const { roomClosed } = await roomStore.leaveRoom(payload.code, payload.playerId, payload.token);
+        return json({ ok: true, roomClosed });
+      }
       case 'game:start': {
         const room = await roomStore.startGame(payload.code, payload.playerId);
         return json({ ok: true, room });
