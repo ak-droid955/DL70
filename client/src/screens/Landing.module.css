@@ -110,8 +110,8 @@
 }
 
 .heroSpotJoin {
-  left: 36%;
-  top: 84%;
+  left: 34.5%;
+  top: 80%;
 }
 
 .heroSpotCreate {
@@ -139,7 +139,9 @@
 
 .heroCreate {
   border: none;
-  background: var(--saffron);
+  /* Slightly see-through, like the Join button beside it, so the plaza reads
+     through both. Same value as --saffron with alpha. */
+  background: oklch(68% 0.19 48 / 0.85);
   box-shadow: 0 4px 0 var(--saffron-deep);
 }
 
