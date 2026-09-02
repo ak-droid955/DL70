@@ -32,7 +32,20 @@ export default function MapView() {
   // polygon is click-selectable and hover-highlighted, colored by current leader/owner.
   useEffect(() => {
     if (!containerRef.current || !state.staticSeats || mapRef.current) return;
-    const map = L.map(containerRef.current, { attributionControl: false, zoomControl: true }).setView([28.65, 77.12], 10);
+    // Static view: the whole of Delhi is always framed to fit the container, and
+    // every zoom/pan interaction is off — the map is a fixed board, not a viewer.
+    const map = L.map(containerRef.current, {
+      attributionControl: false,
+      zoomControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      touchZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      zoomSnap: 0,
+      zoomDelta: 0
+    }).setView([28.65, 77.12], 10);
     mapRef.current = map;
     const bounds: L.LatLngBounds[] = [];
 
@@ -55,13 +68,23 @@ export default function MapView() {
       }
     });
 
+    let resizeObserver: ResizeObserver | undefined;
     if (bounds.length) {
       let b = bounds[0];
       bounds.forEach((x) => (b = b.extend(x)));
-      map.fitBounds(b, { padding: [10, 10] });
+      const fit = () => {
+        map.invalidateSize({ animate: false });
+        map.fitBounds(b, { padding: [10, 10], animate: false });
+      };
+      fit();
+      // Keep the whole map framed when the container resizes, since the user
+      // can no longer zoom or pan to bring it back into view.
+      resizeObserver = new ResizeObserver(fit);
+      resizeObserver.observe(containerRef.current);
     }
 
     return () => {
+      resizeObserver?.disconnect();
       map.remove();
       mapRef.current = null;
       layersRef.current = {};
