@@ -120,6 +120,7 @@ interface Ctx {
   selectSeat: (acNo: string | null) => void;
   closeSeat: () => void;
   selectVoteBank: (id: VoteBankId | null) => void;
+  leaveRoom: () => Promise<void>;
   addSeatSpend: (acNo: string, amt: number) => void;
   clearSeatDraft: (acNo: string) => void;
   submitTurn: () => Promise<void>;
@@ -416,7 +417,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     patch({ summarySeenForTurn });
   };
 
-  const playAgain = () => {
+  // Drops this player's stored identity and returns to the landing page —
+  // shared by "play again" after a match and by leaving a room from the lobby.
+  const forgetRoomAndGoHome = () => {
     safeRemove('local', LS_PLAYER_ID);
     safeRemove('local', LS_ROOM_CODE);
     safeRemove('local', LS_TOKEN);
@@ -427,6 +430,26 @@ export function GameProvider({ children }: { children: ReactNode }) {
       staticSeats: s.staticSeats,
       step: 'landing'
     }));
+  };
+
+  const playAgain = forgetRoomAndGoHome;
+
+  // Give up the seat in the lobby: the server frees the slot (closing the room
+  // if nobody is left, handing the host role on if it was ours), then we forget
+  // the room locally. A server that rejects the request — an older deploy
+  // without room:leave, or a campaign that started underneath us — still leaves
+  // this client on its way out, since the player asked to go.
+  const leaveRoom = async () => {
+    const { room, myPlayerId } = stateRef.current;
+    const token = safeGet('local', LS_TOKEN);
+    if (room && myPlayerId && token) {
+      try {
+        await call('room:leave', { code: room.code, playerId: myPlayerId, token });
+      } catch {
+        /* leaving is a local decision; go home regardless */
+      }
+    }
+    forgetRoomAndGoHome();
   };
 
   const value = useMemo<Ctx>(
@@ -454,6 +477,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       selectSeat,
       closeSeat,
       selectVoteBank,
+      leaveRoom,
       addSeatSpend,
       clearSeatDraft,
       submitTurn,

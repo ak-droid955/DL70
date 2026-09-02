@@ -39,15 +39,19 @@ export function FooterMark() {
   );
 }
 
-/** Header for the create-room / join-room pages. Omit `onBack` in the lobby,
- *  where the player is already in a room and leaving isn't a client-side
- *  action. */
-export function PageHeader({ onBack }: { onBack?: () => void }) {
+/** Header for the create-room / join-room / lobby pages. The left slot holds
+ *  `onBack` on the way into a room and `onExit` once the player is in one;
+ *  pass neither and it stays empty, keeping the logo hard right. */
+export function PageHeader({ onBack, onExit }: { onBack?: () => void; onExit?: () => void }) {
   return (
     <div className={styles.header}>
       {onBack ? (
         <button type="button" className={styles.backLink} onClick={onBack}>
           <span className={styles.backArrow}>←</span> Back to DL-70
+        </button>
+      ) : onExit ? (
+        <button type="button" className={styles.exitLink} onClick={onExit}>
+          <span className={styles.backArrow}>←</span> Exit Match
         </button>
       ) : (
         <span />
