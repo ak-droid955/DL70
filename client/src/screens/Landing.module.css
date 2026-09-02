@@ -105,7 +105,9 @@
 .heroSpotJoin,
 .heroSpotCreate {
   position: absolute;
-  transform: translate(-50%, -50%);
+  /* The 3px is a fixed nudge right on top of the percentage placement, to sit
+     the pair square on the paving rather than half over its edge. */
+  transform: translate(calc(-50% + 3px), -50%);
   pointer-events: auto;
 }
 
