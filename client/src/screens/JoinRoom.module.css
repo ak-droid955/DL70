@@ -1,42 +1,42 @@
 .card {
-  max-width: 660px;
+  max-width: 520px;
   text-align: center;
 }
 
 .title {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(28px, 5vw, 40px);
+  font-size: clamp(22px, 3.4vw, 28px);
   color: var(--ink);
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   letter-spacing: -0.5px;
 }
 
 .blurb {
-  font-size: 16px;
+  font-size: 13.5px;
   line-height: 1.6;
   color: var(--ink-muted);
-  margin: 0 auto 34px;
-  max-width: 520px;
+  margin: 0 auto 24px;
+  max-width: 430px;
 }
 
 .joinRow {
   display: flex;
-  gap: 14px;
-  margin-bottom: 30px;
+  gap: 10px;
+  margin-bottom: 22px;
 }
 
 .codeInput {
   flex: 1;
   min-width: 0;
   box-sizing: border-box;
-  padding: 19px 12px;
-  border-radius: 16px;
+  padding: 13px 10px;
+  border-radius: 12px;
   border: 2px solid var(--paper-border);
   background: var(--card-paper);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 17px;
+  font-size: 15px;
   letter-spacing: 2px;
   text-align: center;
   text-transform: uppercase;
@@ -52,14 +52,14 @@
 
 .joinBtn {
   flex: 1;
-  padding: 19px 12px;
-  border-radius: 16px;
+  padding: 13px 10px;
+  border-radius: 12px;
   border: 2px solid var(--ink);
   background: var(--card-paper);
   color: var(--ink);
   font-family: var(--font-ui);
   font-weight: 700;
-  font-size: 17px;
+  font-size: 15px;
   cursor: pointer;
 }
 .joinBtn:disabled {
@@ -69,24 +69,24 @@
 }
 
 .error {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--error-ink);
   font-weight: 600;
-  margin: -18px 0 24px;
+  margin: -14px 0 20px;
 }
 
 .openRoomsLabel {
   font-family: var(--font-label);
-  font-size: 20px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 1.6px;
   color: var(--ink-muted);
   text-transform: uppercase;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .emptyNote {
-  font-size: 14px;
+  font-size: 12.5px;
   color: var(--paper-muted);
   margin: 0;
 }
@@ -94,7 +94,7 @@
 .roomList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 9px;
   text-align: left;
 }
 
@@ -104,9 +104,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 16px 20px;
-  border-radius: 14px;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 11px;
   border: 2px solid var(--paper-border);
   background: var(--card-paper);
   font-family: var(--font-ui);
@@ -127,21 +127,21 @@
 .roomIdentity {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 11px;
   min-width: 0;
 }
 
 .roomCode {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 17px;
-  letter-spacing: 1.5px;
+  font-size: 15px;
+  letter-spacing: 1.3px;
   color: var(--brick);
   flex: none;
 }
 
 .roomName {
-  font-size: 16px;
+  font-size: 14px;
   color: oklch(22% 0.02 40);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -149,7 +149,7 @@
 }
 
 .roomCount {
-  font-size: 14px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--ink-muted);
   flex: none;

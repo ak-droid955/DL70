@@ -1,20 +1,20 @@
 .card {
-  max-width: 600px;
+  max-width: 480px;
 }
 
 .heading {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(28px, 5vw, 40px);
+  font-size: clamp(22px, 3.4vw, 28px);
   color: var(--ink);
-  margin: 0 0 30px;
+  margin: 0 0 20px;
   letter-spacing: -0.5px;
 }
 
 .headingSm {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(24px, 4vw, 32px);
+  font-size: clamp(19px, 3vw, 24px);
   color: var(--ink);
   margin: 0 0 6px;
   letter-spacing: -0.5px;
@@ -30,34 +30,34 @@
   cursor: pointer;
   font-family: var(--font-ui);
   font-weight: 700;
-  font-size: 15px;
+  font-size: 13px;
   color: var(--ink-muted);
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 .backToRooms:hover {
   color: var(--brick);
 }
 
 .roomMeta {
-  font-size: 14px;
+  font-size: 12.5px;
   color: var(--ink-muted);
-  margin: 0 0 30px;
+  margin: 0 0 20px;
 }
 
 .label {
   display: block;
   font-family: var(--font-label);
-  font-size: 20px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   color: oklch(40% 0.02 40);
   text-transform: uppercase;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 .labelCentered {
   text-align: center;
   font-weight: 900;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
 .labelHint {
@@ -69,11 +69,11 @@
 .input {
   width: 100%;
   box-sizing: border-box;
-  padding: 15px 18px;
-  border-radius: 14px;
+  padding: 11px 14px;
+  border-radius: 11px;
   border: 2px solid var(--paper-border);
   background: var(--card-paper);
-  font-size: 18px;
+  font-size: 15px;
   font-family: var(--font-ui);
   color: var(--ink);
   outline: none;
@@ -93,20 +93,20 @@
 }
 
 .fieldError {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--error-ink);
-  margin: 6px 0 0;
+  margin: 5px 0 0;
 }
 
 .fieldGap {
-  height: 24px;
+  height: 16px;
 }
 
 .colorGrid {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  gap: 12px;
-  margin-bottom: 28px;
+  gap: 9px;
+  margin-bottom: 20px;
 }
 
 .swatch {
@@ -125,16 +125,16 @@
 .symbolGrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 9px;
+  margin-bottom: 12px;
 }
 
 .symbolBtn {
   aspect-ratio: 1;
-  border-radius: 14px;
+  border-radius: 11px;
   background: oklch(96% 0.01 75);
   border: 2px solid var(--paper-border-soft);
-  font-size: clamp(26px, 5vw, 44px);
+  font-size: clamp(20px, 3.5vw, 30px);
   line-height: 1;
   cursor: pointer;
   display: flex;
@@ -153,15 +153,15 @@
 .uploadRow {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 32px;
+  margin-bottom: 22px;
 }
 
 .symbolPreview {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   border: 2px solid var(--paper-border);
   background-size: cover;
   background-position: center;
@@ -169,7 +169,7 @@
 }
 
 .uploadText {
-  font-size: 18px;
+  font-size: 14px;
   color: oklch(50% 0.02 40);
 }
 
@@ -180,10 +180,10 @@
 }
 
 .uploadBtn {
-  padding: 8px 16px;
+  padding: 6px 13px;
   border-radius: 100px;
   border: 2px solid var(--ink);
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--ink);
 }
@@ -201,7 +201,7 @@
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 6px;
+  height: 5px;
   border-radius: 999px;
   background: linear-gradient(
     to right,
@@ -217,8 +217,8 @@
 .timerSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--saffron);
   border: 3px solid var(--card-paper);
@@ -226,8 +226,8 @@
   cursor: pointer;
 }
 .timerSlider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--saffron);
   border: 3px solid var(--card-paper);
@@ -243,7 +243,7 @@
 .timerLabel {
   flex: 1;
   text-align: center;
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 500;
   color: oklch(60% 0.015 75);
 }
@@ -253,27 +253,27 @@
 }
 
 .timerHint {
-  font-size: 16px;
+  font-size: 13px;
   line-height: 1.5;
   color: oklch(52% 0.015 75);
-  margin: 0 0 32px;
+  margin: 0 0 22px;
 }
 
 .formError {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--error-ink);
-  margin: 0 0 16px;
+  margin: 0 0 14px;
 }
 
 .submitBtn {
   width: 100%;
-  padding: 19px;
+  padding: 14px;
   border-radius: 100px;
   border: none;
   font-family: var(--font-ui);
   font-weight: 700;
-  font-size: 17px;
+  font-size: 15px;
   background: var(--ink);
   color: var(--paper);
   box-shadow: 0 4px 0 var(--ink-deep);
@@ -304,14 +304,14 @@
     gap: 8px;
   }
   .label {
-    font-size: 16px;
+    font-size: 13px;
   }
   .uploadText,
   .uploadBtn {
-    font-size: 15px;
+    font-size: 13px;
   }
   .timerLabel,
   .timerHint {
-    font-size: 13px;
+    font-size: 12px;
   }
 }
