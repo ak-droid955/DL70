@@ -91,13 +91,32 @@
   color: var(--brick);
 }
 
+/* The two CTAs sit on the plaza in the hero artwork rather than in a row
+   under the title: Join on the paving left of the steps, Create on the path by
+   the tree to the right. Percentages of the hero box, which the photo covers
+   anchored to its bottom edge, so the spots track the artwork as it scales. */
 .heroActions {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 36px;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   opacity: 0;
+}
+
+.heroSpotJoin,
+.heroSpotCreate {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.heroSpotJoin {
+  left: 36%;
+  top: 84%;
+}
+
+.heroSpotCreate {
+  left: 73%;
+  top: 80%;
 }
 
 .heroJoin,
@@ -793,8 +812,15 @@
     white-space: normal;
     font-size: clamp(15px, 4.2vw, 20px);
   }
-  .heroActions {
-    gap: 14px;
+  /* Phones crop the artwork hard, so stack the two spots down the middle of
+     the plaza instead of flanking the steps. */
+  .heroSpotJoin {
+    left: 50%;
+    top: 60%;
+  }
+  .heroSpotCreate {
+    left: 50%;
+    top: 74%;
   }
   .heroJoin,
   .heroCreate {

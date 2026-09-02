@@ -75,22 +75,33 @@ export default function Landing() {
         <Logo size="lg" />
       </header>
 
-      <section className={styles.hero} style={{ backgroundImage: `${HERO_OVERLAY}, url(${heroBuilding})` }}>
-        <div className={`${styles.heroInner} ${heroReady ? styles.heroReady : ''}`}>
+      <section
+        className={`${styles.hero} ${heroReady ? styles.heroReady : ''}`}
+        style={{ backgroundImage: `${HERO_OVERLAY}, url(${heroBuilding})` }}
+      >
+        <div className={styles.heroInner}>
           <h1 className={styles.heroTitle}>
             दिल्ली <span className={styles.heroTitleAccent}>Ka Raja</span>
           </h1>
-          <div className={styles.heroActions}>
-            <button type="button" className={styles.heroJoin} onClick={goToJoin}>
-              Join a Room
-            </button>
-            <button type="button" className={styles.heroCreate} onClick={goCreate}>
-              Create a Room
-            </button>
-          </div>
           <p className={styles.heroTagline}>
             रैली nikaalo, गठबंधन banao, aur पीठ में छुर्रा maarne se pehle sochna mat.
           </p>
+        </div>
+
+        {/* Outside heroInner (which is capped at 1280px) so the two spots are
+            placed against the full-bleed hero, and land on the plaza either
+            side of the steps in the artwork. */}
+        <div className={styles.heroActions}>
+          <span className={styles.heroSpotJoin}>
+            <button type="button" className={styles.heroJoin} onClick={goToJoin}>
+              Join a Room
+            </button>
+          </span>
+          <span className={styles.heroSpotCreate}>
+            <button type="button" className={styles.heroCreate} onClick={goCreate}>
+              Create a Room
+            </button>
+          </span>
         </div>
       </section>
 
