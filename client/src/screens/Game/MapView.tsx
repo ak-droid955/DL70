@@ -1,11 +1,12 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef } from 'react';
-import type { Room } from '../../lib/types';
+import { VOTE_BANK_PRIMARY_MIN, VOTE_BANK_STRONG_MIN } from '../../lib/types';
+import type { Room, StaticSeat, VoteBankId } from '../../lib/types';
 import { useGame } from '../../state/GameProvider';
 import styles from './MapView.module.css';
 
-function styleForSeat(room: Room, acNo: string): L.PathOptions {
+function baseStyleForSeat(room: Room, acNo: string): L.PathOptions {
   const seat = room.seats[acNo];
   if (!seat) return { color: '#999', weight: 1, fillColor: 'oklch(93% 0.005 80)', fillOpacity: 0.7 };
   if (seat.locked === 'INDEPENDENT') return { color: '#999', weight: 1, fillColor: '#cfcfcf', fillOpacity: 0.6 };
@@ -20,6 +21,29 @@ function styleForSeat(room: Room, acNo: string): L.PathOptions {
   return { color: '#b8b3a8', weight: 1, fillColor: leader ? leader.color : 'oklch(93% 0.005 80)', fillOpacity: 0.35 };
 }
 
+// With a Vote Bank open in the panel, the map becomes a map of that bank: the
+// seats where it is primary read strongest, its secondary seats sit a step
+// back, and everywhere it only carries a baseline is dimmed out — the seat's
+// own ownership colours are kept, just re-weighted.
+function styleForSeat(
+  room: Room,
+  acNo: string,
+  voteBankId: VoteBankId | null,
+  staticSeat: StaticSeat | undefined
+): L.PathOptions {
+  const base = baseStyleForSeat(room, acNo);
+  if (!voteBankId) return base;
+  const strength = staticSeat?.voteBankStrength?.[voteBankId] ?? 0;
+  const fillOpacity = base.fillOpacity ?? 0.5;
+  if (strength >= VOTE_BANK_PRIMARY_MIN) {
+    return { ...base, color: 'oklch(30% 0.02 80)', weight: 2, fillOpacity: Math.min(1, fillOpacity + 0.45) };
+  }
+  if (strength >= VOTE_BANK_STRONG_MIN) {
+    return { ...base, color: '#8f8a80', weight: 1.25, fillOpacity: Math.min(1, fillOpacity + 0.2) };
+  }
+  return { ...base, color: '#cdc8be', weight: 0.75, fillOpacity: fillOpacity * 0.3 };
+}
+
 export default function MapView() {
   const { state, selectSeat } = useGame();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -27,6 +51,10 @@ export default function MapView() {
   const layersRef = useRef<Record<string, L.GeoJSON>>({});
   const roomRef = useRef(state.room);
   roomRef.current = state.room;
+  const voteBankRef = useRef(state.selectedVoteBankId);
+  voteBankRef.current = state.selectedVoteBankId;
+  const staticSeatsRef = useRef(state.staticSeats);
+  staticSeatsRef.current = state.staticSeats;
 
   // Init the Leaflet map once static seat geometry is available; each constituency
   // polygon is click-selectable and hover-highlighted, colored by current leader/owner.
@@ -52,13 +80,18 @@ export default function MapView() {
     Object.values(state.staticSeats).forEach((seat) => {
       const feature = { type: 'Feature', geometry: seat.geometry, properties: {} } as GeoJSON.Feature;
       const layer = L.geoJSON(feature, {
-        style: () => (roomRef.current ? styleForSeat(roomRef.current, seat.acNo) : {})
+        style: () =>
+          roomRef.current
+            ? styleForSeat(roomRef.current, seat.acNo, voteBankRef.current, staticSeatsRef.current?.[seat.acNo])
+            : {}
       }).addTo(map);
       layer.on('click', () => selectSeat(seat.acNo));
       layer.on('mouseover', (e) => (e.target as L.Path).setStyle({ weight: 2.5 }));
       layer.on('mouseout', () => {
         const l = layersRef.current[seat.acNo];
-        if (l && roomRef.current) l.setStyle(styleForSeat(roomRef.current, seat.acNo));
+        if (l && roomRef.current) {
+          l.setStyle(styleForSeat(roomRef.current, seat.acNo, voteBankRef.current, staticSeatsRef.current?.[seat.acNo]));
+        }
       });
       layersRef.current[seat.acNo] = layer;
       try {
@@ -92,11 +125,14 @@ export default function MapView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.staticSeats]);
 
-  // Re-sync polygon fills whenever the authoritative room state changes.
+  // Re-sync polygon fills whenever the authoritative room state changes, or the
+  // player opens a different Vote Bank in the panel.
   useEffect(() => {
     if (!state.room) return;
-    Object.entries(layersRef.current).forEach(([acNo, layer]) => layer.setStyle(styleForSeat(state.room!, acNo)));
-  }, [state.room]);
+    Object.entries(layersRef.current).forEach(([acNo, layer]) =>
+      layer.setStyle(styleForSeat(state.room!, acNo, state.selectedVoteBankId, state.staticSeats?.[acNo]))
+    );
+  }, [state.room, state.selectedVoteBankId, state.staticSeats]);
 
   return (
     <div className={styles.wrap}>

@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { call, supabase, subscribeToRoom } from '../lib/supabaseClient';
 import { TURN_TIMER_OPTIONS } from '../lib/types';
-import type { Player, Room, StaticSeat } from '../lib/types';
+import type { Player, Room, StaticSeat, VoteBankId } from '../lib/types';
 
 // How often any client with an active turn timer pings the server to check
 // whether the deadline has passed — see the checkExpiry effect below.
@@ -35,6 +35,10 @@ interface State {
   room: Room | null;
   myPlayerId: string | null;
   selectedSeatAcNo: string | null;
+  // Vote Bank currently open in the Vote Bank panel; also drives which seats
+  // the map highlights. Purely a view concern — Vote Bank influence itself is
+  // earned by campaign spend in seats, never spent on directly.
+  selectedVoteBankId: VoteBankId | null;
   draftSeatSpends: Record<string, number>;
   summarySeenForTurn: number;
   // True while a room-mutating request is in flight. Every action that
@@ -64,6 +68,7 @@ const initialState: State = {
   room: null,
   myPlayerId: null,
   selectedSeatAcNo: null,
+  selectedVoteBankId: null,
   draftSeatSpends: {},
   summarySeenForTurn: 0,
   busy: false
@@ -114,6 +119,7 @@ interface Ctx {
   endMatch: () => Promise<void>;
   selectSeat: (acNo: string | null) => void;
   closeSeat: () => void;
+  selectVoteBank: (id: VoteBankId | null) => void;
   addSeatSpend: (acNo: string, amt: number) => void;
   clearSeatDraft: (acNo: string) => void;
   submitTurn: () => Promise<void>;
@@ -373,6 +379,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const selectSeat = (acNo: string | null) => patch({ selectedSeatAcNo: acNo });
   const closeSeat = () => patch({ selectedSeatAcNo: null });
+  // Clicking the open bank again closes the panel, matching the rail's toggle.
+  const selectVoteBank = (id: VoteBankId | null) =>
+    patch({ selectedVoteBankId: id && stateRef.current.selectedVoteBankId === id ? null : id });
 
   const addSeatSpend = (acNo: string, amt: number) => {
     const { room } = stateRef.current;
@@ -444,6 +453,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       endMatch,
       selectSeat,
       closeSeat,
+      selectVoteBank,
       addSeatSpend,
       clearSeatDraft,
       submitTurn,
