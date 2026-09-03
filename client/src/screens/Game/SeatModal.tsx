@@ -6,6 +6,10 @@ import styles from './SeatModal.module.css';
 
 const VOTE_BANK_BY_ID = Object.fromEntries(VOTE_BANKS.map((b) => [b.id, b]));
 
+// The ladder is drawn as one cell per rung, so a player's standing reads as a
+// position on the climb rather than a percentage.
+const RUNG_CELLS = Array.from({ length: TOTAL_RUNGS }, (_, i) => i + 1);
+
 /** A bank's name beside its round icon, so a seat's banks are recognisable at
  * a glance. Falls back to the short code on the accent colour when a bank has
  * no artwork yet, matching the Vote Bank panel's rail. */
@@ -41,7 +45,9 @@ export default function SeatModal() {
       const rungs = Math.min(TOTAL_RUNGS, Math.floor(total / perRung));
       return {
         partyName: p.partyName,
+        partyCode: p.partyCode,
         color: p.color,
+        symbol: p.symbol,
         rungs,
         mineTag: p.id === state.myPlayerId ? ' (you)' : '',
         pct: Math.round((rungs / TOTAL_RUNGS) * 100)
@@ -113,6 +119,12 @@ export default function SeatModal() {
         )}
 
         <div className={styles.body}>
+          {!!rows.length && (
+            <div className={styles.winHeader}>
+              <span className={styles.winLabel}>WIN</span>
+            </div>
+          )}
+
           {rows.map((row) => (
             <div className={styles.row} key={row.partyName}>
               <div className={styles.rowTop}>
@@ -124,8 +136,31 @@ export default function SeatModal() {
                   Rung {row.rungs}/{TOTAL_RUNGS}
                 </div>
               </div>
-              <div className={styles.progressTrack}>
-                <div className={styles.progressFill} style={{ background: row.color, width: `${row.pct}%` }} />
+              <div className={styles.ladder}>
+                <div className={styles.ladderTrack}>
+                  {RUNG_CELLS.map((n) => (
+                    <span
+                      key={n}
+                      className={n === TOTAL_RUNGS ? styles.rungWin : styles.rung}
+                      style={n <= row.rungs ? { background: row.color } : undefined}
+                    />
+                  ))}
+                </div>
+                <div className={styles.winMark} />
+                {/* The party's election symbol rides the ladder at its current
+                    rung, falling back to the party code when none was set. */}
+                <div
+                  className={styles.token}
+                  style={{
+                    left: `${row.pct}%`,
+                    borderColor: row.color,
+                    ...(row.symbol
+                      ? { backgroundImage: `url(${row.symbol})` }
+                      : { background: row.color })
+                  }}
+                >
+                  {!row.symbol && <span className={styles.tokenCode}>{row.partyCode}</span>}
+                </div>
               </div>
             </div>
           ))}
