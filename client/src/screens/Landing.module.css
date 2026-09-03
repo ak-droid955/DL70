@@ -123,6 +123,44 @@
   transform: translate(calc(-50% + 14px), -50%);
 }
 
+/* The percentages above place the spots against the hero BOX; the photo,
+   though, is `cover` anchored to the box's bottom edge, so it rescales as the
+   window changes and the spots drift across the artwork — measured, the gap
+   between Create and the planter beside it ran 0px at 1440x820 but 71px at
+   1280x800. So where container units are available the spots are re-expressed
+   in the ARTWORK's own coordinates: the hero becomes a size container, the
+   rendered photo box is derived from it with the same cover maths (the art is
+   1774x887), and each spot is a fraction of that box. Those fractions are the
+   placement as it was tuned, so the pair now holds that spot on the plaza at
+   every width. The block above stays as the fallback. */
+@media (min-width: 641px) {
+  @supports (width: 1cqw) {
+    .hero {
+      container-type: size;
+    }
+
+    .heroActions {
+      --art-w: max(100cqw, calc(100cqh * 1774 / 887));
+      --art-h: calc(var(--art-w) * 887 / 1774);
+    }
+
+    .heroSpotJoin,
+    .heroSpotCreate {
+      top: auto;
+      bottom: calc(var(--art-h) * 0.2);
+      transform: translate(-50%, 50%);
+    }
+
+    .heroSpotJoin {
+      left: calc(50% - var(--art-w) * 0.15124);
+    }
+
+    .heroSpotCreate {
+      left: calc(50% + var(--art-w) * 0.22091);
+    }
+  }
+}
+
 .heroJoin,
 .heroCreate {
   font-family: var(--font-ui);
