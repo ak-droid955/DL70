@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Traders and shopkeepers">
+  <circle cx="48" cy="48" r="48" fill="#7A4A21"/>
+  <g fill="#fff">
+    <path d="M20 30h56v6H20z"/>
+    <path d="M20 36h9.3l-1.6 8H20zm9.3 0h9.4l-.8 8h-8.2zm9.4 0h9.3l-.3 8h-8.8zm9.3 0h9.3l.3 8h-8.8zm9.3 0h9.4l.8 8h-8.2zM66.7 36H76v8h-7.7z"/>
+    <path d="M24 48h48v26H24z" opacity=".28"/>
+    <path d="M24 48h48v4H24zm0 26h48v-4H24z"/>
+    <path d="M28 52h20v18H28z"/>
+    <path d="M54 52h14v10H54z"/>
+  </g>
+</svg>

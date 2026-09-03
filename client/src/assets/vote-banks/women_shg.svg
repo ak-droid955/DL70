@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Women and self-help groups">
+  <circle cx="48" cy="48" r="48" fill="#F07C00"/>
+  <g fill="#fff">
+    <circle cx="26" cy="42" r="8"/>
+    <path d="M12 74c0-9 6.2-14 14-14 2 0 3.8.2 5.5.8-3.3 3.3-5.2 8-5.2 13.2z"/>
+    <circle cx="70" cy="42" r="8"/>
+    <path d="M84 74H69.7c0-5.2-1.9-9.9-5.2-13.2 1.7-.6 3.5-.8 5.5-.8 7.8 0 14 5 14 14z"/>
+    <path d="M48 20c7.2 0 12 5 12 12 0 5-1.6 8-1.6 8H37.6s-1.6-3-1.6-8c0-7 4.8-12 12-12z"/>
+    <circle cx="48" cy="36" r="9"/>
+    <path d="M31 76c0-10 7.6-16 17-16s17 6 17 16z"/>
+  </g>
+</svg>

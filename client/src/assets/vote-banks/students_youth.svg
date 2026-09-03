@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Students and youth">
+  <circle cx="48" cy="48" r="48" fill="#6D3BEF"/>
+  <g fill="#fff">
+    <path d="M48 16 84 30 48 44 12 30z"/>
+    <path d="M78 34v12a2.5 2.5 0 0 1-5 0V34z"/>
+    <circle cx="34" cy="54" r="8"/>
+    <path d="M20 80c0-9 6.3-14 14-14s14 5 14 14z"/>
+    <circle cx="62" cy="54" r="8"/>
+    <path d="M48 80c0-9 6.3-14 14-14s14 5 14 14z"/>
+  </g>
+</svg>

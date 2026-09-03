@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Government, DTC and DJB staff">
+  <circle cx="48" cy="48" r="48" fill="#1552D6"/>
+  <g fill="#fff">
+    <path d="M28 20h40a6 6 0 0 1 6 6v50a6 6 0 0 1-6 6H28a6 6 0 0 1-6-6V26a6 6 0 0 1 6-6zm0 7a1 1 0 0 0-1 1v48a1 1 0 0 0 1 1h40a1 1 0 0 0 1-1V28a1 1 0 0 0-1-1z"/>
+    <path d="M42 14h12a4 4 0 0 1 4 4v4H38v-4a4 4 0 0 1 4-4z"/>
+    <circle cx="48" cy="42" r="8"/>
+    <path d="M34 62c0-7.5 6.3-12 14-12s14 4.5 14 12z"/>
+    <path d="M33 68h30v5H33z"/>
+  </g>
+</svg>
