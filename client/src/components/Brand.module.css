@@ -48,11 +48,13 @@
   color: #000;
 }
 
-/* Header shared by the create-room and join-room pages: back link + wordmark. */
+/* Header shared by the create-room, join-room and lobby pages: back link (or
+   exit link) + wordmark. Transparent, so the rally photograph behind the card
+   runs all the way up behind it instead of stopping at a paper-coloured bar. */
 .header {
   position: relative;
   z-index: 1;
-  background: var(--paper);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: space-between;
