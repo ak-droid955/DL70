@@ -1,8 +1,27 @@
 import { FIRST_ENTRY_MAX_RUNGS, TOTAL_RUNGS, VOTE_BANKS } from '../../lib/types';
+import type { VoteBankId } from '../../lib/types';
+import { voteBankArt } from '../../lib/voteBankArt';
 import { useGame } from '../../state/GameProvider';
 import styles from './SeatModal.module.css';
 
-const VOTE_BANK_NAME_BY_ID = Object.fromEntries(VOTE_BANKS.map((b) => [b.id, b.name]));
+const VOTE_BANK_BY_ID = Object.fromEntries(VOTE_BANKS.map((b) => [b.id, b]));
+
+/** A bank's name beside its round icon, so a seat's banks are recognisable at
+ * a glance. Falls back to the short code on the accent colour when a bank has
+ * no artwork yet, matching the Vote Bank panel's rail. */
+function VoteBankChip({ id, primary = false }: { id: VoteBankId; primary?: boolean }) {
+  const bank = VOTE_BANK_BY_ID[id];
+  if (!bank) return null;
+  const art = voteBankArt(id);
+  return (
+    <span className={primary ? styles.chipPrimary : styles.chip}>
+      <span className={styles.chipIcon} style={{ background: art.icon ? 'transparent' : art.accent }}>
+        {art.icon ? <img src={art.icon} alt="" /> : bank.short}
+      </span>
+      {bank.name}
+    </span>
+  );
+}
 
 export default function SeatModal() {
   const { state, getMe, getRemaining, closeSeat, addSeatSpend, clearSeatDraft } = useGame();
@@ -81,10 +100,14 @@ export default function SeatModal() {
         {staticSeat && (
           <div className={styles.voteBankRow}>
             <div className={styles.voteBankLabel}>PRIMARY VOTE BANK</div>
-            <div className={styles.voteBankPrimary}>{VOTE_BANK_NAME_BY_ID[staticSeat.primaryVoteBank]}</div>
+            <div>
+              <VoteBankChip id={staticSeat.primaryVoteBank} primary />
+            </div>
             <div className={styles.voteBankLabel}>ALSO STRONG HERE</div>
             <div className={styles.voteBankSecondary}>
-              {staticSeat.secondaryVoteBanks.map((id) => VOTE_BANK_NAME_BY_ID[id]).join(', ')}
+              {staticSeat.secondaryVoteBanks.map((id) => (
+                <VoteBankChip key={id} id={id} />
+              ))}
             </div>
           </div>
         )}

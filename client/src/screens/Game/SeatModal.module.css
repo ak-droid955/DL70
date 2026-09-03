@@ -75,8 +75,8 @@
   border-bottom: 1px solid var(--border);
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 4px 10px;
-  align-items: baseline;
+  gap: 6px 10px;
+  align-items: center;
 }
 
 .voteBankLabel {
@@ -86,14 +86,53 @@
   white-space: nowrap;
 }
 
-.voteBankPrimary {
+.voteBankSecondary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 14px;
+}
+
+/* Icon + name, sized so the two rows read as one family with the primary
+   bank set slightly larger. */
+.chip,
+.chipPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.chipPrimary {
   font-size: 12.5px;
   font-weight: 700;
 }
 
-.voteBankSecondary {
-  font-size: 12px;
-  color: var(--text);
+.chipIcon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 7.5px;
+}
+
+.chipIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.chipPrimary .chipIcon {
+  width: 22px;
+  height: 22px;
+  font-size: 9px;
 }
 
 .body {
