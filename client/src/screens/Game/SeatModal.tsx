@@ -49,6 +49,9 @@ export default function SeatModal() {
         color: p.color,
         symbol: p.symbol,
         rungs,
+        // Money is tracked in whole rungs, so this is exactly what the party
+        // has put into the seat, including the player's uncommitted draft.
+        spent: total,
         mineTag: p.id === state.myPlayerId ? ' (you)' : '',
         pct: Math.round((rungs / TOTAL_RUNGS) * 100)
       };
@@ -132,9 +135,7 @@ export default function SeatModal() {
                   {row.partyName}
                   {row.mineTag}
                 </div>
-                <div className={styles.rowTotal}>
-                  Rung {row.rungs}/{TOTAL_RUNGS}
-                </div>
+                <div className={styles.rowTotal}>Spent ₹{row.spent.toLocaleString('en-IN')}K</div>
               </div>
               <div className={styles.ladder}>
                 <div className={styles.ladderTrack}>
