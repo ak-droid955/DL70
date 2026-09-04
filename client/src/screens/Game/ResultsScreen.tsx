@@ -10,6 +10,7 @@ export default function ResultsScreen() {
     .slice()
     .sort((a, b) => b.seatsWon - a.seatsWon)
     .map((p) => ({
+      id: p.id,
       partyName: p.partyName,
       color: p.color,
       seatsWon: p.seatsWon,
@@ -35,7 +36,7 @@ export default function ResultsScreen() {
       </div>
       <div className={styles.standings}>
         {finalStandings.map((f) => (
-          <div className={styles.standingRow} key={f.partyName}>
+          <div className={styles.standingRow} key={f.id}>
             <div className={styles.standingName}>{f.partyName}</div>
             <div className={styles.barTrack}>
               <div className={styles.barFill} style={{ background: f.color, width: `${f.pct}%` }}>

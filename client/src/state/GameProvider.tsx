@@ -234,6 +234,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(id);
   }, [roomCode, roomPhase, hasTurnTimer]);
 
+  // A turn can resolve without this player ever submitting — the countdown
+  // expires and the server settles the turn for everyone. That leaves last
+  // turn's uncommitted allocations sitting in the draft, where they quietly
+  // shrink the new turn's displayed budget and would be re-submitted against
+  // it. Submitting already clears the draft, so this only ever fires on the
+  // paths that don't.
+  const roomTurn = state.room?.turn ?? null;
+  useEffect(() => {
+    setState((s) => (Object.keys(s.draftSeatSpends).length ? { ...s, draftSeatSpends: {} } : s));
+  }, [roomTurn]);
+
   const persistSession = (code: string, playerId: string, token: string) => {
     safeSet('local', LS_ROOM_CODE, code);
     safeSet('local', LS_PLAYER_ID, playerId);
@@ -403,7 +414,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!room || !myPlayerId) return;
       try {
         await call('game:submitTurn', { code: room.code, playerId: myPlayerId, seatSpends: draftSeatSpends });
-        patch({ draftSeatSpends: {}, selectedSeatAcNo: null });
+        patch({ draftSeatSpends: {}, selectedSeatAcNo: null, error: null });
       } catch (err) {
         patch({ error: (err as Error).message });
       }

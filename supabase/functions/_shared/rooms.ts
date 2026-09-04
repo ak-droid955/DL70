@@ -195,13 +195,20 @@ async function persistRoom(tx: typeof sql, room: Room): Promise<void> {
 // action never partially persists), then writes it back. Returns the final
 // persisted room; anything else an action needs to return is captured by the
 // caller via a closed-over variable (see submitTurn).
-async function withRoomLock(code: string, fn: (room: Room) => void | Promise<void>): Promise<Room> {
+//
+// `fn` returning false means "nothing changed" and skips the write entirely.
+// That matters because an `update` always produces a new row version and so
+// always fires a Postgres Changes event, even when every column is written
+// back unchanged: without this, the checkExpiry ping every client sends every
+// couple of seconds would broadcast a room update to the whole room on every
+// tick, re-rendering the map for everybody several times a second.
+async function withRoomLock(code: string, fn: (room: Room) => boolean | void | Promise<boolean | void>): Promise<Room> {
   return sql.begin(async (tx) => {
     const rows = await tx`select * from rooms where code = ${code.toUpperCase()} for update`;
     if (!rows.length) throw new RoomError('Room not found.');
     const room = rowToRoom(rows[0]);
-    await fn(room);
-    await persistRoom(tx as unknown as typeof sql, room);
+    const changed = await fn(room);
+    if (changed !== false) await persistRoom(tx as unknown as typeof sql, room);
     return room;
   });
 }
@@ -360,7 +367,7 @@ class RoomStore {
       const player = room.players[playerId];
       if (!player) throw new RoomError('Player not found in this room.');
       if (room.phase !== 'playing') throw new RoomError('Game is not in progress.');
-      if (player.ready) return; // already submitted this turn, no-op
+      if (player.ready) return false; // already submitted this turn, no-op
 
       // Spending is by whole Campaign Rungs: a submitted amount is snapped down to
       // a whole number of rungs at the seat's fixed per-rung cost, capped so a
@@ -417,7 +424,7 @@ class RoomStore {
   // another client, or a retry) does nothing.
   async checkExpiry(code: string): Promise<Room> {
     return withRoomLock(code, (room) => {
-      if (room.phase !== 'playing' || !room.turnDeadline || Date.now() < room.turnDeadline) return;
+      if (room.phase !== 'playing' || !room.turnDeadline || Date.now() < room.turnDeadline) return false;
       settleTurn(room);
       room.updatedAt = Date.now();
     });
