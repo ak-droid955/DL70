@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Purvanchali and migrant groups">
+  <circle cx="48" cy="48" r="48" fill="#E8730C"/>
+  <g fill="#fff">
+    <circle cx="34" cy="28" r="9"/>
+    <path d="M22 74V48c0-6.6 5.4-9 12-9s12 2.4 12 9v26z"/>
+    <path d="M14 52h12v18H14z"/>
+    <path d="M16 48h8v4h-8z"/>
+    <path d="M58 26h20a8 8 0 0 1 8 8v32a6 6 0 0 1-6 6H56a6 6 0 0 1-6-6V34a8 8 0 0 1 8-8z" opacity=".35"/>
+    <path d="M58 26h20a8 8 0 0 1 8 8v8H50v-8a8 8 0 0 1 8-8z"/>
+    <rect x="54" y="46" width="12" height="10" rx="2"/>
+    <rect x="70" y="46" width="12" height="10" rx="2"/>
+    <path d="M52 72h6l-4 8h-6zm26 0h6l4 8h-6z"/>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Auto and transport unions">
+  <circle cx="48" cy="48" r="48" fill="#2E9E4F"/>
+  <g fill="#fff">
+    <path d="M26 30h44a6 6 0 0 1 6 6v30a4 4 0 0 1-4 4H24a4 4 0 0 1-4-4V36a6 6 0 0 1 6-6z" opacity=".25"/>
+    <path d="M26 30h44a6 6 0 0 1 6 6v6H20v-6a6 6 0 0 1 6-6z"/>
+    <rect x="25" y="46" width="20" height="14" rx="2"/>
+    <rect x="51" y="46" width="20" height="14" rx="2"/>
+    <circle cx="30" cy="68" r="5"/>
+    <circle cx="66" cy="68" r="5"/>
+  </g>
+</svg>

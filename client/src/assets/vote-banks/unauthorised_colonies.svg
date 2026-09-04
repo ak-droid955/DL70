@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="JJ colony clusters">
+  <circle cx="48" cy="48" r="48" fill="#C0392B"/>
+  <g fill="#fff">
+    <path d="M18 40h30v34H18z" opacity=".35"/>
+    <path d="M14 40h38l-6-9H20z"/>
+    <path d="M24 48h9v9h-9z"/>
+    <path d="M50 52h30v22H50z" opacity=".35"/>
+    <path d="M46 52h38l-6-9H52z"/>
+    <path d="M58 60h9v9h-9z"/>
+    <path d="M16 72h64v6H16z"/>
+    <path d="M62 22h3v22h-3z"/>
+    <path d="M56 24h15v3H56z"/>
+  </g>
+</svg>

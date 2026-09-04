@@ -1,8 +1,31 @@
 import { FIRST_ENTRY_MAX_RUNGS, TOTAL_RUNGS, VOTE_BANKS } from '../../lib/types';
+import type { VoteBankId } from '../../lib/types';
+import { voteBankArt } from '../../lib/voteBankArt';
 import { useGame } from '../../state/GameProvider';
 import styles from './SeatModal.module.css';
 
-const VOTE_BANK_NAME_BY_ID = Object.fromEntries(VOTE_BANKS.map((b) => [b.id, b.name]));
+const VOTE_BANK_BY_ID = Object.fromEntries(VOTE_BANKS.map((b) => [b.id, b]));
+
+// The ladder is drawn as one cell per rung, so a player's standing reads as a
+// position on the climb rather than a percentage.
+const RUNG_CELLS = Array.from({ length: TOTAL_RUNGS }, (_, i) => i + 1);
+
+/** A bank's name beside its round icon, so a seat's banks are recognisable at
+ * a glance. Falls back to the short code on the accent colour when a bank has
+ * no artwork yet, matching the Vote Bank panel's rail. */
+function VoteBankChip({ id, primary = false }: { id: VoteBankId; primary?: boolean }) {
+  const bank = VOTE_BANK_BY_ID[id];
+  if (!bank) return null;
+  const art = voteBankArt(id);
+  return (
+    <span className={primary ? styles.chipPrimary : styles.chip}>
+      <span className={styles.chipIcon} style={{ background: art.icon ? 'transparent' : art.accent }}>
+        {art.icon ? <img src={art.icon} alt="" /> : bank.short}
+      </span>
+      {bank.name}
+    </span>
+  );
+}
 
 export default function SeatModal() {
   const { state, getMe, getRemaining, closeSeat, addSeatSpend, clearSeatDraft } = useGame();
@@ -22,8 +45,13 @@ export default function SeatModal() {
       const rungs = Math.min(TOTAL_RUNGS, Math.floor(total / perRung));
       return {
         partyName: p.partyName,
+        partyCode: p.partyCode,
         color: p.color,
+        symbol: p.symbol,
         rungs,
+        // Money is tracked in whole rungs, so this is exactly what the party
+        // has put into the seat, including the player's uncommitted draft.
+        spent: total,
         mineTag: p.id === state.myPlayerId ? ' (you)' : '',
         pct: Math.round((rungs / TOTAL_RUNGS) * 100)
       };
@@ -81,15 +109,25 @@ export default function SeatModal() {
         {staticSeat && (
           <div className={styles.voteBankRow}>
             <div className={styles.voteBankLabel}>PRIMARY VOTE BANK</div>
-            <div className={styles.voteBankPrimary}>{VOTE_BANK_NAME_BY_ID[staticSeat.primaryVoteBank]}</div>
+            <div>
+              <VoteBankChip id={staticSeat.primaryVoteBank} primary />
+            </div>
             <div className={styles.voteBankLabel}>ALSO STRONG HERE</div>
             <div className={styles.voteBankSecondary}>
-              {staticSeat.secondaryVoteBanks.map((id) => VOTE_BANK_NAME_BY_ID[id]).join(', ')}
+              {staticSeat.secondaryVoteBanks.map((id) => (
+                <VoteBankChip key={id} id={id} />
+              ))}
             </div>
           </div>
         )}
 
         <div className={styles.body}>
+          {!!rows.length && (
+            <div className={styles.winHeader}>
+              <span className={styles.winLabel}>WIN</span>
+            </div>
+          )}
+
           {rows.map((row) => (
             <div className={styles.row} key={row.partyName}>
               <div className={styles.rowTop}>
@@ -97,12 +135,33 @@ export default function SeatModal() {
                   {row.partyName}
                   {row.mineTag}
                 </div>
-                <div className={styles.rowTotal}>
-                  Rung {row.rungs}/{TOTAL_RUNGS}
-                </div>
+                <div className={styles.rowTotal}>Spent ₹{row.spent.toLocaleString('en-IN')}K</div>
               </div>
-              <div className={styles.progressTrack}>
-                <div className={styles.progressFill} style={{ background: row.color, width: `${row.pct}%` }} />
+              <div className={styles.ladder}>
+                <div className={styles.ladderTrack}>
+                  {RUNG_CELLS.map((n) => (
+                    <span
+                      key={n}
+                      className={n === TOTAL_RUNGS ? styles.rungWin : styles.rung}
+                      style={n <= row.rungs ? { background: row.color } : undefined}
+                    />
+                  ))}
+                </div>
+                <div className={styles.winMark} />
+                {/* The party's election symbol rides the ladder at its current
+                    rung, falling back to the party code when none was set. */}
+                <div
+                  className={styles.token}
+                  style={{
+                    left: `${row.pct}%`,
+                    borderColor: row.color,
+                    ...(row.symbol
+                      ? { backgroundImage: `url(${row.symbol})` }
+                      : { background: row.color })
+                  }}
+                >
+                  {!row.symbol && <span className={styles.tokenCode}>{row.partyCode}</span>}
+                </div>
               </div>
             </div>
           ))}
