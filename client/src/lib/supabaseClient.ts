@@ -46,7 +46,7 @@ export function rowToRoom(row: Record<string, any>): Room {
     players: asJson(row.players),
     seats: asJson(row.seats),
     voteBankInfluence: asJson(row.vote_bank_influence),
-    voteBankLeaders: asJson(row.vote_bank_leaders),
+    voteBankConquerors: asJson(row.vote_bank_leaders),
     pendingTurn: asJson(row.pending_turn),
     turnLog: asJson(row.turn_log)
   };

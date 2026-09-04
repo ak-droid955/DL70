@@ -164,7 +164,7 @@ function rowToRoom(row: Record<string, any>): Room {
     players: asJson(row.players),
     seats: asJson(row.seats),
     voteBankInfluence: asJson(row.vote_bank_influence),
-    voteBankLeaders: asJson(row.vote_bank_leaders),
+    voteBankConquerors: asJson(row.vote_bank_leaders),
     pendingTurn: asJson(row.pending_turn),
     turnLog: asJson(row.turn_log),
     createdAt: new Date(row.created_at).getTime(),
@@ -193,7 +193,7 @@ async function persistRoom(tx: typeof sql, room: Room): Promise<void> {
       players = ${sql.json(room.players as never)},
       seats = ${sql.json(room.seats as never)},
       vote_bank_influence = ${sql.json(room.voteBankInfluence as never)},
-      vote_bank_leaders = ${sql.json(room.voteBankLeaders as never)},
+      vote_bank_leaders = ${sql.json(room.voteBankConquerors as never)},
       pending_turn = ${sql.json(room.pendingTurn as never)},
       turn_log = ${sql.json(room.turnLog as never)},
       updated_at = ${new Date(room.updatedAt).toISOString()}
@@ -234,10 +234,10 @@ class RoomStore {
       };
     });
     const voteBankInfluence: Room['voteBankInfluence'] = {} as Room['voteBankInfluence'];
-    const voteBankLeaders: Room['voteBankLeaders'] = {} as Room['voteBankLeaders'];
+    const voteBankConquerors: Room['voteBankConquerors'] = {} as Room['voteBankConquerors'];
     VOTE_BANK_IDS.forEach((id) => {
       voteBankInfluence[id] = {};
-      voteBankLeaders[id] = null;
+      voteBankConquerors[id] = null;
     });
     const now = new Date().toISOString();
     const turnTimerSeconds = normalizeTurnTimer(input.turnTimerSeconds);
@@ -252,7 +252,7 @@ class RoomStore {
         ) values (
           ${candidate}, 'lobby', 1, ${MAX_TURNS_DEFAULT}, ${BUDGET_PER_TURN_DEFAULT}, ${turnTimerSeconds}, null, ${player.id},
           ${sql.json({ [player.id]: player } as never)}, ${sql.json(seats as never)},
-          ${sql.json(voteBankInfluence as never)}, ${sql.json(voteBankLeaders as never)},
+          ${sql.json(voteBankInfluence as never)}, ${sql.json(voteBankConquerors as never)},
           ${sql.json({ turnNumber: 1, submissions: {} } as never)}, '[]'::jsonb, ${now}, ${now}
         )
         on conflict (code) do nothing

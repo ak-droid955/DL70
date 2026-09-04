@@ -16,6 +16,7 @@ import type { Player, Room, Seat, TurnEvent } from './types.ts';
 import {
   VOTE_BANKS,
   VOTE_BANK_IDS,
+  VOTE_BANK_STRONG_MIN,
   loadConstituencyVoteBanks,
   validateConstituencyVoteBanks,
   type ConstituencyVoteBanks,
@@ -53,23 +54,16 @@ export function maxPerRungFor(acNo: string): number {
   return MAX_PER_RUNG[acNo] ?? MAX_PER_RUNG_FALLBACK;
 }
 
-// Vote Bank leadership reward. Unlike the old one-time "claim" bonus this
-// replaces, leadership is re-evaluated every turn and the current leader of
-// each Vote Bank is paid this bonus again each turn they remain the leader —
-// so contesting a rival's Vote Bank lead is a way to cut off their income,
-// not just a one-off race. Reuses the same budget-bonus mechanism the game
-// already had (added to the leader's next-turn budgetThisTurn) rather than a
-// separate currency.
-export const VOTE_BANK_LEADER_BONUS_BASE = 60; // ₹K, paid each turn to each Vote Bank's current leader
-// Geographic-relevance rule for that bonus: how much of the base bonus a
-// leader actually receives this turn depends on how strongly this turn's own
-// seat spending concentrated in constituencies where the Vote Bank they lead
-// is strong (a spend-weighted average of that Vote Bank's strength across the
-// seats they spent in this turn). A leader who spent nothing this turn gets
-// the floor multiplier. Both the strength needed for full effect and the
-// floor are configurable.
-export const VOTE_BANK_BONUS_FULL_EFFECT_STRENGTH = 60; // strength value at/above which the bonus is undiscounted
-export const VOTE_BANK_BONUS_MIN_MULTIPLIER = 0.4; // floor multiplier when spend is concentrated elsewhere (or nowhere)
+// Vote Bank conquest. A Vote Bank pays out once and only once: to the first
+// player who has WON more than VOTE_BANK_CONQUEST_THRESHOLD of the
+// constituencies that bank is strong in (its primary and secondary seats —
+// see VOTE_BANK_STRONG_MIN in voteBanks.ts). Influence still accumulates from
+// campaign spend and is what the Vote Bank meter reads, but it no longer pays
+// anything by itself: only holding the seats does. Paid through the same
+// budget-bonus mechanism as before (added to the winner's next-turn
+// budgetThisTurn) rather than a separate currency.
+export const VOTE_BANK_CONQUEST_THRESHOLD = 0.6; // must hold MORE than this share of the bank's seats
+export const VOTE_BANK_CONQUEST_BONUS = 300; // ₹K, one-time, per Vote Bank conquered
 
 // NOTE: order and length must stay identical to PARTY_COLOR_SWATCHES in
 // client/src/lib/types.ts — a colour is stored by its index in this array.
@@ -189,6 +183,7 @@ export interface StaticSeat {
 }
 
 let cachedStaticSeats: Record<string, StaticSeat> | null = null;
+let cachedBankSeats: Record<VoteBankId, string[]> | null = null;
 let warmPromise: Promise<void> | null = null;
 
 // Fetches and computes the static seat table, if not already cached. Call
@@ -237,6 +232,25 @@ function computeStaticSeats(data: GeoJSON.FeatureCollection): void {
     };
   });
   cachedStaticSeats = seats;
+  cachedBankSeats = null; // rebuilt lazily from the new seat table
+}
+
+// The constituencies a Vote Bank "owns" for the conquest test: every seat the
+// bank is strong in (primary or a listed secondary). Derived from the same
+// strength table the map and the Vote Bank panel read, so the seat count shown
+// in the panel is exactly the denominator used here.
+export function seatsInVoteBank(bankId: VoteBankId): string[] {
+  if (!cachedBankSeats) {
+    const byBank = {} as Record<VoteBankId, string[]>;
+    VOTE_BANK_IDS.forEach((id) => (byBank[id] = []));
+    Object.values(loadStaticSeats()).forEach((seat) => {
+      VOTE_BANK_IDS.forEach((id) => {
+        if ((seat.voteBankStrength[id] ?? 0) >= VOTE_BANK_STRONG_MIN) byBank[id].push(seat.acNo);
+      });
+    });
+    cachedBankSeats = byBank;
+  }
+  return cachedBankSeats[bankId] || [];
 }
 
 // Synchronous accessor used by resolveTurn() and the room store — assumes
@@ -335,54 +349,6 @@ export function resolveTurn(room: Room): { events: TurnEvent[]; perPlayerSpend: 
     });
   });
 
-  // Vote Bank leadership is re-evaluated every turn (never permanent, unlike a
-  // seat lock) — whoever has the most accumulated influence leads. The
-  // current leader of each bank is paid a recurring bonus, scaled down unless
-  // this turn's own spend concentrated in constituencies where that bank is
-  // actually strong (the "geographic relevance" rule) — a leader coasting on
-  // old influence without campaigning anywhere this turn gets the floor rate.
-  VOTE_BANKS.forEach((bank) => {
-    const influence = room.voteBankInfluence[bank.id];
-    const entries = Object.entries(influence).filter(([, amt]) => amt > 0);
-    const previousLeaderId = room.voteBankLeaders[bank.id];
-    if (!entries.length) {
-      room.voteBankLeaders[bank.id] = null;
-      return;
-    }
-    entries.sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
-    const [leaderId] = entries[0];
-    room.voteBankLeaders[bank.id] = leaderId;
-    if (leaderId !== previousLeaderId) {
-      events.push({
-        type: 'vote_bank_leader_change',
-        voteBankId: bank.id,
-        voteBankName: bank.name,
-        playerId: leaderId,
-        previousLeaderId
-      });
-    }
-
-    const spendBySeat = effectiveSpendThisTurn[leaderId];
-    let weightedStrength = 0;
-    if (spendBySeat) {
-      let totalSpend = 0;
-      let weightedSum = 0;
-      Object.entries(spendBySeat).forEach(([acNo, amt]) => {
-        const s = staticSeats[acNo];
-        if (!s) return;
-        totalSpend += amt;
-        weightedSum += amt * s.voteBankStrength[bank.id];
-      });
-      weightedStrength = totalSpend > 0 ? weightedSum / totalSpend : 0;
-    }
-    const multiplier = Math.min(1, Math.max(VOTE_BANK_BONUS_MIN_MULTIPLIER, weightedStrength / VOTE_BANK_BONUS_FULL_EFFECT_STRENGTH));
-    const bonusAmount = Math.round(VOTE_BANK_LEADER_BONUS_BASE * multiplier);
-    if (bonusAmount > 0) {
-      players[leaderId].pendingBonus = (players[leaderId].pendingBonus || 0) + bonusAmount;
-      events.push({ type: 'vote_bank_bonus', voteBankId: bank.id, voteBankName: bank.name, playerId: leaderId, amount: bonusAmount });
-    }
-  });
-
   // A seat locks the moment a player reaches the final rung. If two players
   // reach it on the same blind turn, whoever was ahead going into the turn wins
   // (ties broken deterministically); normally only one player tops out at once.
@@ -402,6 +368,40 @@ export function resolveTurn(room: Room): { events: TurnEvent[]; perPlayerSpend: 
   if (isFinalTurn) {
     events.push(...forceLockRemainingSeats(room));
   }
+
+  // Vote Bank conquest, evaluated after this turn's seat locks (including the
+  // final turn's forced locks) so a bank falls the moment its 60% is held.
+  // Only one player can hold more than 60% of a bank's seats, and a bank pays
+  // out once: once conquered it stays conquered — seat locks are permanent —
+  // and never pays again.
+  VOTE_BANKS.forEach((bank) => {
+    if (room.voteBankConquerors[bank.id]) return;
+    const bankSeats = seatsInVoteBank(bank.id);
+    if (!bankSeats.length) return;
+    const heldByPlayer: Record<string, number> = {};
+    bankSeats.forEach((acNo) => {
+      const owner = seats[acNo]?.locked;
+      // 'INDEPENDENT' marks a seat nobody campaigned in — it belongs to no player.
+      if (!owner || !players[owner]) return;
+      heldByPlayer[owner] = (heldByPlayer[owner] || 0) + 1;
+    });
+    const conquest = Object.entries(heldByPlayer).find(
+      ([, held]) => held / bankSeats.length > VOTE_BANK_CONQUEST_THRESHOLD
+    );
+    if (!conquest) return;
+    const [playerId, seatsHeld] = conquest;
+    room.voteBankConquerors[bank.id] = playerId;
+    players[playerId].pendingBonus = (players[playerId].pendingBonus || 0) + VOTE_BANK_CONQUEST_BONUS;
+    events.push({
+      type: 'vote_bank_conquered',
+      voteBankId: bank.id,
+      voteBankName: bank.name,
+      playerId,
+      amount: VOTE_BANK_CONQUEST_BONUS,
+      seatsHeld,
+      seatsTotal: bankSeats.length
+    });
+  });
 
   Object.values(players).forEach((p) => {
     const spent = perPlayerSpend[p.id] || 0;

@@ -148,6 +148,12 @@ const CONSTITUENCY_VOTE_BANKS: ConstituencyVoteBankEntry[] = [
 // banks, which are present to some degree nearly everywhere).
 const PRIMARY_STRENGTH = 85;
 const SECONDARY_STRENGTHS = [60, 50, 42, 36] as const;
+// A constituency "belongs" to a Vote Bank when the bank is its primary or one
+// of its listed secondaries — i.e. strength at or above the weakest secondary
+// tier, rather than one of the two baselines. This is the set the conquest
+// test in gameData.ts counts over, and the seat count the Vote Bank panel
+// shows. Keep in sync with VOTE_BANK_STRONG_MIN in client/src/lib/types.ts.
+export const VOTE_BANK_STRONG_MIN = SECONDARY_STRENGTHS[SECONDARY_STRENGTHS.length - 1];
 const CROSS_CUTTING_BASELINE = 25;
 const CONCENTRATED_BASELINE = 10;
 
