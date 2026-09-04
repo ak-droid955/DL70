@@ -261,7 +261,10 @@ export function forceLockRemainingSeats(room: Room): TurnEvent[] {
       seat.locked = 'INDEPENDENT';
       return;
     }
-    entries.sort((a, b) => b[1] - a[1]);
+    // Same deterministic tie-break resolveTurn() uses for a same-turn race to
+    // the final rung: equal spend is settled by player id, not by whichever
+    // key happens to come first out of the JSON object.
+    entries.sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
     const [leaderId] = entries[0];
     seat.locked = leaderId;
     events.push({ type: 'forced_lock', acNo: seat.acNo, seatName: seat.name, playerId: leaderId });

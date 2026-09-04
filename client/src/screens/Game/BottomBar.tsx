@@ -40,6 +40,8 @@ export default function BottomBar() {
         <div className={styles.budgetValue}>₹{getRemaining()}K left</div>
       </div>
 
+      {state.error && <div className={styles.error}>{state.error}</div>}
+
       <button
         className={styles.submitBtn}
         disabled={locked}

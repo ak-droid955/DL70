@@ -76,3 +76,15 @@
   color: white;
   cursor: pointer;
 }
+
+/* Action errors (a rejected submit, an end-match that raced the last turn)
+   used to be written to state and never rendered anywhere on the game
+   screen, so a failed submit looked like nothing happened at all. */
+.error {
+  flex-shrink: 0;
+  max-width: 260px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--error-ink);
+}

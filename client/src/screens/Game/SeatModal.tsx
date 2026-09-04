@@ -44,6 +44,7 @@ export default function SeatModal() {
       const total = committed + pending;
       const rungs = Math.min(TOTAL_RUNGS, Math.floor(total / perRung));
       return {
+        id: p.id,
         partyName: p.partyName,
         partyCode: p.partyCode,
         color: p.color,
@@ -129,7 +130,7 @@ export default function SeatModal() {
           )}
 
           {rows.map((row) => (
-            <div className={styles.row} key={row.partyName}>
+            <div className={styles.row} key={row.id}>
               <div className={styles.rowTop}>
                 <div className={styles.rowParty}>
                   {row.partyName}
