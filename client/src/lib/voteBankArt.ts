@@ -16,20 +16,21 @@ Object.entries(files).forEach(([path, url]) => {
   byBasename[base] = url;
 });
 
-// One distinct hue per bank, used for the rail icon chip, the banner fallback
-// and the selected-tab accent — so a bank stays recognisable before any
-// artwork is supplied.
+// One distinct hue per bank, used for the rail icon chip, the banner fallback,
+// the selected-tab accent and the map highlight. Kept as plain sRGB hex so it
+// is equally safe in CSS and in the SVG fill attributes Leaflet writes — so a
+// bank stays recognisable before any artwork is supplied.
 const ACCENTS: Record<VoteBankId, string> = {
-  traders: 'oklch(64% 0.16 55)',
-  transport_unions: 'oklch(60% 0.14 95)',
-  rwa: 'oklch(55% 0.13 150)',
-  unauthorised_colonies: 'oklch(58% 0.13 190)',
-  govt_staff: 'oklch(50% 0.12 250)',
-  women_shg: 'oklch(58% 0.16 350)',
-  farmers: 'oklch(56% 0.14 130)',
-  students_youth: 'oklch(58% 0.15 285)',
-  purvanchali_migrant: 'oklch(58% 0.15 25)',
-  community_religious: 'oklch(52% 0.12 215)'
+  traders: '#d36c00',
+  transport_unions: '#9b7e00',
+  rwa: '#298646',
+  unauthorised_colonies: '#00918b',
+  govt_staff: '#2266a4',
+  women_shg: '#bc4b87',
+  farmers: '#588418',
+  students_youth: '#736ace',
+  purvanchali_migrant: '#c34f4b',
+  community_religious: '#007994'
 };
 
 export interface VoteBankArt {

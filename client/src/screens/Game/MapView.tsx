@@ -51,17 +51,17 @@ function styleForSeat(
 
   if (strength >= VOTE_BANK_PRIMARY_MIN) {
     return claimed
-      ? { ...base, color: accent, weight: 3, fillOpacity: Math.min(1, (base.fillOpacity ?? 0.5) + 0.35) }
-      : { ...base, color: 'white', weight: 1.5, fillColor: accent, fillOpacity: 0.85 };
+      ? { ...base, color: accent, weight: 3.5, opacity: 1, fillOpacity: 1 }
+      : { ...base, color: 'white', weight: 1.5, opacity: 1, fillColor: accent, fillOpacity: 0.92 };
   }
   if (strength >= VOTE_BANK_STRONG_MIN) {
     return claimed
-      ? { ...base, color: accent, weight: 1.75, opacity: 0.85, fillOpacity: Math.min(1, (base.fillOpacity ?? 0.5) + 0.15) }
-      : { ...base, color: accent, weight: 1, opacity: 0.55, fillColor: accent, fillOpacity: 0.3 };
+      ? { ...base, color: accent, weight: 2, opacity: 0.9, fillOpacity: Math.min(1, (base.fillOpacity ?? 0.5) + 0.2) }
+      : { ...base, color: accent, weight: 1, opacity: 0.5, fillColor: accent, fillOpacity: 0.32 };
   }
-  // Out of the bank's reach: pushed back to a faint outline so it never
-  // competes with the highlighted seats.
-  return { ...base, color: '#d6d1c7', weight: 0.75, fillColor: '#ffffff', fillOpacity: 0.35 };
+  // Out of the bank's reach: pushed back to a faint outline on near-paper so it
+  // never competes with the highlighted seats.
+  return { ...base, color: '#ded9cf', weight: 0.75, opacity: 1, fillColor: '#faf8f4', fillOpacity: 1 };
 }
 
 export default function MapView() {
