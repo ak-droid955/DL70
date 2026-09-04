@@ -3,6 +3,7 @@ import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef } from 'react';
 import { VOTE_BANK_PRIMARY_MIN, VOTE_BANK_STRONG_MIN } from '../../lib/types';
 import type { Room, StaticSeat, VoteBankId } from '../../lib/types';
+import { voteBankArt } from '../../lib/voteBankArt';
 import { useGame } from '../../state/GameProvider';
 import styles from './MapView.module.css';
 
@@ -21,10 +22,21 @@ function baseStyleForSeat(room: Room, acNo: string): L.PathOptions {
   return { color: '#b8b3a8', weight: 1, fillColor: leader ? leader.color : 'oklch(93% 0.005 80)', fillOpacity: 0.35 };
 }
 
-// With a Vote Bank open in the panel, the map becomes a map of that bank: the
-// seats where it is primary read strongest, its secondary seats sit a step
-// back, and everywhere it only carries a baseline is dimmed out — the seat's
-// own ownership colours are kept, just re-weighted.
+// A seat only carries a player colour once someone has locked it or put
+// influence into it; until then its fill is blank and there is nothing for a
+// highlight to lean on.
+function isClaimed(room: Room, acNo: string): boolean {
+  const seat = room.seats[acNo];
+  if (!seat) return false;
+  return Boolean(seat.locked) || Object.keys(seat.progress || {}).length > 0;
+}
+
+// With a Vote Bank open in the panel the map becomes a map of that bank. Its
+// primary seats are flooded with the bank's own colour, its secondary seats
+// carry a light wash of the same hue, and every other seat is faded almost to
+// the paper so the bank's footprint reads at a glance. Seats a player already
+// holds keep that player's colour — the bank highlight is carried there by a
+// thick accent ring instead, so the map never lies about who holds what.
 function styleForSeat(
   room: Room,
   acNo: string,
@@ -33,15 +45,23 @@ function styleForSeat(
 ): L.PathOptions {
   const base = baseStyleForSeat(room, acNo);
   if (!voteBankId) return base;
+  const accent = voteBankArt(voteBankId).accent;
   const strength = staticSeat?.voteBankStrength?.[voteBankId] ?? 0;
-  const fillOpacity = base.fillOpacity ?? 0.5;
+  const claimed = isClaimed(room, acNo);
+
   if (strength >= VOTE_BANK_PRIMARY_MIN) {
-    return { ...base, color: 'oklch(30% 0.02 80)', weight: 2, fillOpacity: Math.min(1, fillOpacity + 0.45) };
+    return claimed
+      ? { ...base, color: accent, weight: 3.5, opacity: 1, fillOpacity: 1 }
+      : { ...base, color: 'white', weight: 1.5, opacity: 1, fillColor: accent, fillOpacity: 0.92 };
   }
   if (strength >= VOTE_BANK_STRONG_MIN) {
-    return { ...base, color: '#8f8a80', weight: 1.25, fillOpacity: Math.min(1, fillOpacity + 0.2) };
+    return claimed
+      ? { ...base, color: accent, weight: 2, opacity: 0.9, fillOpacity: Math.min(1, (base.fillOpacity ?? 0.5) + 0.2) }
+      : { ...base, color: accent, weight: 1, opacity: 0.5, fillColor: accent, fillOpacity: 0.32 };
   }
-  return { ...base, color: '#cdc8be', weight: 0.75, fillOpacity: fillOpacity * 0.3 };
+  // Out of the bank's reach: pushed back to a faint outline on near-paper so it
+  // never competes with the highlighted seats.
+  return { ...base, color: '#ded9cf', weight: 0.75, opacity: 1, fillColor: '#faf8f4', fillOpacity: 1 };
 }
 
 export default function MapView() {
@@ -86,7 +106,9 @@ export default function MapView() {
             : {}
       }).addTo(map);
       layer.on('click', () => selectSeat(seat.acNo));
-      layer.on('mouseover', (e) => (e.target as L.Path).setStyle({ weight: 2.5 }));
+      // Hover always thickens rather than thins, so hovering a primary seat of the
+      // open Vote Bank never shrinks its highlight outline.
+      layer.on('mouseover', (e) => (e.target as L.Path).setStyle({ weight: 3.5 }));
       layer.on('mouseout', () => {
         const l = layersRef.current[seat.acNo];
         if (l && roomRef.current) {
@@ -129,9 +151,16 @@ export default function MapView() {
   // player opens a different Vote Bank in the panel.
   useEffect(() => {
     if (!state.room) return;
-    Object.entries(layersRef.current).forEach(([acNo, layer]) =>
-      layer.setStyle(styleForSeat(state.room!, acNo, state.selectedVoteBankId, state.staticSeats?.[acNo]))
-    );
+    Object.entries(layersRef.current).forEach(([acNo, layer]) => {
+      layer.setStyle(styleForSeat(state.room!, acNo, state.selectedVoteBankId, state.staticSeats?.[acNo]));
+      // Highlighted seats are lifted above their neighbours so a bordering
+      // faded seat can never paint over their outline.
+      const strength = state.selectedVoteBankId
+        ? state.staticSeats?.[acNo]?.voteBankStrength?.[state.selectedVoteBankId] ?? 0
+        : 0;
+      if (strength >= VOTE_BANK_STRONG_MIN) layer.bringToFront();
+      else layer.bringToBack();
+    });
   }, [state.room, state.selectedVoteBankId, state.staticSeats]);
 
   return (
