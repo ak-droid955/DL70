@@ -40,8 +40,15 @@ export type TurnEvent =
   | { type: 'conflict'; acNo: string; playerId: string; fee: number; seatName: string }
   | { type: 'lock'; acNo: string; seatName: string; playerId: string }
   | { type: 'forced_lock'; acNo: string; seatName: string; playerId: string }
-  | { type: 'vote_bank_leader_change'; voteBankId: VoteBankId; voteBankName: string; playerId: string; previousLeaderId: string | null }
-  | { type: 'vote_bank_bonus'; voteBankId: VoteBankId; voteBankName: string; playerId: string; amount: number };
+  | {
+      type: 'vote_bank_conquered';
+      voteBankId: VoteBankId;
+      voteBankName: string;
+      playerId: string;
+      amount: number;
+      seatsHeld: number;
+      seatsTotal: number;
+    };
 
 export interface TurnLogEntry {
   turn: number;
@@ -68,9 +75,14 @@ export interface Room {
   // turns from spend in constituencies where that Vote Bank is strong (see
   // resolveTurn in gameData.ts). Not something players spend on directly.
   voteBankInfluence: Record<VoteBankId, Record<string, number>>;
-  // Current leader (highest cumulative influence) per Vote Bank, recomputed
-  // every resolved turn. null until at least one player has any influence.
-  voteBankLeaders: Record<VoteBankId, string | null>;
+  // Who has conquered each Vote Bank — the player holding more than
+  // VOTE_BANK_CONQUEST_THRESHOLD of its constituencies — or null while it is
+  // still contested. Set once and never cleared: seat locks are permanent, so
+  // a conquest can't be undone, and the bonus pays on the turn it is set.
+  // NOTE: persisted in the `vote_bank_leaders` jsonb column, which predates
+  // conquest (it used to hold each bank's influence leader). The column keeps
+  // its old name so live rooms and older clients keep reading the same field.
+  voteBankConquerors: Record<VoteBankId, string | null>;
   pendingTurn: PendingTurn;
   turnLog: TurnLogEntry[];
   createdAt: number;

@@ -1,5 +1,6 @@
-import { VOTE_BANKS, VOTE_BANK_STRONG_MIN, type VoteBankId } from '../../lib/types';
+import { VOTE_BANKS, VOTE_BANK_CONQUEST_THRESHOLD, type VoteBankId } from '../../lib/types';
 import { voteBankArt } from '../../lib/voteBankArt';
+import { voteBankStanding } from '../../lib/voteBankSeats';
 import { useGame } from '../../state/GameProvider';
 import styles from './VoteBankPanel.module.css';
 
@@ -20,8 +21,8 @@ function RailButton({ id, selected, onSelect }: { id: VoteBankId; selected: bool
   const bank = VOTE_BANKS.find((b) => b.id === id)!;
   const art = voteBankArt(id);
   const { state } = useGame();
-  const leaderId = state.room!.voteBankLeaders[id];
-  const leader = leaderId ? state.room!.players[leaderId] : null;
+  const conquerorId = state.room!.voteBankConquerors[id];
+  const conqueror = conquerorId ? state.room!.players[conquerorId] : null;
 
   return (
     <button
@@ -33,35 +34,33 @@ function RailButton({ id, selected, onSelect }: { id: VoteBankId; selected: bool
       <span className={styles.railIcon} style={{ background: art.icon ? 'transparent' : art.accent }}>
         {art.icon ? <img src={art.icon} alt="" /> : <span className={styles.railShort}>{bank.short}</span>}
       </span>
-      {leader && <span className={styles.railLeaderDot} style={{ background: leader.color }} />}
+      {conqueror && <span className={styles.railLeaderDot} style={{ background: conqueror.color }} />}
     </button>
   );
 }
 
 /** Banner for the open Vote Bank: icon tile, name over its artwork, the count
- *  of seats it is strong in, and the influence meter underneath. */
+ *  of seats it is strong in, and the conquest meter underneath — each
+ *  campaign's share of those seats, against the line it has to cross to take
+ *  the bank. */
 function VoteBankBanner({ id }: { id: VoteBankId }) {
   const { state, selectVoteBank } = useGame();
   const room = state.room!;
   const bank = VOTE_BANKS.find((b) => b.id === id)!;
   const art = voteBankArt(id);
 
-  const influence = room.voteBankInfluence[id] || {};
-  const total = Object.values(influence).reduce((a, b) => a + b, 0);
-  const leaderId = room.voteBankLeaders[id];
-  const leader = leaderId ? room.players[leaderId] : null;
-  const myInfluence = state.myPlayerId ? influence[state.myPlayerId] || 0 : 0;
+  const conquerorId = room.voteBankConquerors[id];
+  const conqueror = conquerorId ? room.players[conquerorId] : null;
+  const standing = voteBankStanding(room, state.staticSeats, id, state.myPlayerId);
+  const strongSeats = standing.total;
 
-  // Segments are each campaign's share of all influence in this bank, biggest
-  // first, so the meter reads as a tug of war between the parties.
-  const segments = Object.entries(influence)
+  // Segments are each campaign's share of this bank's constituencies, biggest
+  // first. Unlike the old influence meter the track doesn't fill: the gap is
+  // the seats still up for grabs, and the marker is the conquest line.
+  const segments = Object.entries(standing.heldByPlayer)
     .map(([playerId, value]) => ({ player: room.players[playerId], value }))
     .filter((s) => s.player && s.value > 0)
     .sort((a, b) => b.value - a.value);
-
-  const strongSeats = state.staticSeats
-    ? Object.values(state.staticSeats).filter((s) => (s.voteBankStrength[id] ?? 0) >= VOTE_BANK_STRONG_MIN).length
-    : 0;
 
   return (
     <div className={styles.banner}>
@@ -98,16 +97,16 @@ function VoteBankBanner({ id }: { id: VoteBankId }) {
             <div
               key={s.player.id}
               className={styles.meterSeg}
-              style={{ width: `${(s.value / total) * 100}%`, background: s.player.color }}
-              title={`${s.player.partyName}: ${Math.round(s.value)}`}
+              style={{ width: `${strongSeats ? (s.value / strongSeats) * 100 : 0}%`, background: s.player.color }}
+              title={`${s.player.partyName}: ${s.value} of ${strongSeats} seats`}
             />
           ))}
-          <div className={styles.meterMid} />
+          <div className={styles.meterMid} style={{ left: `${VOTE_BANK_CONQUEST_THRESHOLD * 100}%` }} />
         </div>
 
-        <div className={styles.leaderCell} style={{ borderColor: leader ? leader.color : 'var(--border)' }}>
-          {leader && leader.symbol ? (
-            <div className={styles.leaderSymbol} style={{ backgroundImage: `url(${leader.symbol})` }} />
+        <div className={styles.leaderCell} style={{ borderColor: conqueror ? conqueror.color : 'var(--border)' }}>
+          {conqueror && conqueror.symbol ? (
+            <div className={styles.leaderSymbol} style={{ backgroundImage: `url(${conqueror.symbol})` }} />
           ) : (
             <Silhouette />
           )}
@@ -115,12 +114,14 @@ function VoteBankBanner({ id }: { id: VoteBankId }) {
       </div>
 
       <div className={styles.status}>
-        <span className={styles.statusLeader} style={{ color: leader ? leader.color : 'var(--text-muted)' }}>
-          {leader
-            ? `${leader.partyName}${leaderId === state.myPlayerId ? ' (you)' : ''} leads`
-            : 'Uncontested'}
+        <span className={styles.statusLeader} style={{ color: conqueror ? conqueror.color : 'var(--text-muted)' }}>
+          {conqueror
+            ? `${conqueror.partyName}${conquerorId === state.myPlayerId ? ' (you)' : ''} conquered this bank`
+            : `Unconquered — needs ${standing.needed} of ${strongSeats} seats`}
         </span>
-        <span className={styles.statusMine}>Your influence: {Math.round(myInfluence)}</span>
+        <span className={styles.statusMine}>
+          Your seats here: {standing.mine} / {strongSeats}
+        </span>
       </div>
     </div>
   );

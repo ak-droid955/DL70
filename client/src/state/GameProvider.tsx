@@ -31,6 +31,9 @@ interface State {
   symbolChoice: string | null; // emoji of the selected preset symbol, if any
   pendingMode: PendingMode;
   pendingCode: string | null;
+  // Party colours already taken in the room being joined, as of the last
+  // room:peek. Refreshed live from the open-rooms poll on the setup screen.
+  pendingTakenColors: string[];
   error: string | null;
   room: Room | null;
   myPlayerId: string | null;
@@ -64,6 +67,7 @@ const initialState: State = {
   symbolChoice: null,
   pendingMode: null,
   pendingCode: null,
+  pendingTakenColors: [],
   error: null,
   room: null,
   myPlayerId: null,
@@ -253,11 +257,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return me.budgetThisTurn - sSum;
   }, [getMe]);
 
-  const goCreate = () => patch({ step: 'setup', pendingMode: 'create', error: null });
+  const goCreate = () => patch({ step: 'setup', pendingMode: 'create', pendingTakenColors: [], error: null });
 
   // The join flow is its own page (room-code entry + open-room list) before
   // the setup form, mirroring the design's lobby -> setup progression.
-  const goToJoin = () => patch({ step: 'join', error: null, pendingMode: null, pendingCode: null });
+  const goToJoin = () =>
+    patch({ step: 'join', error: null, pendingMode: null, pendingCode: null, pendingTakenColors: [] });
 
   // "Back" out of the join/setup pages to the landing page. From the setup
   // form of a join we step back to the room list rather than all the way home.
@@ -277,8 +282,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const code = (rawCode || '').trim().toUpperCase();
     if (!code) return patch({ error: 'Enter a room code' });
     try {
-      await call('room:peek', { code });
-      patch({ step: 'setup', pendingMode: 'join', pendingCode: code, error: null });
+      const { takenColors } = await call<{ takenColors: string[] }>('room:peek', { code });
+      patch({
+        step: 'setup',
+        pendingMode: 'join',
+        pendingCode: code,
+        pendingTakenColors: takenColors ?? [],
+        error: null
+      });
     } catch (err) {
       patch({ error: (err as Error).message });
     }

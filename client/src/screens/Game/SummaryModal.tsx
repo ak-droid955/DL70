@@ -75,11 +75,11 @@ export default function SummaryModal({ lastLog }: { lastLog: TurnLogEntry }) {
             const evs = lastLog.events.filter((e) => e.playerId === p.id);
             const won = evs.filter((e) => e.type === 'lock' || e.type === 'forced_lock').map((e) => (e as any).seatName);
             const bonus = evs
-              .filter((e) => e.type === 'vote_bank_bonus')
+              .filter((e) => e.type === 'vote_bank_conquered')
               .reduce((sum, e) => sum + ((e as any).amount || 0), 0);
             const spent = lastLog.perPlayerSpend[p.id] || 0;
-            const leads = (Object.keys(room.voteBankLeaders) as VoteBankId[]).filter(
-              (id) => room.voteBankLeaders[id] === p.id
+            const conquered = (Object.keys(room.voteBankConquerors) as VoteBankId[]).filter(
+              (id) => room.voteBankConquerors[id] === p.id
             );
             const clashes = clashesByPlayer[p.id] || [];
 
@@ -106,15 +106,15 @@ export default function SummaryModal({ lastLog }: { lastLog: TurnLogEntry }) {
                 {(won.length > 0 || bonus > 0) && (
                   <div className={styles.gains}>
                     {won.length > 0 && <div>Won {won.join(', ')}</div>}
-                    {bonus > 0 && <div>Vote Bank bonus +₹{bonus.toLocaleString('en-IN')}K</div>}
+                    {bonus > 0 && <div>Vote Bank conquest +₹{bonus.toLocaleString('en-IN')}K</div>}
                   </div>
                 )}
 
                 <div className={styles.section}>
-                  <div className={styles.sectionLabel}>VOTE BANK LEADS</div>
-                  {leads.length > 0 ? (
+                  <div className={styles.sectionLabel}>VOTE BANKS CONQUERED</div>
+                  {conquered.length > 0 ? (
                     <div className={styles.leadList}>
-                      {leads.map((id) => {
+                      {conquered.map((id) => {
                         const art = voteBankArt(id);
                         return (
                           <span className={styles.lead} key={id}>
@@ -130,7 +130,7 @@ export default function SummaryModal({ lastLog }: { lastLog: TurnLogEntry }) {
                       })}
                     </div>
                   ) : (
-                    <div className={styles.empty}>Leads no Vote Bank yet</div>
+                    <div className={styles.empty}>No Vote Bank conquered yet</div>
                   )}
                 </div>
 

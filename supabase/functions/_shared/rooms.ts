@@ -43,7 +43,18 @@ export interface OpenRoomSummary {
   code: string;
   playerCount: number;
   hostPartyName: string;
+  // Colours already claimed by players in the room. Two players in the same
+  // room may never share a party colour — the board would be unreadable — so
+  // the client greys these out before anyone submits, and joinRoom() rejects
+  // them for good measure.
+  takenColors: string[];
   createdAt: number;
+}
+
+const COLOR_TAKEN_MESSAGE = 'That party colour is already taken in this room. Pick another one.';
+
+function takenColorsOf(players: Record<string, Player>): string[] {
+  return Object.values(players).map((p) => p.color);
 }
 
 export class RoomError extends Error {}
@@ -153,7 +164,7 @@ function rowToRoom(row: Record<string, any>): Room {
     players: asJson(row.players),
     seats: asJson(row.seats),
     voteBankInfluence: asJson(row.vote_bank_influence),
-    voteBankLeaders: asJson(row.vote_bank_leaders),
+    voteBankConquerors: asJson(row.vote_bank_leaders),
     pendingTurn: asJson(row.pending_turn),
     turnLog: asJson(row.turn_log),
     createdAt: new Date(row.created_at).getTime(),
@@ -182,7 +193,7 @@ async function persistRoom(tx: typeof sql, room: Room): Promise<void> {
       players = ${sql.json(room.players as never)},
       seats = ${sql.json(room.seats as never)},
       vote_bank_influence = ${sql.json(room.voteBankInfluence as never)},
-      vote_bank_leaders = ${sql.json(room.voteBankLeaders as never)},
+      vote_bank_leaders = ${sql.json(room.voteBankConquerors as never)},
       pending_turn = ${sql.json(room.pendingTurn as never)},
       turn_log = ${sql.json(room.turnLog as never)},
       updated_at = ${new Date(room.updatedAt).toISOString()}
@@ -223,10 +234,10 @@ class RoomStore {
       };
     });
     const voteBankInfluence: Room['voteBankInfluence'] = {} as Room['voteBankInfluence'];
-    const voteBankLeaders: Room['voteBankLeaders'] = {} as Room['voteBankLeaders'];
+    const voteBankConquerors: Room['voteBankConquerors'] = {} as Room['voteBankConquerors'];
     VOTE_BANK_IDS.forEach((id) => {
       voteBankInfluence[id] = {};
-      voteBankLeaders[id] = null;
+      voteBankConquerors[id] = null;
     });
     const now = new Date().toISOString();
     const turnTimerSeconds = normalizeTurnTimer(input.turnTimerSeconds);
@@ -241,7 +252,7 @@ class RoomStore {
         ) values (
           ${candidate}, 'lobby', 1, ${MAX_TURNS_DEFAULT}, ${BUDGET_PER_TURN_DEFAULT}, ${turnTimerSeconds}, null, ${player.id},
           ${sql.json({ [player.id]: player } as never)}, ${sql.json(seats as never)},
-          ${sql.json(voteBankInfluence as never)}, ${sql.json(voteBankLeaders as never)},
+          ${sql.json(voteBankInfluence as never)}, ${sql.json(voteBankConquerors as never)},
           ${sql.json({ turnNumber: 1, submissions: {} } as never)}, '[]'::jsonb, ${now}, ${now}
         )
         on conflict (code) do nothing
@@ -266,6 +277,7 @@ class RoomStore {
           code: row.code as string,
           playerCount: Object.keys(players).length,
           hostPartyName: players[row.host_id]?.partyName || 'Unknown',
+          takenColors: takenColorsOf(players),
           createdAt: new Date(row.created_at).getTime()
         };
       })
@@ -273,14 +285,17 @@ class RoomStore {
       .sort((a, b) => b.createdAt - a.createdAt);
   }
 
-  async peekRoom(code: string): Promise<{ code: string; phase: Room['phase']; playerCount: number }> {
+  async peekRoom(
+    code: string
+  ): Promise<{ code: string; phase: Room['phase']; playerCount: number; takenColors: string[] }> {
     const rows = await sql`select code, phase, players from rooms where code = ${code.toUpperCase()}`;
     if (!rows.length) throw new RoomError('Room not found. Check the code.');
     const row = rows[0];
-    const playerCount = Object.keys(asJson<Record<string, Player>>(row.players)).length;
+    const players = asJson<Record<string, Player>>(row.players);
+    const playerCount = Object.keys(players).length;
     if (row.phase !== 'lobby') throw new RoomError('That game already started.');
     if (playerCount >= MAX_PLAYERS) throw new RoomError('Room is full (5 players).');
-    return { code: row.code, phase: row.phase, playerCount };
+    return { code: row.code, phase: row.phase, playerCount, takenColors: takenColorsOf(players) };
   }
 
   async joinRoom(code: string, input: NewPlayerInput): Promise<{ room: Room; playerId: string; token: string }> {
@@ -288,6 +303,9 @@ class RoomStore {
     const room = await withRoomLock(code, (room) => {
       if (room.phase !== 'lobby') throw new RoomError('That game already started.');
       if (Object.keys(room.players).length >= MAX_PLAYERS) throw new RoomError('Room is full (5 players).');
+      // Checked under the row lock so two people picking the same colour at
+      // the same moment can't both slip through.
+      if (takenColorsOf(room.players).includes(player.color)) throw new RoomError(COLOR_TAKEN_MESSAGE);
       room.players[player.id] = player;
       room.updatedAt = Date.now();
     });

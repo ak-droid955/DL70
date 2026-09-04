@@ -197,8 +197,9 @@
   border-top: 1px solid var(--border);
 }
 
-/* Ruler-style influence track: ticks underneath, one coloured segment per
-   campaign sized by its share of this bank's influence. */
+/* Ruler-style conquest track: ticks underneath, one coloured segment per
+   campaign sized by its share of this bank's constituencies. The track only
+   fills as seats are won, and .meterMid marks the conquest line. */
 .meter {
   position: relative;
   flex: 1;
@@ -228,7 +229,8 @@
 
 .meterMid {
   position: absolute;
-  left: 50%;
+  /* Overridden inline with the real conquest threshold. */
+  left: 60%;
   top: 0;
   bottom: 0;
   width: 1px;

@@ -60,12 +60,25 @@ export const VOTE_BANKS: VoteBankDef[] = [
 export const VOTE_BANK_PRIMARY_MIN = 85;
 export const VOTE_BANK_STRONG_MIN = 36;
 
+// A Vote Bank is conquered by the player who wins more than this share of the
+// constituencies it is strong in — the seats counted by VOTE_BANK_STRONG_MIN
+// above. Keep in sync with VOTE_BANK_CONQUEST_THRESHOLD on the server
+// (supabase/functions/_shared/gameData.ts).
+export const VOTE_BANK_CONQUEST_THRESHOLD = 0.6;
+
 export type TurnEvent =
   | { type: 'conflict'; acNo: string; playerId: string; fee: number; seatName: string }
   | { type: 'lock'; acNo: string; seatName: string; playerId: string }
   | { type: 'forced_lock'; acNo: string; seatName: string; playerId: string }
-  | { type: 'vote_bank_leader_change'; voteBankId: VoteBankId; voteBankName: string; playerId: string; previousLeaderId: string | null }
-  | { type: 'vote_bank_bonus'; voteBankId: VoteBankId; voteBankName: string; playerId: string; amount: number };
+  | {
+      type: 'vote_bank_conquered';
+      voteBankId: VoteBankId;
+      voteBankName: string;
+      playerId: string;
+      amount: number;
+      seatsHeld: number;
+      seatsTotal: number;
+    };
 
 export interface TurnLogEntry {
   turn: number;
@@ -85,7 +98,10 @@ export interface Room {
   players: Record<string, Player>;
   seats: Record<string, Seat>;
   voteBankInfluence: Record<VoteBankId, Record<string, number>>;
-  voteBankLeaders: Record<VoteBankId, string | null>;
+  // Who has conquered each Vote Bank (holds more than
+  // VOTE_BANK_CONQUEST_THRESHOLD of its seats), or null while contested.
+  // Arrives in the `vote_bank_leaders` column — see the server's types.ts.
+  voteBankConquerors: Record<VoteBankId, string | null>;
   pendingTurn: { turnNumber: number; submissions: Record<string, unknown> };
   turnLog: TurnLogEntry[];
 }
@@ -110,6 +126,9 @@ export interface OpenRoomSummary {
   code: string;
   playerCount: number;
   hostPartyName: string;
+  // Party colours already claimed in that room — no two players in one room
+  // may share a colour, so the setup screen greys these out.
+  takenColors: string[];
   createdAt: number;
 }
 
