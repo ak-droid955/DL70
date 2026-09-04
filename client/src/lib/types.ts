@@ -110,6 +110,9 @@ export interface OpenRoomSummary {
   code: string;
   playerCount: number;
   hostPartyName: string;
+  // Party colours already claimed in that room — no two players in one room
+  // may share a colour, so the setup screen greys these out.
+  takenColors: string[];
   createdAt: number;
 }
 

@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { useEffect, useMemo, type CSSProperties } from 'react';
 import { PROFANITY_MESSAGE, hasProfanity } from '../lib/profanity';
 import { PARTY_COLOR_SWATCHES, PARTY_SYMBOLS, TURN_TIMER_OPTIONS } from '../lib/types';
 import { useOpenRooms } from '../lib/useOpenRooms';
@@ -26,11 +26,29 @@ export default function Setup() {
   const openRooms = useOpenRooms();
   const activeRoom = openRooms?.find((r) => r.code === state.pendingCode) ?? null;
 
+  // No two players in a room may campaign in the same colour. The list comes
+  // from the room:peek that opened this form and is refreshed by the
+  // open-rooms poll, so a colour someone claims while this form is open goes
+  // grey here too. The server re-checks on join either way.
+  const takenColors = useMemo(() => {
+    if (isCreate) return new Set<string>();
+    return new Set([...state.pendingTakenColors, ...(activeRoom?.takenColors ?? [])]);
+  }, [isCreate, state.pendingTakenColors, activeRoom]);
+  const colorTaken = takenColors.has(PARTY_COLOR_SWATCHES[state.colorChoice]);
+
+  // Nudge the selection off a colour that's been claimed, so the form never
+  // sits on a choice the server would reject.
+  useEffect(() => {
+    if (!colorTaken) return;
+    const free = PARTY_COLOR_SWATCHES.findIndex((c) => !takenColors.has(c));
+    if (free >= 0) pickColor(free);
+  }, [colorTaken, takenColors, pickColor]);
+
   const nameBad = hasProfanity(state.nameInput);
   const partyNameBad = hasProfanity(state.partyNameInput);
   const partyCodeBad = hasProfanity(state.partyCodeInput);
   const incomplete = !state.nameInput.trim() || !state.partyNameInput.trim();
-  const blocked = incomplete || nameBad || partyNameBad || partyCodeBad;
+  const blocked = incomplete || nameBad || partyNameBad || partyCodeBad || colorTaken;
   const disableSubmit = blocked || state.busy;
 
   const submitLabel = state.busy
@@ -105,23 +123,33 @@ export default function Setup() {
 
         <span className={styles.label}>Party Colour</span>
         <div className={styles.colorGrid}>
-          {PARTY_COLOR_SWATCHES.map((color, i) => (
-            <button
-              type="button"
-              key={color}
-              aria-label={`Party colour ${i + 1}`}
-              aria-pressed={i === state.colorChoice}
-              onClick={() => pickColor(i)}
-              className={`${styles.swatch} ${i === state.colorChoice ? styles.swatchSelected : ''}`}
-              style={
-                {
-                  background: color,
-                  '--swatch-ring': i === state.colorChoice ? color : 'transparent'
-                } as CSSProperties
-              }
-            />
-          ))}
+          {PARTY_COLOR_SWATCHES.map((color, i) => {
+            const taken = takenColors.has(color);
+            return (
+              <button
+                type="button"
+                key={color}
+                aria-label={`Party colour ${i + 1}${taken ? ' (taken)' : ''}`}
+                aria-pressed={i === state.colorChoice}
+                disabled={taken}
+                title={taken ? 'Already taken by another party in this room' : undefined}
+                onClick={() => pickColor(i)}
+                className={`${styles.swatch} ${i === state.colorChoice ? styles.swatchSelected : ''} ${
+                  taken ? styles.swatchTaken : ''
+                }`}
+                style={
+                  {
+                    background: color,
+                    '--swatch-ring': i === state.colorChoice ? color : 'transparent'
+                  } as CSSProperties
+                }
+              />
+            );
+          })}
         </div>
+        {!isCreate && takenColors.size > 0 && (
+          <p className={styles.colorHint}>Greyed-out colours are already taken in this room.</p>
+        )}
 
         <span className={styles.label}>
           Party Symbol <span className={styles.labelHint}>(optional)</span>
