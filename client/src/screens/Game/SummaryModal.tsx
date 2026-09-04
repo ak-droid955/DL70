@@ -12,7 +12,6 @@ const VOTE_BANK_BY_ID = Object.fromEntries(VOTE_BANKS.map((b) => [b.id, b]));
 interface Clash {
   acNo: string;
   seatName: string;
-  rungs: number;
   rivals: Player[];
 }
 
@@ -54,13 +53,12 @@ export default function SummaryModal({ lastLog }: { lastLog: TurnLogEntry }) {
       if (rungs <= 0) return;
       (byRung[rungs] ||= []).push(p);
     });
-    Object.entries(byRung).forEach(([rung, tied]) => {
+    Object.values(byRung).forEach((tied) => {
       if (tied.length < 2) return;
       tied.forEach((p) => {
         (clashesByPlayer[p.id] ||= []).push({
           acNo: seat.acNo,
           seatName: seat.name,
-          rungs: Number(rung),
           rivals: tied.filter((r) => r.id !== p.id)
         });
       });
@@ -144,7 +142,6 @@ export default function SummaryModal({ lastLog }: { lastLog: TurnLogEntry }) {
                         <div className={styles.clash} key={c.acNo}>
                           <div className={styles.clashSeat}>{c.seatName}</div>
                           <div className={styles.clashRivals}>
-                            <span className={styles.clashRung}>Rung {c.rungs}</span>
                             {c.rivals.map((r) => (
                               <SymbolToken player={r} size="sm" key={r.id} />
                             ))}

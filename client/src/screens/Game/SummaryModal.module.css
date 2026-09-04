@@ -210,12 +210,6 @@
   flex-shrink: 0;
 }
 
-.clashRung {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--red);
-}
-
 .empty {
   margin-top: 5px;
   font-size: 11.5px;
