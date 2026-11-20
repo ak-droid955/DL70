@@ -19,8 +19,8 @@
   color: var(--ink);
 }
 
-/* Rally photograph behind the card (assets/bg-rally-stage.jpg on create and
-   in the lobby, bg-rally-truck-join.jpg on join), under the design's
+/* Rally photograph behind the card (assets/bg-rally-stage.* on create and
+   in the lobby, bg-rally-truck-join.* on join), under the design's
    dark-to-paper wash. Absolute rather than fixed so it spans the whole
    document — the setup form is taller than the viewport and a fixed layer
    would cut off mid-scroll. The photo URL comes in as --shell-photo from
