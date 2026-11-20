@@ -34,7 +34,7 @@ export default function SeatModal() {
   const seat = state.selectedSeatAcNo ? room.seats[state.selectedSeatAcNo] : null;
   if (!seat) return null;
   const staticSeat = state.staticSeats?.[seat.acNo];
-  const perRung = staticSeat?.maxPerRung ?? 75;
+  const perRung = staticSeat?.maxPerRung ?? 45;
 
   const players = Object.values(room.players);
   const rows = players
