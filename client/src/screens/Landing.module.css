@@ -42,7 +42,7 @@
 }
 
 /* ---------- hero ---------- */
-/* Background photograph (assets/hero-building.jpg) plus the design's
+/* Background photograph (assets/hero-building.avif/.webp, chosen in lib/backgrounds.ts) plus the design's
    paper-toned gradient wash; both are set together in Landing.tsx so the
    bundler can fingerprint the image URL. */
 .hero {

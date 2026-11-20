@@ -1,7 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
-import bgRallyStage from '../assets/bg-rally-stage.jpg';
-import bgRallyTruck from '../assets/bg-rally-truck-join.jpg';
 import { ArchFrieze, PageHeader } from '../components/Brand';
+import { rallyStageBg, rallyTruckBg } from '../lib/backgrounds';
 import { useGame } from '../state/GameProvider';
 import styles from './RoomShell.module.css';
 
@@ -20,7 +19,7 @@ export default function RoomShell({
   children: ReactNode;
 }) {
   const { goHome } = useGame();
-  const photo = variant === 'stage' ? bgRallyStage : bgRallyTruck;
+  const photo = variant === 'stage' ? rallyStageBg : rallyTruckBg;
   return (
     <div className={styles.shell}>
       <div className={styles.backdrop} style={{ '--shell-photo': `url(${photo})` } as CSSProperties} />

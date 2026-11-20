@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import heroBuilding from '../assets/hero-building.jpg';
 import { ArchFrieze, FooterMark, Logo } from '../components/Brand';
+import { heroBg, warmRoomBackgrounds } from '../lib/backgrounds';
 import { useGame } from '../state/GameProvider';
 import ConstituencyMap from './ConstituencyMap';
 import styles from './Landing.module.css';
@@ -58,8 +58,12 @@ export default function Landing() {
 
   useEffect(() => {
     const img = new Image();
-    img.onload = img.onerror = () => setHeroReady(true);
-    img.src = heroBuilding;
+    img.onload = img.onerror = () => {
+      setHeroReady(true);
+      // Hero is in; use the idle time to fetch the Join/Create backdrops.
+      warmRoomBackgrounds();
+    };
+    img.src = heroBg;
   }, []);
 
   const goToSlide = (i: number) => {
@@ -77,7 +81,7 @@ export default function Landing() {
 
       <section
         className={`${styles.hero} ${heroReady ? styles.heroReady : ''}`}
-        style={{ backgroundImage: `${HERO_OVERLAY}, url(${heroBuilding})` }}
+        style={{ backgroundImage: `${HERO_OVERLAY}, url(${heroBg})` }}
       >
         <div className={styles.heroInner}>
           <h1 className={styles.heroTitle}>
