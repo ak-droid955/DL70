@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import ConfirmDialog from '../../components/ConfirmDialog';
 import { useGame } from '../../state/GameProvider';
 import BottomBar from './BottomBar';
 import MapView from './MapView';
@@ -38,15 +39,7 @@ export default function GameScreen() {
   const isResultsVisible = room.phase === 'gameover' && !isSummaryVisible;
   const isWaitingOverlay = !!(me && me.ready) && room.phase === 'playing' && !isSummaryVisible;
 
-  const handleEndMatch = () => {
-    if (
-      window.confirm(
-        'End the match now? Any spends not yet submitted this turn will be lost. Every still-unclaimed seat will go to whoever is currently leading it as of the last completed turn. This cannot be undone.'
-      )
-    ) {
-      endMatch();
-    }
-  };
+  const [confirmingEnd, setConfirmingEnd] = useState(false);
 
   return (
     <div className={styles.screen}>
@@ -56,7 +49,7 @@ export default function GameScreen() {
         {room.phase === 'playing' && room.turnDeadline && <TurnCountdown deadline={room.turnDeadline} />}
         <div className={styles.rightGroup}>
           {isHost && room.phase === 'playing' && (
-            <button className={styles.endMatchBtn} onClick={handleEndMatch}>
+            <button className={styles.endMatchBtn} onClick={() => setConfirmingEnd(true)}>
               End Match
             </button>
           )}
@@ -75,6 +68,24 @@ export default function GameScreen() {
       {!state.selectedSeatAcNo && isWaitingOverlay && <WaitingOverlay />}
       {isSummaryVisible && <SummaryModal lastLog={lastLog!} />}
       {isResultsVisible && <ResultsScreen />}
+      {confirmingEnd && room.phase === 'playing' && (
+        <ConfirmDialog
+          title="End the match now?"
+          confirmLabel="End Match"
+          danger
+          onConfirm={() => {
+            setConfirmingEnd(false);
+            endMatch();
+          }}
+          onCancel={() => setConfirmingEnd(false)}
+        >
+          <ul>
+            <li>Any spends not yet submitted this turn will be lost.</li>
+            <li>Every unclaimed seat goes to whoever was leading it after the last completed turn.</li>
+            <li>This cannot be undone.</li>
+          </ul>
+        </ConfirmDialog>
+      )}
     </div>
   );
 }

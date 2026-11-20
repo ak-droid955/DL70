@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { TURN_TIMER_OPTIONS } from '../lib/types';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { useGame } from '../state/GameProvider';
 import RoomShell, { shellStyles } from './RoomShell';
 import styles from './Lobby.module.css';
@@ -15,6 +16,7 @@ function timerLabel(seconds: number | null): string {
 export default function Lobby() {
   const { state, startGame, leaveRoom } = useGame();
   const [copied, setCopied] = useState(false);
+  const [confirmingExit, setConfirmingExit] = useState(false);
   const room = state.room!;
   const players = Object.values(room.players);
   const isHost = room.hostId === state.myPlayerId;
@@ -34,15 +36,12 @@ export default function Lobby() {
     setCopied(true);
   };
 
-  const handleExit = () => {
-    const message = isHost
-      ? 'Exit the match? Your slot is freed and, if nobody else is in the room, the room closes.'
-      : 'Exit the match? Your slot is freed and you will need the room code to join again.';
-    if (window.confirm(message)) leaveRoom();
-  };
+  const exitMessage = isHost
+    ? 'Your slot is freed and, if nobody else is in the room, the room closes.'
+    : 'Your slot is freed and you will need the room code to join again.';
 
   return (
-    <RoomShell variant="stage" showBack={false} onExit={handleExit}>
+    <RoomShell variant="stage" showBack={false} onExit={() => setConfirmingExit(true)}>
       <div className={`${shellStyles.card} ${styles.card}`}>
         <div className={styles.codeLabel}>Room Code</div>
         <div className={styles.code}>{room.code}</div>
@@ -101,6 +100,20 @@ export default function Lobby() {
           <p className={styles.waitingLabel}>Waiting for the host to start…</p>
         )}
       </div>
+      {confirmingExit && (
+        <ConfirmDialog
+          title="Exit the match?"
+          confirmLabel="Exit"
+          danger
+          onConfirm={() => {
+            setConfirmingExit(false);
+            leaveRoom();
+          }}
+          onCancel={() => setConfirmingExit(false)}
+        >
+          {exitMessage}
+        </ConfirmDialog>
+      )}
     </RoomShell>
   );
 }
