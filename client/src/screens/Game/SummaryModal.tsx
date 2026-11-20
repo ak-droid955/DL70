@@ -46,7 +46,7 @@ export default function SummaryModal({ lastLog }: { lastLog: TurnLogEntry }) {
   const clashesByPlayer: Record<string, Clash[]> = {};
   Object.values(room.seats).forEach((seat) => {
     if (seat.locked) return;
-    const perRung = state.staticSeats?.[seat.acNo]?.maxPerRung ?? 75;
+    const perRung = state.staticSeats?.[seat.acNo]?.maxPerRung ?? 45;
     const byRung: Record<number, Player[]> = {};
     players.forEach((p) => {
       const rungs = Math.min(TOTAL_RUNGS, Math.floor((seat.progress[p.id] || 0) / perRung));

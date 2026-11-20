@@ -27,7 +27,7 @@ const DELHI_AC_GEOJSON_URL =
   'https://raw.githubusercontent.com/ak-droid955/DL70/main/supabase/functions/_shared/data/delhi_AC.json';
 
 export const MAX_TURNS_DEFAULT = 10;
-export const BUDGET_PER_TURN_DEFAULT = 300; // in ₹ thousands
+export const BUDGET_PER_TURN_DEFAULT = 180; // in ₹ thousands
 
 // Campaign Rungs: every constituency has TOTAL_RUNGS rungs. A rung costs a
 // fixed amount (MAX_PER_RUNG, per constituency, in ₹K); spending that amount
@@ -38,17 +38,18 @@ export const TOTAL_RUNGS = 10;
 export const FIRST_ENTRY_MAX_RUNGS = 3;
 
 // Fixed ₹K cost to climb one rung, per constituency (AC_NO -> ₹K). Sourced from
-// the game's per-constituency spending table.
+// the game's per-constituency spending table, cut by 40% and rounded to the
+// nearest ₹5K.
 const MAX_PER_RUNG: Record<string, number> = {
-  '1': 65, '2': 75, '3': 65, '4': 65, '5': 75, '6': 80, '7': 65, '8': 65, '9': 75, '10': 60,
-  '11': 80, '12': 60, '13': 75, '14': 70, '15': 75, '16': 70, '17': 75, '18': 75, '19': 80, '20': 80,
-  '21': 80, '22': 80, '23': 65, '24': 65, '25': 70, '26': 60, '27': 85, '28': 75, '29': 70, '30': 80,
-  '31': 90, '32': 85, '33': 90, '34': 85, '35': 70, '36': 75, '37': 70, '38': 60, '39': 90, '40': 110,
-  '41': 85, '42': 75, '43': 80, '44': 75, '45': 80, '46': 85, '47': 60, '48': 60, '49': 80, '50': 100,
-  '51': 105, '52': 75, '53': 80, '54': 105, '55': 60, '56': 60, '57': 90, '58': 85, '59': 80, '60': 75,
-  '61': 80, '62': 70, '63': 60, '64': 70, '65': 85, '66': 80, '67': 80, '68': 65, '69': 100, '70': 90
+  '1': 40, '2': 45, '3': 40, '4': 40, '5': 45, '6': 50, '7': 40, '8': 40, '9': 45, '10': 35,
+  '11': 50, '12': 35, '13': 45, '14': 40, '15': 45, '16': 40, '17': 45, '18': 45, '19': 50, '20': 50,
+  '21': 50, '22': 50, '23': 40, '24': 40, '25': 40, '26': 35, '27': 50, '28': 45, '29': 40, '30': 50,
+  '31': 55, '32': 50, '33': 55, '34': 50, '35': 40, '36': 45, '37': 40, '38': 35, '39': 55, '40': 65,
+  '41': 50, '42': 45, '43': 50, '44': 45, '45': 50, '46': 50, '47': 35, '48': 35, '49': 50, '50': 60,
+  '51': 65, '52': 45, '53': 50, '54': 65, '55': 35, '56': 35, '57': 55, '58': 50, '59': 50, '60': 45,
+  '61': 50, '62': 40, '63': 35, '64': 40, '65': 50, '66': 50, '67': 50, '68': 40, '69': 60, '70': 55
 };
-const MAX_PER_RUNG_FALLBACK = 75; // used only if an acNo is somehow missing from the table above
+const MAX_PER_RUNG_FALLBACK = 45; // used only if an acNo is somehow missing from the table above
 
 export function maxPerRungFor(acNo: string): number {
   return MAX_PER_RUNG[acNo] ?? MAX_PER_RUNG_FALLBACK;
@@ -63,7 +64,7 @@ export function maxPerRungFor(acNo: string): number {
 // budget-bonus mechanism as before (added to the winner's next-turn
 // budgetThisTurn) rather than a separate currency.
 export const VOTE_BANK_CONQUEST_THRESHOLD = 0.6; // must hold MORE than this share of the bank's seats
-export const VOTE_BANK_CONQUEST_BONUS = 300; // ₹K, one-time, per Vote Bank conquered
+export const VOTE_BANK_CONQUEST_BONUS = 180; // ₹K, one-time, per Vote Bank conquered
 
 // NOTE: order and length must stay identical to PARTY_COLOR_SWATCHES in
 // client/src/lib/types.ts — a colour is stored by its index in this array.
