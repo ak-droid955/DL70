@@ -1,12 +1,14 @@
+import aapSymbol from '../assets/parties/aap.png';
+import bjpSymbol from '../assets/parties/bjp.png';
+import incSymbol from '../assets/parties/inc.png';
 import RoomShell, { shellStyles } from './RoomShell';
 import styles from './SinglePlayer.module.css';
 
-// Each party's election symbol, shown as an emoji until real logo artwork
-// is added.
+// Each party's election symbol (square, transparent-background PNGs).
 const PARTIES = [
-  { id: 'bjp', name: 'BJP', symbol: '🪷', symbolLabel: 'Lotus' },
-  { id: 'aap', name: 'Aam Aadmi Party', symbol: '🧹', symbolLabel: 'Broom' },
-  { id: 'inc', name: 'Indian National Congress', symbol: '✋', symbolLabel: 'Hand' }
+  { id: 'bjp', name: 'BJP', symbol: bjpSymbol, symbolLabel: 'Lotus' },
+  { id: 'aap', name: 'Aam Aadmi Party', symbol: aapSymbol, symbolLabel: 'Broom' },
+  { id: 'inc', name: 'Indian National Congress', symbol: incSymbol, symbolLabel: 'Hand' }
 ] as const;
 
 /** Single-player entry page: pick the party you will play as. */
@@ -18,9 +20,7 @@ export default function SinglePlayer() {
         <div className={styles.grid}>
           {PARTIES.map((party) => (
             <div key={party.id} className={styles.slot}>
-              <span className={styles.logo} role="img" aria-label={`${party.symbolLabel} symbol`}>
-                {party.symbol}
-              </span>
+              <img className={styles.logo} src={party.symbol} alt={`${party.symbolLabel} symbol`} />
               <span className={styles.name}>{party.name}</span>
             </div>
           ))}

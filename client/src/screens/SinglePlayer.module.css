@@ -33,8 +33,9 @@
 }
 
 .logo {
-  font-size: 44px;
-  line-height: 1;
+  width: 60%;
+  aspect-ratio: 1;
+  object-fit: contain;
 }
 
 .name {
@@ -49,9 +50,6 @@
 @media (max-width: 640px) {
   .grid {
     gap: 8px;
-  }
-  .logo {
-    font-size: 34px;
   }
   .slot {
     padding: 6px;
