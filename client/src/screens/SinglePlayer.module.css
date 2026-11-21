@@ -459,6 +459,60 @@
   justify-content: flex-end;
   gap: 4px;
 }
+.statRowWrap {
+  flex-wrap: wrap;
+}
+.chipButton {
+  font-family: inherit;
+  cursor: pointer;
+  white-space: normal;
+  text-align: right;
+}
+.chipButton:hover {
+  background: oklch(95% 0.012 75);
+}
+.ideologyPicker {
+  flex-basis: 100%;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1.5px dashed var(--paper-border);
+}
+.ideologyHint {
+  margin: 0 0 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  text-align: left;
+}
+.ideologyOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.ideologyOption {
+  padding: 4px 9px;
+  border-radius: 100px;
+  border: 1.5px solid var(--ink);
+  background: oklch(99% 0.006 75);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ideologyOption:hover:not(:disabled) {
+  background: oklch(95% 0.012 75);
+}
+.ideologyOptionOn,
+.ideologyOptionOn:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+.ideologyOption:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .chip {
   padding: 3px 8px;
   border-radius: 100px;

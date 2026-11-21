@@ -77,6 +77,23 @@ const CUSTOM_PARTY: { id: 'custom'; name: string; stats: readonly StatRow[] } = 
   ]
 };
 
+// Ideologies a Custom Party can pick from (up to MAX_IDEOLOGIES).
+const IDEOLOGY_OPTIONS = [
+  'Centrism',
+  'Conservatism',
+  'Liberalism',
+  'Social democracy',
+  'Socialism',
+  'Secularism',
+  'Nationalism',
+  'Populism',
+  'Regionalism',
+  'Welfarism',
+  'Environmentalism',
+  'Anti-corruption'
+] as const;
+const MAX_IDEOLOGIES = 2;
+
 type PartyId = (typeof PARTIES)[number]['id'] | typeof CUSTOM_PARTY.id;
 
 // Each mode's explainer, shown under the mode buttons once one is picked.
@@ -120,6 +137,13 @@ export default function SinglePlayer() {
   // Name for the Custom Party, editable from its details card via the pen.
   const [customName, setCustomName] = useState<string>(CUSTOM_PARTY.name);
   const [editingName, setEditingName] = useState(false);
+  // Ideologies picked for the Custom Party, and whether the picker is open.
+  const [customIdeologies, setCustomIdeologies] = useState<string[]>([]);
+  const [ideologyPickerOpen, setIdeologyPickerOpen] = useState(false);
+  const toggleIdeology = (idea: string) =>
+    setCustomIdeologies((cur) =>
+      cur.includes(idea) ? cur.filter((i) => i !== idea) : cur.length < MAX_IDEOLOGIES ? [...cur, idea] : cur
+    );
   const [nameDraft, setNameDraft] = useState('');
 
   const startEditingName = () => {
@@ -164,6 +188,7 @@ export default function SinglePlayer() {
   const pick = (id: PartyId) => {
     setSelected(id);
     setPanelOpen(true);
+    setIdeologyPickerOpen(false);
   };
 
   // The details card is only up while a party is being looked at: it closes
@@ -387,22 +412,70 @@ export default function SinglePlayer() {
               </div>
             )}
             <dl className={styles.stats}>
-              {detail.stats.map((row) => (
-                <div key={row.label} className={styles.statRow}>
-                  <dt>{row.label}</dt>
-                  {typeof row.value === 'string' ? (
-                    <dd>{row.value}</dd>
-                  ) : (
-                    <dd className={styles.chips}>
-                      {row.value.map((v) => (
-                        <span key={v} className={styles.chip}>
-                          {v}
-                        </span>
-                      ))}
-                    </dd>
-                  )}
-                </div>
-              ))}
+              {detail.stats.map((row) => {
+                // Custom Party's ideologies are chosen by the player.
+                if (selected === CUSTOM_PARTY.id && row.label === 'Ideologies') {
+                  return (
+                    <div key={row.label} className={`${styles.statRow} ${styles.statRowWrap}`}>
+                      <dt>{row.label}</dt>
+                      <dd className={styles.chips}>
+                        <button
+                          type="button"
+                          className={`${styles.chip} ${styles.chipButton}`}
+                          aria-expanded={ideologyPickerOpen}
+                          aria-controls="ideology-picker"
+                          tabIndex={panelOpen ? 0 : -1}
+                          onClick={() => setIdeologyPickerOpen((o) => !o)}
+                        >
+                          {customIdeologies.length ? customIdeologies.join(', ') : 'Your choice'}
+                          <span aria-hidden="true">{ideologyPickerOpen ? ' ▴' : ' ▾'}</span>
+                        </button>
+                      </dd>
+                      {ideologyPickerOpen && (
+                        <div id="ideology-picker" className={styles.ideologyPicker}>
+                          <p className={styles.ideologyHint}>
+                            Pick up to {MAX_IDEOLOGIES} ({customIdeologies.length}/{MAX_IDEOLOGIES})
+                          </p>
+                          <div className={styles.ideologyOptions}>
+                            {IDEOLOGY_OPTIONS.map((idea) => {
+                              const on = customIdeologies.includes(idea);
+                              const full = !on && customIdeologies.length >= MAX_IDEOLOGIES;
+                              return (
+                                <button
+                                  key={idea}
+                                  type="button"
+                                  aria-pressed={on}
+                                  disabled={full}
+                                  className={`${styles.ideologyOption} ${on ? styles.ideologyOptionOn : ''}`}
+                                  onClick={() => toggleIdeology(idea)}
+                                >
+                                  {idea}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                return (
+                  <div key={row.label} className={styles.statRow}>
+                    <dt>{row.label}</dt>
+                    {typeof row.value === 'string' ? (
+                      <dd>{row.value}</dd>
+                    ) : (
+                      <dd className={styles.chips}>
+                        {row.value.map((v) => (
+                          <span key={v} className={styles.chip}>
+                            {v}
+                          </span>
+                        ))}
+                      </dd>
+                    )}
+                  </div>
+                );
+              })}
             </dl>
           </>
         )}
