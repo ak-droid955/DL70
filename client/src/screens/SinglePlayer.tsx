@@ -77,20 +77,43 @@ const CUSTOM_PARTY: { id: 'custom'; name: string; stats: readonly StatRow[] } = 
   ]
 };
 
-// Ideologies a Custom Party can pick from (up to MAX_IDEOLOGIES).
-const IDEOLOGY_OPTIONS = [
-  'Centrism',
-  'Conservatism',
-  'Liberalism',
-  'Social democracy',
-  'Socialism',
-  'Secularism',
-  'Nationalism',
-  'Populism',
-  'Regionalism',
-  'Welfarism',
-  'Environmentalism',
-  'Anti-corruption'
+// Ideologies a Custom Party can pick from (up to MAX_IDEOLOGIES), shown in
+// two groups: Indian political traditions first, then general ones.
+const IDEOLOGY_GROUPS = [
+  {
+    label: 'Indian',
+    options: [
+      'Gandhism',
+      'Hindutva',
+      'Integral humanism',
+      'Ambedkarism',
+      'Nehruvian socialism',
+      'Lohiaite socialism',
+      'Dravidianism',
+      'Sarvodaya',
+      'Swadeshi',
+      'Social justice',
+      'Kisan politics',
+      'Federalism'
+    ]
+  },
+  {
+    label: 'General',
+    options: [
+      'Centrism',
+      'Conservatism',
+      'Liberalism',
+      'Social democracy',
+      'Socialism',
+      'Secularism',
+      'Nationalism',
+      'Populism',
+      'Regionalism',
+      'Welfarism',
+      'Environmentalism',
+      'Anti-corruption'
+    ]
+  }
 ] as const;
 const MAX_IDEOLOGIES = 2;
 
@@ -436,24 +459,29 @@ export default function SinglePlayer() {
                           <p className={styles.ideologyHint}>
                             Pick up to {MAX_IDEOLOGIES} ({customIdeologies.length}/{MAX_IDEOLOGIES})
                           </p>
-                          <div className={styles.ideologyOptions}>
-                            {IDEOLOGY_OPTIONS.map((idea) => {
-                              const on = customIdeologies.includes(idea);
-                              const full = !on && customIdeologies.length >= MAX_IDEOLOGIES;
-                              return (
-                                <button
-                                  key={idea}
-                                  type="button"
-                                  aria-pressed={on}
-                                  disabled={full}
-                                  className={`${styles.ideologyOption} ${on ? styles.ideologyOptionOn : ''}`}
-                                  onClick={() => toggleIdeology(idea)}
-                                >
-                                  {idea}
-                                </button>
-                              );
-                            })}
-                          </div>
+                          {IDEOLOGY_GROUPS.map((group) => (
+                            <div key={group.label} className={styles.ideologyGroup}>
+                              <p className={styles.ideologyGroupLabel}>{group.label}</p>
+                              <div className={styles.ideologyOptions}>
+                                {group.options.map((idea) => {
+                                  const on = customIdeologies.includes(idea);
+                                  const full = !on && customIdeologies.length >= MAX_IDEOLOGIES;
+                                  return (
+                                    <button
+                                      key={idea}
+                                      type="button"
+                                      aria-pressed={on}
+                                      disabled={full}
+                                      className={`${styles.ideologyOption} ${on ? styles.ideologyOptionOn : ''}`}
+                                      onClick={() => toggleIdeology(idea)}
+                                    >
+                                      {idea}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
