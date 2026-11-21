@@ -1,4 +1,22 @@
 .card {
   max-width: 480px;
-  min-height: 480px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.slot {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  border: 2px solid var(--paper-border);
+  background: var(--card-paper);
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
