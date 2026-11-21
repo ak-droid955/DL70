@@ -120,8 +120,8 @@
   left: 71.5%;
   top: 80%;
   /* Was 11px right of the shared nudge to clear the planter edge; now moved
-     30px left of that. */
-  transform: translate(calc(-50% - 16px), -50%);
+     60px left of that. */
+  transform: translate(calc(-50% - 46px), -50%);
 }
 
 /* The percentages above place the spots against the hero BOX; the photo,
@@ -157,7 +157,7 @@
     }
 
     .heroSpotCreate {
-      left: calc(50% + var(--art-w) * 0.22091 - 30px);
+      left: calc(50% + var(--art-w) * 0.22091 - 60px);
     }
   }
 }
