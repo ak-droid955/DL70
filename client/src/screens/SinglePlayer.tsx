@@ -5,59 +5,84 @@ import incSymbol from '../assets/parties/inc.png';
 import RoomShell, { shellStyles } from './RoomShell';
 import styles from './SinglePlayer.module.css';
 
+// One row in the party details card. An array value renders as chips.
+type StatRow = { label: string; value: string | readonly string[] };
+
 // Each party's election symbol (square, transparent-background PNGs) and the
 // stats shown in the floating details card when the party is picked. Vote
-// share is from the 2025 Delhi assembly election.
-const PARTIES = [
+// share and Delhi status are from the 2025 Delhi assembly election.
+const PARTIES: readonly {
+  id: 'bjp' | 'aap' | 'inc';
+  name: string;
+  symbol: string;
+  symbolLabel: string;
+  stats: readonly StatRow[];
+}[] = [
   {
     id: 'bjp',
     name: 'Bharatiya Janata Party',
     symbol: bjpSymbol,
     symbolLabel: 'Lotus',
-    stats: {
-      lastElection: '45.6%',
-      ideologies: ['Hindu nationalism', 'Conservatism'],
-      jurisdiction: 'National',
-      founded: '1980'
-    }
+    stats: [
+      { label: 'Last election', value: '45.6%' },
+      { label: 'In Delhi', value: 'Government' },
+      { label: 'Ideologies', value: ['Hindu nationalism', 'Conservatism'] },
+      { label: 'Symbol', value: 'Lotus' },
+      { label: 'Founders', value: ['Atal Bihari Vajpayee', 'L. K. Advani'] },
+      { label: 'Delhi CMs', value: ['Madan Lal Khurana', 'Sahib Singh Verma', 'Sushma Swaraj', 'Rekha Gupta'] },
+      { label: 'Jurisdiction', value: 'National' },
+      { label: 'Founded', value: '1980' }
+    ]
   },
   {
     id: 'aap',
     name: 'Aam Aadmi Party',
     symbol: aapSymbol,
     symbolLabel: 'Broom',
-    stats: {
-      lastElection: '43.6%',
-      ideologies: ['Populism', 'Anti-corruption'],
-      jurisdiction: 'National',
-      founded: '2012'
-    }
+    stats: [
+      { label: 'Last election', value: '43.6%' },
+      { label: 'In Delhi', value: 'Opposition' },
+      { label: 'Ideologies', value: ['Populism', 'Anti-corruption'] },
+      { label: 'Symbol', value: 'Broom' },
+      { label: 'Founders', value: ['Arvind Kejriwal'] },
+      { label: 'Delhi CMs', value: ['Arvind Kejriwal', 'Atishi'] },
+      { label: 'Jurisdiction', value: 'National' },
+      { label: 'Founded', value: '2012' }
+    ]
   },
   {
     id: 'inc',
     name: 'Indian National Congress',
     symbol: incSymbol,
     symbolLabel: 'Hand',
-    stats: {
-      lastElection: '6.3%',
-      ideologies: ['Secularism', 'Social liberalism'],
-      jurisdiction: 'National',
-      founded: '1885'
-    }
+    stats: [
+      { label: 'Last election', value: '6.3%' },
+      { label: 'In Delhi', value: 'No seats' },
+      { label: 'Ideologies', value: ['Secularism', 'Social liberalism'] },
+      { label: 'Symbol', value: 'Hand' },
+      { label: 'Founders', value: ['A. O. Hume', 'Dadabhai Naoroji'] },
+      { label: 'Delhi CMs', value: ['Sheila Dikshit'] },
+      { label: 'Jurisdiction', value: 'National' },
+      { label: 'Founded', value: '1885' }
+    ]
   }
-] as const;
+];
 
 // Build-your-own option, shown after the real parties with a plus mark.
-const CUSTOM_PARTY = {
+const CUSTOM_PARTY: { id: 'custom'; name: string; stats: readonly StatRow[] } = {
   id: 'custom',
   name: 'Custom Party',
-  stats: {
-    lastElection: '—',
-    ideologies: ['Your choice'],
-    jurisdiction: 'Delhi',
-    founded: 'Today'
-  }
-} as const;
+  stats: [
+    { label: 'Last election', value: '—' },
+    { label: 'In Delhi', value: 'Newcomer' },
+    { label: 'Ideologies', value: ['Your choice'] },
+    { label: 'Symbol', value: 'Your choice' },
+    { label: 'Founders', value: ['You'] },
+    { label: 'Delhi CMs', value: '—' },
+    { label: 'Jurisdiction', value: 'Delhi' },
+    { label: 'Founded', value: 'Today' }
+  ]
+};
 
 type PartyId = (typeof PARTIES)[number]['id'] | typeof CUSTOM_PARTY.id;
 
@@ -189,28 +214,22 @@ export default function SinglePlayer() {
             )}
             <h2 className={styles.panelName}>{detail.name}</h2>
             <dl className={styles.stats}>
-              <div className={styles.statRow}>
-                <dt>Last election</dt>
-                <dd>{detail.stats.lastElection}</dd>
-              </div>
-              <div className={styles.statRow}>
-                <dt>Ideologies</dt>
-                <dd className={styles.chips}>
-                  {detail.stats.ideologies.map((i) => (
-                    <span key={i} className={styles.chip}>
-                      {i}
-                    </span>
-                  ))}
-                </dd>
-              </div>
-              <div className={styles.statRow}>
-                <dt>Jurisdiction</dt>
-                <dd>{detail.stats.jurisdiction}</dd>
-              </div>
-              <div className={styles.statRow}>
-                <dt>Founded</dt>
-                <dd>{detail.stats.founded}</dd>
-              </div>
+              {detail.stats.map((row) => (
+                <div key={row.label} className={styles.statRow}>
+                  <dt>{row.label}</dt>
+                  {typeof row.value === 'string' ? (
+                    <dd>{row.value}</dd>
+                  ) : (
+                    <dd className={styles.chips}>
+                      {row.value.map((v) => (
+                        <span key={v} className={styles.chip}>
+                          {v}
+                        </span>
+                      ))}
+                    </dd>
+                  )}
+                </div>
+              ))}
             </dl>
           </>
         )}
