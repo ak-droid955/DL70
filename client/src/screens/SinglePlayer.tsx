@@ -10,7 +10,7 @@ type StatRow = { label: string; value: string | readonly string[] };
 
 // Each party's election symbol (square, transparent-background PNGs) and the
 // stats shown in the floating details card when the party is picked. Vote
-// share and Delhi status are from the 2025 Delhi assembly election.
+// share is from the 2025 Delhi assembly election.
 const PARTIES: readonly {
   id: 'bjp' | 'aap' | 'inc';
   name: string;
@@ -25,9 +25,7 @@ const PARTIES: readonly {
     symbolLabel: 'Lotus',
     stats: [
       { label: 'Last election', value: '45.6%' },
-      { label: 'In Delhi', value: 'Government' },
       { label: 'Ideologies', value: ['Hindu nationalism', 'Conservatism'] },
-      { label: 'Symbol', value: 'Lotus' },
       { label: 'Founders', value: ['Atal Bihari Vajpayee', 'L. K. Advani'] },
       { label: 'Delhi CMs', value: ['Madan Lal Khurana', 'Sahib Singh Verma', 'Sushma Swaraj', 'Rekha Gupta'] },
       { label: 'Jurisdiction', value: 'National' },
@@ -41,9 +39,7 @@ const PARTIES: readonly {
     symbolLabel: 'Broom',
     stats: [
       { label: 'Last election', value: '43.6%' },
-      { label: 'In Delhi', value: 'Opposition' },
       { label: 'Ideologies', value: ['Populism', 'Anti-corruption'] },
-      { label: 'Symbol', value: 'Broom' },
       { label: 'Founders', value: ['Arvind Kejriwal'] },
       { label: 'Delhi CMs', value: ['Arvind Kejriwal', 'Atishi'] },
       { label: 'Jurisdiction', value: 'National' },
@@ -57,9 +53,7 @@ const PARTIES: readonly {
     symbolLabel: 'Hand',
     stats: [
       { label: 'Last election', value: '6.3%' },
-      { label: 'In Delhi', value: 'No seats' },
       { label: 'Ideologies', value: ['Secularism', 'Social liberalism'] },
-      { label: 'Symbol', value: 'Hand' },
       { label: 'Founders', value: ['A. O. Hume', 'Dadabhai Naoroji'] },
       { label: 'Delhi CMs', value: ['Sheila Dikshit'] },
       { label: 'Jurisdiction', value: 'National' },
@@ -74,9 +68,7 @@ const CUSTOM_PARTY: { id: 'custom'; name: string; stats: readonly StatRow[] } = 
   name: 'Custom Party',
   stats: [
     { label: 'Last election', value: '—' },
-    { label: 'In Delhi', value: 'Newcomer' },
     { label: 'Ideologies', value: ['Your choice'] },
-    { label: 'Symbol', value: 'Your choice' },
     { label: 'Founders', value: ['You'] },
     { label: 'Delhi CMs', value: '—' },
     { label: 'Jurisdiction', value: 'Delhi' },
