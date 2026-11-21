@@ -89,8 +89,8 @@ export default function SinglePlayer() {
             })}
           </div>
 
-          {/* Appears once a party is picked. What it leads to is still to come. */}
-          {selected && (
+          {/* Appears once a mode is picked. What it leads to is still to come. */}
+          {mode && (
             <button type="button" className={styles.nextBtn}>
               Next →
             </button>
