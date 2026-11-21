@@ -106,6 +106,10 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+}
+
+/* Sits under the party card; same frosted card, with breathing room. */
+.modeCard {
   margin-top: 22px;
 }
 
