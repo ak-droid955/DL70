@@ -190,6 +190,7 @@ export default function SinglePlayer() {
   }, [panelOpen]);
 
   const activeMode = MODES.find((m) => m.id === mode);
+  const canProceed = mode !== null && (mode === 'historical' || selected !== null);
   const real = PARTIES.find((p) => p.id === selected);
   const detail = selected === CUSTOM_PARTY.id ? CUSTOM_PARTY : real;
 
@@ -265,8 +266,11 @@ export default function SinglePlayer() {
             </div>
           )}
 
-          {/* Appears once a mode is picked. What it leads to is still to come. */}
-          {mode && (
+          {/* Next needs a mode, and a party too unless the mode is Historical
+              Elections (which replays real parties, so none is picked).
+              What it leads to is still to come. */}
+          {mode && !canProceed && <p className={styles.nextHint}>Select your party above to continue.</p>}
+          {canProceed && (
             <button type="button" className={styles.nextBtn}>
               Next →
             </button>
