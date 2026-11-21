@@ -98,7 +98,7 @@ export default function Landing() {
         <div className={styles.heroActions}>
           <span className={styles.heroSpotJoin}>
             <button type="button" className={styles.heroJoin} onClick={goToJoin}>
-              Join a Room
+              Play Multiplayer
             </button>
           </span>
           <span className={styles.heroSpotCreate}>
