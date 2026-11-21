@@ -151,6 +151,10 @@ type ModeId = (typeof MODES)[number]['id'];
 export default function SinglePlayer() {
   const [selected, setSelected] = useState<PartyId | null>(null);
   const [mode, setMode] = useState<ModeId | null>(null);
+  // Which page of the flow is showing: the party/mode picker, or the page
+  // that follows Next for the 1 vs Many mode. Kept in this component so the
+  // picks survive going back.
+  const [page, setPage] = useState<'pick' | 'one-vs-many'>('pick');
   // The side panel opens on every party click and can be closed without
   // clearing the selection.
   const [panelOpen, setPanelOpen] = useState(false);
@@ -242,6 +246,83 @@ export default function SinglePlayer() {
   const real = PARTIES.find((p) => p.id === selected);
   const detail = selected === CUSTOM_PARTY.id ? CUSTOM_PARTY : real;
 
+  const goNext = () => {
+    if (mode === 'one-vs-many') {
+      setPanelOpen(false);
+      setPage('one-vs-many');
+    }
+  };
+
+  // 1 vs Many: your party against every other party, run by the computer.
+  if (page === 'one-vs-many' && selected) {
+    const you = real
+      ? { name: real.name, symbol: real.symbol, alt: `${real.symbolLabel} symbol`, custom: false }
+      : { name: customName, symbol: customSymbol, alt: 'Your party symbol', custom: true };
+    const rivals = PARTIES.filter((p) => p.id !== selected);
+    return (
+      <RoomShell variant="booth">
+        <div className={styles.column}>
+          <div className={`${shellStyles.card} ${styles.card}`}>
+            <p className={styles.modeInfoTagline}>1 vs Many</p>
+            <h1 className={styles.heading}>You against everyone</h1>
+
+            <div className={styles.versus}>
+              <div className={`${styles.vsSide} ${styles.vsYou}`}>
+                <p className={styles.vsLabel}>You</p>
+                <div className={styles.vsParty}>
+                  {you.symbol ? (
+                    <img
+                      className={`${styles.vsLogo} ${you.custom ? styles.customLogo : ''}`}
+                      src={you.symbol}
+                      alt={you.alt}
+                    />
+                  ) : (
+                    <span className={`${styles.plus} ${styles.vsLogo}`} aria-hidden="true">
+                      +
+                    </span>
+                  )}
+                  <span className={styles.vsName}>{you.name}</span>
+                </div>
+              </div>
+
+              <span className={styles.vsMark} aria-hidden="true">
+                vs
+              </span>
+
+              <div className={styles.vsSide}>
+                <p className={styles.vsLabel}>Computer</p>
+                {rivals.map((r) => (
+                  <div key={r.id} className={styles.vsParty}>
+                    <img className={styles.vsLogo} src={r.symbol} alt={`${r.symbolLabel} symbol`} />
+                    <span className={styles.vsName}>{r.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className={`${styles.modeInfo} ${styles.modeInfoShown} ${styles.goal}`}>
+              <h3 className={styles.modeInfoTitle}>Win 36 of 70 seats</h3>
+              <p className={styles.modeInfoText}>
+                Every other party is played by the computer. Campaign across Delhi's 70 constituencies and take a
+                majority on your own.
+              </p>
+            </div>
+
+            <div className={styles.pageActions}>
+              <button type="button" className={styles.modeBtn} onClick={() => setPage('pick')}>
+                ← Back
+              </button>
+              {/* What starting the game leads to is still to come. */}
+              <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`}>
+                Start Campaign →
+              </button>
+            </div>
+          </div>
+        </div>
+      </RoomShell>
+    );
+  }
+
   return (
     <RoomShell variant="booth">
       <div className={`${styles.column} ${panelOpen ? styles.columnShifted : ''}`}>
@@ -332,7 +413,7 @@ export default function SinglePlayer() {
               What it leads to is still to come. */}
           {mode && !canProceed && <p className={styles.nextHint}>Select your party above to continue.</p>}
           {canProceed && (
-            <button type="button" className={styles.nextBtn}>
+            <button type="button" className={styles.nextBtn} onClick={goNext}>
               Next →
             </button>
           )}
