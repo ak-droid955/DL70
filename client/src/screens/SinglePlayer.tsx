@@ -65,13 +65,6 @@ export default function SinglePlayer() {
               <span className={styles.name}>{CUSTOM_PARTY.name}</span>
             </button>
           </div>
-
-          {/* Appears once a party is picked. What it leads to is still to come. */}
-          {selected && (
-            <button type="button" className={styles.nextBtn}>
-              Next →
-            </button>
-          )}
         </div>
 
         {/* Game modes, in their own card below the party card. Single choice;
@@ -95,6 +88,13 @@ export default function SinglePlayer() {
               );
             })}
           </div>
+
+          {/* Appears once a party is picked. What it leads to is still to come. */}
+          {selected && (
+            <button type="button" className={styles.nextBtn}>
+              Next →
+            </button>
+          )}
         </div>
       </div>
     </RoomShell>
