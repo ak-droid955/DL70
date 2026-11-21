@@ -90,7 +90,7 @@ export default function SinglePlayer() {
 
   return (
     <RoomShell variant="stage">
-      <div className={styles.column}>
+      <div className={`${styles.column} ${panelOpen ? styles.columnShifted : ''}`}>
         <div className={`${shellStyles.card} ${styles.card}`}>
           <h1 className={styles.heading}>Select Your Party</h1>
           <div className={styles.grid} role="radiogroup" aria-label="Party">
@@ -156,13 +156,8 @@ export default function SinglePlayer() {
         </div>
       </div>
 
-      {/* Party details, sliding in from the right. Stays mounted so it can
-          animate out; the backdrop closes it on click. */}
-      <div
-        className={`${styles.backdrop} ${panelOpen ? styles.backdropOpen : ''}`}
-        onClick={() => setPanelOpen(false)}
-        aria-hidden="true"
-      />
+      {/* Party details: a small floating card that slides in on the right.
+          Stays mounted so it can animate out. */}
       <aside
         className={`${styles.panel} ${panelOpen ? styles.panelOpen : ''}`}
         aria-hidden={!panelOpen}
