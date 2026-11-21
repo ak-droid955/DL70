@@ -6,7 +6,7 @@ import styles from './SinglePlayer.module.css';
 
 // Each party's election symbol (square, transparent-background PNGs).
 const PARTIES = [
-  { id: 'bjp', name: 'BJP', symbol: bjpSymbol, symbolLabel: 'Lotus' },
+  { id: 'bjp', name: 'Bharatiya Janata Party', symbol: bjpSymbol, symbolLabel: 'Lotus' },
   { id: 'aap', name: 'Aam Aadmi Party', symbol: aapSymbol, symbolLabel: 'Broom' },
   { id: 'inc', name: 'Indian National Congress', symbol: incSymbol, symbolLabel: 'Hand' }
 ] as const;

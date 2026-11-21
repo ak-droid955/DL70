@@ -1,5 +1,5 @@
 .card {
-  max-width: 480px;
+  max-width: 680px;
 }
 
 .heading {
@@ -14,7 +14,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .slot {
@@ -41,7 +41,7 @@
 .name {
   font-family: var(--font-ui);
   font-weight: 700;
-  font-size: 13.5px;
+  font-size: 15px;
   line-height: 1.25;
   color: var(--ink);
   overflow-wrap: anywhere;
