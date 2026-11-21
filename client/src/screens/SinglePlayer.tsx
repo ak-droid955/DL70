@@ -306,11 +306,24 @@ export default function SinglePlayer() {
           </div>
 
           {/* Explainer for the picked mode. */}
+          {/* All three explainers share one grid cell so the box is always as
+              tall as the longest one; only the picked mode's is visible. */}
           {activeMode && (
-            <div key={activeMode.id} className={styles.modeInfo}>
-              <h3 className={styles.modeInfoTitle}>{activeMode.label}</h3>
-              <p className={styles.modeInfoTagline}>{activeMode.tagline}</p>
-              <p className={styles.modeInfoText}>{activeMode.description}</p>
+            <div className={styles.modeInfoStack}>
+              {MODES.map((m) => {
+                const shown = m.id === activeMode.id;
+                return (
+                  <div
+                    key={m.id}
+                    className={`${styles.modeInfo} ${shown ? styles.modeInfoShown : ''}`}
+                    aria-hidden={!shown}
+                  >
+                    <h3 className={styles.modeInfoTitle}>{m.label}</h3>
+                    <p className={styles.modeInfoTagline}>{m.tagline}</p>
+                    <p className={styles.modeInfoText}>{m.description}</p>
+                  </div>
+                );
+              })}
             </div>
           )}
 
