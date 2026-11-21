@@ -253,71 +253,12 @@ export default function SinglePlayer() {
     }
   };
 
-  // 1 vs Many: your party against every other party, run by the computer.
+  // 1 vs Many: an empty card for now; its contents are still to come.
   if (page === 'one-vs-many' && selected) {
-    const you = real
-      ? { name: real.name, symbol: real.symbol, alt: `${real.symbolLabel} symbol`, custom: false }
-      : { name: customName, symbol: customSymbol, alt: 'Your party symbol', custom: true };
-    const rivals = PARTIES.filter((p) => p.id !== selected);
     return (
       <RoomShell variant="booth">
         <div className={styles.column}>
-          <div className={`${shellStyles.card} ${styles.card}`}>
-            <p className={styles.modeInfoTagline}>1 vs Many</p>
-            <h1 className={styles.heading}>You against everyone</h1>
-
-            <div className={styles.versus}>
-              <div className={`${styles.vsSide} ${styles.vsYou}`}>
-                <p className={styles.vsLabel}>You</p>
-                <div className={styles.vsParty}>
-                  {you.symbol ? (
-                    <img
-                      className={`${styles.vsLogo} ${you.custom ? styles.customLogo : ''}`}
-                      src={you.symbol}
-                      alt={you.alt}
-                    />
-                  ) : (
-                    <span className={`${styles.plus} ${styles.vsLogo}`} aria-hidden="true">
-                      +
-                    </span>
-                  )}
-                  <span className={styles.vsName}>{you.name}</span>
-                </div>
-              </div>
-
-              <span className={styles.vsMark} aria-hidden="true">
-                vs
-              </span>
-
-              <div className={styles.vsSide}>
-                <p className={styles.vsLabel}>Computer</p>
-                {rivals.map((r) => (
-                  <div key={r.id} className={styles.vsParty}>
-                    <img className={styles.vsLogo} src={r.symbol} alt={`${r.symbolLabel} symbol`} />
-                    <span className={styles.vsName}>{r.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className={`${styles.modeInfo} ${styles.modeInfoShown} ${styles.goal}`}>
-              <h3 className={styles.modeInfoTitle}>Win 36 of 70 seats</h3>
-              <p className={styles.modeInfoText}>
-                Every other party is played by the computer. Campaign across Delhi's 70 constituencies and take a
-                majority on your own.
-              </p>
-            </div>
-
-            <div className={styles.pageActions}>
-              <button type="button" className={styles.modeBtn} onClick={() => setPage('pick')}>
-                ← Back
-              </button>
-              {/* What starting the game leads to is still to come. */}
-              <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`}>
-                Start Campaign →
-              </button>
-            </div>
-          </div>
+          <div className={`${shellStyles.card} ${styles.card} ${styles.emptyCard}`} />
         </div>
       </RoomShell>
     );
