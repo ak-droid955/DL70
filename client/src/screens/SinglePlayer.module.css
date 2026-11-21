@@ -7,6 +7,13 @@
   }
 }
 
+.column {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+}
+
 .card {
   max-width: 800px;
 }
@@ -95,6 +102,39 @@
   box-shadow: none;
 }
 
+.modes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.modeBtn {
+  padding: 14px 12px;
+  border-radius: 100px;
+  border: 2.5px solid var(--ink);
+  background: oklch(99% 0.006 75 / 0.9);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 15px;
+  white-space: nowrap;
+  box-shadow: 0 4px 0 var(--ink);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+.modeBtn:hover {
+  transform: translateY(-2px);
+}
+.modeBtn:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.modeBtnSelected {
+  background: var(--ink);
+  color: var(--paper);
+}
+
 /* Phones are too narrow for three one-line names side by side, so the
    parties stack as full-width rows: symbol on the left, name beside it. */
 @media (max-width: 760px) {
@@ -113,5 +153,9 @@
   .logo {
     width: 52px;
     flex: none;
+  }
+  .modes {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
