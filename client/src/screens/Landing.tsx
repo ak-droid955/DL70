@@ -42,7 +42,7 @@ const SLIDE_COUNT = 3;
 const SLIDE_MS = 6000;
 
 export default function Landing() {
-  const { state, goCreate, goToJoin } = useGame();
+  const { state, goSinglePlayer, goToJoin } = useGame();
   const [slide, setSlide] = useState(0);
   // The hero's three-stage fade is gated on the background photo being
   // decoded, so the copy doesn't animate in over a blank hero.
@@ -102,7 +102,7 @@ export default function Landing() {
             </button>
           </span>
           <span className={styles.heroSpotCreate}>
-            <button type="button" className={styles.heroCreate} onClick={goCreate}>
+            <button type="button" className={styles.heroCreate} onClick={goSinglePlayer}>
               Play Single Player
             </button>
           </span>

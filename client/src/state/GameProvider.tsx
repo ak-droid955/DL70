@@ -14,7 +14,7 @@ const LS_ROOM_CODE = 'dvs_room_code';
 const LS_TOKEN = 'dvs_token';
 const LS_SUMMARY_SEEN = 'dvs_summary_seen';
 
-export type Step = 'landing' | 'join' | 'setup' | 'in-room';
+export type Step = 'landing' | 'join' | 'setup' | 'single' | 'in-room';
 export type PendingMode = 'create' | 'join' | null;
 
 interface State {
@@ -111,6 +111,7 @@ interface Ctx {
   getRemaining: () => number;
   goCreate: () => void;
   goToJoin: () => void;
+  goSinglePlayer: () => void;
   goHome: () => void;
   goJoin: () => Promise<void>;
   joinRoomByCode: (code: string) => Promise<void>;
@@ -272,6 +273,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // The join flow is its own page (room-code entry + open-room list) before
   // the setup form, mirroring the design's lobby -> setup progression.
+  // Single-player entry: its own (currently empty) page.
+  const goSinglePlayer = () => patch({ step: 'single', error: null, pendingMode: null });
+
   const goToJoin = () =>
     patch({ step: 'join', error: null, pendingMode: null, pendingCode: null, pendingTakenColors: [] });
 
@@ -486,6 +490,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       getRemaining,
       goCreate,
       goToJoin,
+      goSinglePlayer,
       goHome,
       goJoin,
       joinRoomByCode,
