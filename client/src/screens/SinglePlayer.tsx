@@ -7,7 +7,7 @@ import styles from './SinglePlayer.module.css';
 
 // Each party's election symbol (square, transparent-background PNGs) and the
 // stats shown in the floating details card when the party is picked. Vote
-// share and seats are from the 2025 Delhi assembly election.
+// share is from the 2025 Delhi assembly election.
 const PARTIES = [
   {
     id: 'bjp',
@@ -16,7 +16,6 @@ const PARTIES = [
     symbolLabel: 'Lotus',
     stats: {
       lastElection: '45.6%',
-      seats: '48 / 70',
       ideologies: ['Hindu nationalism', 'Conservatism'],
       jurisdiction: 'National',
       founded: '1980'
@@ -29,7 +28,6 @@ const PARTIES = [
     symbolLabel: 'Broom',
     stats: {
       lastElection: '43.6%',
-      seats: '22 / 70',
       ideologies: ['Populism', 'Anti-corruption'],
       jurisdiction: 'National',
       founded: '2012'
@@ -42,7 +40,6 @@ const PARTIES = [
     symbolLabel: 'Hand',
     stats: {
       lastElection: '6.3%',
-      seats: '0 / 70',
       ideologies: ['Secularism', 'Social liberalism'],
       jurisdiction: 'National',
       founded: '1885'
@@ -56,7 +53,6 @@ const CUSTOM_PARTY = {
   name: 'Custom Party',
   stats: {
     lastElection: '—',
-    seats: '0 / 70',
     ideologies: ['Your choice'],
     jurisdiction: 'Delhi',
     founded: 'Today'
@@ -196,10 +192,6 @@ export default function SinglePlayer() {
               <div className={styles.statRow}>
                 <dt>Last election</dt>
                 <dd>{detail.stats.lastElection}</dd>
-              </div>
-              <div className={styles.statRow}>
-                <dt>Seats won</dt>
-                <dd>{detail.stats.seats}</dd>
               </div>
               <div className={styles.statRow}>
                 <dt>Ideologies</dt>
