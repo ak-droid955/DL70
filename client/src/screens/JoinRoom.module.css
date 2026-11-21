@@ -50,6 +50,19 @@
   border-color: var(--ink);
 }
 
+.createBtn {
+  flex: 1;
+  padding: 13px 10px;
+  border-radius: 12px;
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  color: var(--card-paper);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
 .joinBtn {
   flex: 1;
   padding: 13px 10px;

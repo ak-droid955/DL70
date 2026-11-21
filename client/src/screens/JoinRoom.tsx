@@ -6,7 +6,7 @@ import styles from './JoinRoom.module.css';
 const MAX_PLAYERS = 5;
 
 export default function JoinRoom() {
-  const { state, goJoin, onJoinCodeChange, joinRoomByCode } = useGame();
+  const { state, goCreate, goJoin, onJoinCodeChange, joinRoomByCode } = useGame();
   const openRooms = useOpenRooms();
 
   return (
@@ -22,6 +22,9 @@ export default function JoinRoom() {
         </p>
 
         <div className={styles.joinRow}>
+          <button type="button" className={styles.createBtn} onClick={goCreate}>
+            Create Room
+          </button>
           <input
             className={styles.codeInput}
             value={state.joinCodeInput}
