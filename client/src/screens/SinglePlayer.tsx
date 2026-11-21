@@ -127,14 +127,14 @@ const MODES = [
     label: '1 vs Many',
     tagline: 'You against everyone',
     description:
-      'Your party takes on every other party at once, each one played by the computer. Win a majority of 36 seats on your own.'
+      'Take on every other party at once, each played by the computer. Win 36 seats on your own.'
   },
   {
     id: 'alliance',
     label: 'Alliance Mode',
     tagline: 'Pick your partners',
     description:
-      'Team up with other parties before the vote. Seats won by the whole alliance count together towards the 36-seat majority.'
+      "Team up with other parties before the vote. The alliance's seats count together towards 36."
   },
   {
     id: 'historical',
