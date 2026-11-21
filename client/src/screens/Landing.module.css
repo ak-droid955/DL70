@@ -174,17 +174,17 @@
 }
 
 .heroJoin {
-  border: 2px solid var(--ink);
-  background: oklch(97% 0.01 75 / 0.9);
-  box-shadow: 0 4px 0 oklch(18% 0.02 40 / 0.15);
+  border: none;
+  /* Slightly see-through, like the Create button beside it, so the plaza
+     reads through both. Same value as --saffron with alpha. */
+  background: oklch(68% 0.19 48 / 0.85);
+  box-shadow: 0 4px 0 var(--saffron-deep);
 }
 
 .heroCreate {
-  border: none;
-  /* Slightly see-through, like the Join button beside it, so the plaza reads
-     through both. Same value as --saffron with alpha. */
-  background: oklch(68% 0.19 48 / 0.85);
-  box-shadow: 0 4px 0 var(--saffron-deep);
+  border: 2px solid var(--ink);
+  background: oklch(97% 0.01 75 / 0.9);
+  box-shadow: 0 4px 0 oklch(18% 0.02 40 / 0.15);
 }
 
 .heroJoin:hover,
