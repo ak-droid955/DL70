@@ -5,41 +5,48 @@ import incSymbol from '../assets/parties/inc.png';
 import RoomShell, { shellStyles } from './RoomShell';
 import styles from './SinglePlayer.module.css';
 
-// Each party's election symbol (square, transparent-background PNGs) and a
-// short history shown in the side panel when the party is picked.
+// Each party's election symbol (square, transparent-background PNGs) and the
+// stats shown in the floating details card when the party is picked. Vote
+// share and seats are from the 2025 Delhi assembly election.
 const PARTIES = [
   {
     id: 'bjp',
     name: 'Bharatiya Janata Party',
     symbol: bjpSymbol,
     symbolLabel: 'Lotus',
-    history: [
-      'Founded on 6 April 1980 as the successor to the Bharatiya Jana Sangh (1951), with Atal Bihari Vajpayee as its first president.',
-      'It led national governments under Vajpayee from 1998 to 2004, and under Narendra Modi from 2014.',
-      'In Delhi it won the first assembly election in 1993, then spent 27 years in opposition before winning 48 of 70 seats in 2025.'
-    ]
+    stats: {
+      lastElection: '45.6%',
+      seats: '48 / 70',
+      ideologies: ['Hindu nationalism', 'Conservatism'],
+      jurisdiction: 'National',
+      founded: '1980'
+    }
   },
   {
     id: 'aap',
     name: 'Aam Aadmi Party',
     symbol: aapSymbol,
     symbolLabel: 'Broom',
-    history: [
-      'Founded on 26 November 2012 by Arvind Kejriwal and fellow activists from the India Against Corruption movement.',
-      'It formed a short-lived government in Delhi after the 2013 election, then swept the assembly with 67 of 70 seats in 2015 and 62 in 2020.',
-      'It also won Punjab in 2022 and became a recognised national party in 2023, before losing Delhi in 2025 with 22 seats.'
-    ]
+    stats: {
+      lastElection: '43.6%',
+      seats: '22 / 70',
+      ideologies: ['Populism', 'Anti-corruption'],
+      jurisdiction: 'National',
+      founded: '2012'
+    }
   },
   {
     id: 'inc',
     name: 'Indian National Congress',
     symbol: incSymbol,
     symbolLabel: 'Hand',
-    history: [
-      'Founded in 1885 in Bombay, it led the independence movement and governed India for most of the decades after 1947.',
-      'In Delhi, Sheila Dikshit led it to three straight wins and served as Chief Minister from 1998 to 2013.',
-      'It has not won a seat in the Delhi assembly in the 2015, 2020 or 2025 elections.'
-    ]
+    stats: {
+      lastElection: '6.3%',
+      seats: '0 / 70',
+      ideologies: ['Secularism', 'Social liberalism'],
+      jurisdiction: 'National',
+      founded: '1885'
+    }
   }
 ] as const;
 
@@ -47,10 +54,13 @@ const PARTIES = [
 const CUSTOM_PARTY = {
   id: 'custom',
   name: 'Custom Party',
-  history: [
-    'Start a party of your own: no legacy, no baggage, no vote bank yet.',
-    'You choose the name, symbol and colour, and build support seat by seat.'
-  ]
+  stats: {
+    lastElection: '—',
+    seats: '0 / 70',
+    ideologies: ['Your choice'],
+    jurisdiction: 'Delhi',
+    founded: 'Today'
+  }
 } as const;
 
 type PartyId = (typeof PARTIES)[number]['id'] | typeof CUSTOM_PARTY.id;
@@ -182,11 +192,34 @@ export default function SinglePlayer() {
               </span>
             )}
             <h2 className={styles.panelName}>{detail.name}</h2>
-            <div className={styles.panelHistory}>
-              {detail.history.map((para) => (
-                <p key={para}>{para}</p>
-              ))}
-            </div>
+            <dl className={styles.stats}>
+              <div className={styles.statRow}>
+                <dt>Last election</dt>
+                <dd>{detail.stats.lastElection}</dd>
+              </div>
+              <div className={styles.statRow}>
+                <dt>Seats won</dt>
+                <dd>{detail.stats.seats}</dd>
+              </div>
+              <div className={styles.statRow}>
+                <dt>Ideologies</dt>
+                <dd className={styles.chips}>
+                  {detail.stats.ideologies.map((i) => (
+                    <span key={i} className={styles.chip}>
+                      {i}
+                    </span>
+                  ))}
+                </dd>
+              </div>
+              <div className={styles.statRow}>
+                <dt>Jurisdiction</dt>
+                <dd>{detail.stats.jurisdiction}</dd>
+              </div>
+              <div className={styles.statRow}>
+                <dt>Founded</dt>
+                <dd>{detail.stats.founded}</dd>
+              </div>
+            </dl>
           </>
         )}
       </aside>
