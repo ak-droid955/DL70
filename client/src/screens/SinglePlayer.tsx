@@ -12,7 +12,10 @@ const PARTIES = [
   { id: 'inc', name: 'Indian National Congress', symbol: incSymbol, symbolLabel: 'Hand' }
 ] as const;
 
-type PartyId = (typeof PARTIES)[number]['id'];
+// Build-your-own option, shown after the real parties with a plus mark.
+const CUSTOM_PARTY = { id: 'custom', name: 'Custom Party' } as const;
+
+type PartyId = (typeof PARTIES)[number]['id'] | typeof CUSTOM_PARTY.id;
 
 const MODES = [
   { id: 'one-vs-many', label: '1 vs Many' },
@@ -49,6 +52,18 @@ export default function SinglePlayer() {
                 </button>
               );
             })}
+            <button
+              type="button"
+              role="radio"
+              aria-checked={selected === CUSTOM_PARTY.id}
+              className={`${styles.slot} ${selected === CUSTOM_PARTY.id ? styles.slotSelected : ''}`}
+              onClick={() => setSelected(CUSTOM_PARTY.id)}
+            >
+              <span className={styles.plus} aria-hidden="true">
+                +
+              </span>
+              <span className={styles.name}>{CUSTOM_PARTY.name}</span>
+            </button>
           </div>
 
           {/* Appears once a party is picked. What it leads to is still to come. */}
