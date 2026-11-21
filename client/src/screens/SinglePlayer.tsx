@@ -113,6 +113,28 @@ export default function SinglePlayer() {
   // The side panel opens on every party click and can be closed without
   // clearing the selection.
   const [panelOpen, setPanelOpen] = useState(false);
+  // Symbol the player uploads for their Custom Party, centre-cropped to a
+  // square PNG data URL. Local to this page for now.
+  const [customSymbol, setCustomSymbol] = useState<string | null>(null);
+
+  const onCustomSymbolFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const side = Math.min(img.width, img.height);
+        const canvas = document.createElement('canvas');
+        canvas.width = 192;
+        canvas.height = 192;
+        canvas
+          .getContext('2d')
+          ?.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 192, 192);
+        setCustomSymbol(canvas.toDataURL('image/png'));
+      };
+      img.src = ev.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
 
   const pick = (id: PartyId) => {
     setSelected(id);
@@ -175,9 +197,13 @@ export default function SinglePlayer() {
               className={`${styles.slot} ${selected === CUSTOM_PARTY.id ? styles.slotSelected : ''}`}
               onClick={() => pick(CUSTOM_PARTY.id)}
             >
-              <span className={styles.plus} aria-hidden="true">
-                +
-              </span>
+              {customSymbol ? (
+                <img className={`${styles.logo} ${styles.customLogo}`} src={customSymbol} alt="Your party symbol" />
+              ) : (
+                <span className={styles.plus} aria-hidden="true">
+                  +
+                </span>
+              )}
               <span className={styles.name}>{CUSTOM_PARTY.name}</span>
             </button>
           </div>
@@ -245,9 +271,33 @@ export default function SinglePlayer() {
             {real ? (
               <img className={styles.panelLogo} src={real.symbol} alt={`${real.symbolLabel} symbol`} />
             ) : (
-              <span className={`${styles.plus} ${styles.panelPlus}`} aria-hidden="true">
-                +
-              </span>
+              // Custom Party: the plus (or the uploaded symbol) opens the
+              // file picker / photo gallery.
+              <label className={styles.uploadSymbol}>
+                {customSymbol ? (
+                  <img
+                    className={`${styles.panelLogo} ${styles.customLogo}`}
+                    src={customSymbol}
+                    alt="Your party symbol"
+                  />
+                ) : (
+                  <span className={`${styles.plus} ${styles.panelPlus}`} aria-hidden="true">
+                    +
+                  </span>
+                )}
+                <span className={styles.uploadHint}>{customSymbol ? 'Change symbol' : 'Upload symbol'}</span>
+                <input
+                  className={styles.fileInput}
+                  type="file"
+                  accept="image/*"
+                  tabIndex={panelOpen ? 0 : -1}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) onCustomSymbolFile(file);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
             )}
             <h2 className={styles.panelName}>{detail.name}</h2>
             <dl className={styles.stats}>
