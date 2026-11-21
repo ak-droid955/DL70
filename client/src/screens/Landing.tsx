@@ -103,7 +103,7 @@ export default function Landing() {
           </span>
           <span className={styles.heroSpotCreate}>
             <button type="button" className={styles.heroCreate} onClick={goCreate}>
-              Play
+              Play Single Player
             </button>
           </span>
         </div>
