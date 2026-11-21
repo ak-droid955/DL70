@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import aapSymbol from '../assets/parties/aap.png';
 import bjpSymbol from '../assets/parties/bjp.png';
 import incSymbol from '../assets/parties/inc.png';
@@ -99,13 +99,27 @@ export default function SinglePlayer() {
     setPanelOpen(true);
   };
 
+  // The details card is only up while a party is being looked at: it closes
+  // on Escape or on any click outside both the card and the party tiles
+  // (clicking another tile just switches it).
+  const panelRef = useRef<HTMLElement>(null);
+  const partyGridRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!panelOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setPanelOpen(false);
     };
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as Node;
+      if (panelRef.current?.contains(target) || partyGridRef.current?.contains(target)) return;
+      setPanelOpen(false);
+    };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener('pointerdown', onPointerDown);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointerdown', onPointerDown);
+    };
   }, [panelOpen]);
 
   const real = PARTIES.find((p) => p.id === selected);
@@ -116,7 +130,7 @@ export default function SinglePlayer() {
       <div className={`${styles.column} ${panelOpen ? styles.columnShifted : ''}`}>
         <div className={`${shellStyles.card} ${styles.card}`}>
           <h1 className={styles.heading}>Select Your Party</h1>
-          <div className={styles.grid} role="radiogroup" aria-label="Party">
+          <div ref={partyGridRef} className={styles.grid} role="radiogroup" aria-label="Party">
             {PARTIES.map((party) => {
               const isSelected = selected === party.id;
               return (
@@ -182,6 +196,7 @@ export default function SinglePlayer() {
       {/* Party details: a small floating card that slides in on the right.
           Stays mounted so it can animate out. */}
       <aside
+        ref={panelRef}
         className={`${styles.panel} ${panelOpen ? styles.panelOpen : ''}`}
         aria-hidden={!panelOpen}
         aria-label={detail ? `${detail.name} details` : undefined}
