@@ -243,7 +243,7 @@ export default function SinglePlayer() {
   const detail = selected === CUSTOM_PARTY.id ? CUSTOM_PARTY : real;
 
   return (
-    <RoomShell variant="stage">
+    <RoomShell variant="booth">
       <div className={`${styles.column} ${panelOpen ? styles.columnShifted : ''}`}>
         <div className={`${shellStyles.card} ${styles.card}`}>
           <h1 className={styles.heading}>Select Your Party</h1>

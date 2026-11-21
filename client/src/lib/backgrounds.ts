@@ -2,6 +2,8 @@ import rallyStageAvif from '../assets/bg-rally-stage.avif';
 import rallyStageWebp from '../assets/bg-rally-stage.webp';
 import rallyTruckAvif from '../assets/bg-rally-truck-join.avif';
 import rallyTruckWebp from '../assets/bg-rally-truck-join.webp';
+import pollingBoothAvif from '../assets/bg-polling-booth.avif';
+import pollingBoothWebp from '../assets/bg-polling-booth.webp';
 import heroAvif from '../assets/hero-building.avif';
 import heroWebp from '../assets/hero-building.webp';
 
@@ -20,12 +22,13 @@ const pick = (avif: string, webp: string) => (supportsAvif ? avif : webp);
 export const heroBg = pick(heroAvif, heroWebp);
 export const rallyStageBg = pick(rallyStageAvif, rallyStageWebp);
 export const rallyTruckBg = pick(rallyTruckAvif, rallyTruckWebp);
+export const pollingBoothBg = pick(pollingBoothAvif, pollingBoothWebp);
 
 /** Fetch and decode the room backdrops in idle time, so Join/Create show
  *  their photo immediately instead of popping it in after navigation. */
 export function warmRoomBackgrounds() {
   const run = () => {
-    [rallyStageBg, rallyTruckBg].forEach((src) => {
+    [rallyStageBg, rallyTruckBg, pollingBoothBg].forEach((src) => {
       const img = new Image();
       img.decoding = 'async';
       img.src = src;
