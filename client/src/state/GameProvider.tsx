@@ -14,7 +14,7 @@ const LS_ROOM_CODE = 'dvs_room_code';
 const LS_TOKEN = 'dvs_token';
 const LS_SUMMARY_SEEN = 'dvs_summary_seen';
 
-export type Step = 'landing' | 'join' | 'setup' | 'in-room';
+export type Step = 'landing' | 'join' | 'setup' | 'single' | 'in-room';
 export type PendingMode = 'create' | 'join' | null;
 
 interface State {
@@ -34,6 +34,9 @@ interface State {
   // Party colours already taken in the room being joined, as of the last
   // room:peek. Refreshed live from the open-rooms poll on the setup screen.
   pendingTakenColors: string[];
+  // True when the create-room setup was opened from the Play Multiplayer
+  // (join) screen, so Back returns there instead of to the landing page.
+  createFromJoin: boolean;
   error: string | null;
   room: Room | null;
   myPlayerId: string | null;
@@ -68,6 +71,7 @@ const initialState: State = {
   pendingMode: null,
   pendingCode: null,
   pendingTakenColors: [],
+  createFromJoin: false,
   error: null,
   room: null,
   myPlayerId: null,
@@ -107,6 +111,7 @@ interface Ctx {
   getRemaining: () => number;
   goCreate: () => void;
   goToJoin: () => void;
+  goSinglePlayer: () => void;
   goHome: () => void;
   goJoin: () => Promise<void>;
   joinRoomByCode: (code: string) => Promise<void>;
@@ -257,18 +262,32 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return me.budgetThisTurn - sSum;
   }, [getMe]);
 
-  const goCreate = () => patch({ step: 'setup', pendingMode: 'create', pendingTakenColors: [], error: null });
+  const goCreate = () =>
+    patch({
+      step: 'setup',
+      pendingMode: 'create',
+      pendingTakenColors: [],
+      createFromJoin: stateRef.current.step === 'join',
+      error: null
+    });
 
   // The join flow is its own page (room-code entry + open-room list) before
   // the setup form, mirroring the design's lobby -> setup progression.
+  // Single-player entry: its own (currently empty) page.
+  const goSinglePlayer = () => patch({ step: 'single', error: null, pendingMode: null });
+
   const goToJoin = () =>
     patch({ step: 'join', error: null, pendingMode: null, pendingCode: null, pendingTakenColors: [] });
 
   // "Back" out of the join/setup pages to the landing page. From the setup
-  // form of a join we step back to the room list rather than all the way home.
+  // form of a join, or of a create opened from the join screen, we step back
+  // to the room list rather than all the way home.
   const goHome = () => {
-    const backToRoomList = stateRef.current.step === 'setup' && stateRef.current.pendingMode === 'join';
+    const s = stateRef.current;
+    const backToRoomList =
+      s.step === 'setup' && (s.pendingMode === 'join' || (s.pendingMode === 'create' && s.createFromJoin));
     patch({
+      createFromJoin: false,
       step: backToRoomList ? 'join' : 'landing',
       error: null,
       pendingMode: null,
@@ -471,6 +490,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       getRemaining,
       goCreate,
       goToJoin,
+      goSinglePlayer,
       goHome,
       goJoin,
       joinRoomByCode,
