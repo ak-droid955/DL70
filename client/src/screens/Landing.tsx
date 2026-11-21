@@ -103,7 +103,7 @@ export default function Landing() {
           </span>
           <span className={styles.heroSpotCreate}>
             <button type="button" className={styles.heroCreate} onClick={goCreate}>
-              Create a Room
+              Play
             </button>
           </span>
         </div>
