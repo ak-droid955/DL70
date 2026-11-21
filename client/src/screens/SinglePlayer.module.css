@@ -402,6 +402,17 @@
   outline: none;
 }
 
+.nameInputError {
+  border-color: var(--error-ink);
+}
+.nameError {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--error-ink);
+}
+
 .stats {
   width: 100%;
   margin: 0;

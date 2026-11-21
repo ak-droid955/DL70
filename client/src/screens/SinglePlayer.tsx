@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import aapSymbol from '../assets/parties/aap.png';
 import bjpSymbol from '../assets/parties/bjp.png';
 import incSymbol from '../assets/parties/inc.png';
+import { PROFANITY_MESSAGE, hasProfanity } from '../lib/profanity';
 import RoomShell, { shellStyles } from './RoomShell';
 import styles from './SinglePlayer.module.css';
 
@@ -125,10 +126,20 @@ export default function SinglePlayer() {
     setNameDraft(customName);
     setEditingName(true);
   };
+  // Live check against the shared English + Hinglish profanity list.
+  const nameBlocked = hasProfanity(nameDraft);
+  // Enter: only saves a clean, non-blank name; an abusive one stays in the
+  // field with the error showing.
   const saveName = () => {
+    if (nameBlocked) return;
     const trimmed = nameDraft.trim();
     if (trimmed) setCustomName(trimmed);
     setEditingName(false);
+  };
+  // Clicking away: keep a clean name, otherwise drop the edit.
+  const finishEditingName = () => {
+    if (!nameBlocked) saveName();
+    else setEditingName(false);
   };
 
   const onCustomSymbolFile = (file: File) => {
@@ -324,10 +335,9 @@ export default function SinglePlayer() {
                 }}
               >
                 <input
-                  className={styles.nameInput}
                   value={nameDraft}
                   onChange={(e) => setNameDraft(e.target.value)}
-                  onBlur={saveName}
+                  onBlur={finishEditingName}
                   onKeyDown={(e) => {
                     // Escape cancels the edit rather than closing the card.
                     if (e.key === 'Escape') {
@@ -338,8 +348,16 @@ export default function SinglePlayer() {
                   }}
                   maxLength={40}
                   aria-label="Party name"
+                  aria-invalid={nameBlocked}
+                  aria-describedby={nameBlocked ? 'custom-name-error' : undefined}
+                  className={`${styles.nameInput} ${nameBlocked ? styles.nameInputError : ''}`}
                   autoFocus
                 />
+                {nameBlocked && (
+                  <p id="custom-name-error" className={styles.nameError} role="alert">
+                    {PROFANITY_MESSAGE}
+                  </p>
+                )}
               </form>
             ) : (
               <div className={styles.nameRow}>
