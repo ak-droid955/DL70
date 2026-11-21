@@ -16,6 +16,10 @@
 }
 
 /* Logo lockup (assets/dl70-logo-combined.png). */
+/* In the transparent room header the black-ink logo is recoloured white. */
+.header .logo {
+  filter: brightness(0) invert(1) drop-shadow(0 1px 4px oklch(18% 0.02 40 / 0.6));
+}
 .logo {
   width: auto;
   object-fit: contain;
@@ -48,11 +52,13 @@
   color: #000;
 }
 
-/* Header shared by the create-room and join-room pages: back link + wordmark. */
+/* Header shared by the create-room, join-room, lobby and single-player pages:
+   back link + wordmark. Transparent, sitting on the darker top of the page
+   photo, so its text and logo are white with a soft shadow for contrast. */
 .header {
   position: relative;
   z-index: 1;
-  background: var(--paper);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -72,20 +78,20 @@
   font-family: var(--font-ui);
   font-weight: 700;
   font-size: 18px;
-  color: oklch(30% 0.02 40);
+  color: #fff;
+  text-shadow: 0 1px 6px oklch(18% 0.02 40 / 0.6);
 }
 .backLink:hover {
-  color: var(--brick);
+  color: var(--saffron);
 }
 
 /* Same shape as the back link, in the warning colour: this one gives up the
    player's seat in the room rather than just navigating. */
 .exitLink {
   composes: backLink;
-  color: var(--brick);
 }
 .exitLink:hover {
-  color: var(--error-ink);
+  color: oklch(78% 0.14 30);
 }
 
 .backArrow {

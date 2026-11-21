@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { ArchFrieze, PageHeader } from '../components/Brand';
-import { rallyStageBg, rallyTruckBg } from '../lib/backgrounds';
+import { pollingBoothBg, rallyStageBg, rallyTruckBg } from '../lib/backgrounds';
 import { useGame } from '../state/GameProvider';
 import styles from './RoomShell.module.css';
 
@@ -13,13 +13,13 @@ export default function RoomShell({
   onExit,
   children
 }: {
-  variant: 'stage' | 'join';
+  variant: 'stage' | 'join' | 'booth';
   showBack?: boolean;
   onExit?: () => void;
   children: ReactNode;
 }) {
   const { goHome } = useGame();
-  const photo = variant === 'stage' ? rallyStageBg : rallyTruckBg;
+  const photo = variant === 'stage' ? rallyStageBg : variant === 'booth' ? pollingBoothBg : rallyTruckBg;
   return (
     <div className={styles.shell}>
       <div className={styles.backdrop} style={{ '--shell-photo': `url(${photo})` } as CSSProperties} />

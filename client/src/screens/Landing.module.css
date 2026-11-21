@@ -119,8 +119,9 @@
 .heroSpotCreate {
   left: 71.5%;
   top: 80%;
-  /* 11px further right than the shared nudge, clearing the planter edge. */
-  transform: translate(calc(-50% + 14px), -50%);
+  /* Was 11px right of the shared nudge to clear the planter edge; now moved
+     60px left of that. */
+  transform: translate(calc(-50% - 46px), -50%);
 }
 
 /* The percentages above place the spots against the hero BOX; the photo,
@@ -156,7 +157,7 @@
     }
 
     .heroSpotCreate {
-      left: calc(50% + var(--art-w) * 0.22091);
+      left: calc(50% + var(--art-w) * 0.22091 - 60px);
     }
   }
 }
@@ -174,17 +175,17 @@
 }
 
 .heroJoin {
-  border: 2px solid var(--ink);
-  background: oklch(97% 0.01 75 / 0.9);
-  box-shadow: 0 4px 0 oklch(18% 0.02 40 / 0.15);
+  border: none;
+  /* Slightly see-through, like the Create button beside it, so the plaza
+     reads through both. Same value as --saffron with alpha. */
+  background: oklch(68% 0.19 48 / 0.85);
+  box-shadow: 0 4px 0 var(--saffron-deep);
 }
 
 .heroCreate {
-  border: none;
-  /* Slightly see-through, like the Join button beside it, so the plaza reads
-     through both. Same value as --saffron with alpha. */
-  background: oklch(68% 0.19 48 / 0.85);
-  box-shadow: 0 4px 0 var(--saffron-deep);
+  border: 2px solid var(--ink);
+  background: oklch(97% 0.01 75 / 0.9);
+  box-shadow: 0 4px 0 oklch(18% 0.02 40 / 0.15);
 }
 
 .heroJoin:hover,
