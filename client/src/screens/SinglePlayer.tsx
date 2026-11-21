@@ -78,10 +78,30 @@ const CUSTOM_PARTY: { id: 'custom'; name: string; stats: readonly StatRow[] } = 
 
 type PartyId = (typeof PARTIES)[number]['id'] | typeof CUSTOM_PARTY.id;
 
+// Each mode's explainer, shown under the mode buttons once one is picked.
+// A Delhi majority is 36 of the 70 seats.
 const MODES = [
-  { id: 'one-vs-many', label: '1 vs Many' },
-  { id: 'alliance', label: 'Alliance Mode' },
-  { id: 'historical', label: 'Historical Elections' }
+  {
+    id: 'one-vs-many',
+    label: '1 vs Many',
+    tagline: 'You against everyone',
+    description:
+      'Your party takes on every other party at once, each one played by the computer. Win a majority of 36 seats on your own.'
+  },
+  {
+    id: 'alliance',
+    label: 'Alliance Mode',
+    tagline: 'Pick your partners',
+    description:
+      'Team up with other parties before the vote. Seats won by the whole alliance count together towards the 36-seat majority.'
+  },
+  {
+    id: 'historical',
+    label: 'Historical Elections',
+    tagline: "Replay Delhi's past",
+    description:
+      'Start from the real results of a past Delhi assembly election and see if you can change how it turned out.'
+  }
 ] as const;
 
 type ModeId = (typeof MODES)[number]['id'];
@@ -122,6 +142,7 @@ export default function SinglePlayer() {
     };
   }, [panelOpen]);
 
+  const activeMode = MODES.find((m) => m.id === mode);
   const real = PARTIES.find((p) => p.id === selected);
   const detail = selected === CUSTOM_PARTY.id ? CUSTOM_PARTY : real;
 
@@ -183,6 +204,15 @@ export default function SinglePlayer() {
               );
             })}
           </div>
+
+          {/* Explainer for the picked mode. */}
+          {activeMode && (
+            <div key={activeMode.id} className={styles.modeInfo}>
+              <h3 className={styles.modeInfoTitle}>{activeMode.label}</h3>
+              <p className={styles.modeInfoTagline}>{activeMode.tagline}</p>
+              <p className={styles.modeInfoText}>{activeMode.description}</p>
+            </div>
+          )}
 
           {/* Appears once a mode is picked. What it leads to is still to come. */}
           {mode && (
