@@ -116,6 +116,20 @@ export default function SinglePlayer() {
   // Symbol the player uploads for their Custom Party, centre-cropped to a
   // square PNG data URL. Local to this page for now.
   const [customSymbol, setCustomSymbol] = useState<string | null>(null);
+  // Name for the Custom Party, editable from its details card via the pen.
+  const [customName, setCustomName] = useState<string>(CUSTOM_PARTY.name);
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+
+  const startEditingName = () => {
+    setNameDraft(customName);
+    setEditingName(true);
+  };
+  const saveName = () => {
+    const trimmed = nameDraft.trim();
+    if (trimmed) setCustomName(trimmed);
+    setEditingName(false);
+  };
 
   const onCustomSymbolFile = (file: File) => {
     const reader = new FileReader();
@@ -204,7 +218,7 @@ export default function SinglePlayer() {
                   +
                 </span>
               )}
-              <span className={styles.name}>{CUSTOM_PARTY.name}</span>
+              <span className={styles.name}>{customName}</span>
             </button>
           </div>
         </div>
@@ -299,7 +313,57 @@ export default function SinglePlayer() {
                 />
               </label>
             )}
-            <h2 className={styles.panelName}>{detail.name}</h2>
+            {selected !== CUSTOM_PARTY.id ? (
+              <h2 className={styles.panelName}>{detail.name}</h2>
+            ) : editingName ? (
+              <form
+                className={styles.nameEdit}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  saveName();
+                }}
+              >
+                <input
+                  className={styles.nameInput}
+                  value={nameDraft}
+                  onChange={(e) => setNameDraft(e.target.value)}
+                  onBlur={saveName}
+                  onKeyDown={(e) => {
+                    // Escape cancels the edit rather than closing the card.
+                    if (e.key === 'Escape') {
+                      e.stopPropagation();
+                      e.nativeEvent.stopImmediatePropagation();
+                      setEditingName(false);
+                    }
+                  }}
+                  maxLength={40}
+                  aria-label="Party name"
+                  autoFocus
+                />
+              </form>
+            ) : (
+              <div className={styles.nameRow}>
+                <h2 className={styles.panelName}>{customName}</h2>
+                <button
+                  type="button"
+                  className={styles.penBtn}
+                  onClick={startEditingName}
+                  aria-label="Edit party name"
+                  tabIndex={panelOpen ? 0 : -1}
+                >
+                  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                    <path
+                      d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+            )}
             <dl className={styles.stats}>
               {detail.stats.map((row) => (
                 <div key={row.label} className={styles.statRow}>

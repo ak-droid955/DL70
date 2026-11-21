@@ -52,7 +52,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 10px;
+  padding: 10px 6px;
   border-radius: 12px;
   border: 2px solid var(--paper-border);
   background: var(--card-paper);
@@ -101,6 +101,10 @@
   line-height: 1.25;
   color: var(--ink);
   white-space: nowrap;
+  /* A long Custom Party name is cut off rather than spilling out. */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .modeInfo {
@@ -349,6 +353,53 @@
   color: var(--ink);
   margin: 12px 0 10px;
   letter-spacing: -0.3px;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 12px 0 10px;
+  max-width: 100%;
+}
+.nameRow .panelName {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.penBtn {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--card-paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+.penBtn:hover {
+  background: oklch(95% 0.012 75);
+}
+.nameEdit {
+  width: 100%;
+  margin: 12px 0 10px;
+}
+.nameInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 2px solid var(--ink);
+  background: var(--card-paper);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  text-align: center;
+  color: var(--ink);
+  outline: none;
 }
 
 .stats {
