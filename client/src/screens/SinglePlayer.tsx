@@ -482,6 +482,16 @@ export default function SinglePlayer() {
                               </div>
                             </div>
                           ))}
+                          {/* Confirms the picks and folds the list away. */}
+                          {customIdeologies.length > 0 && (
+                            <button
+                              type="button"
+                              className={styles.ideologyOk}
+                              onClick={() => setIdeologyPickerOpen(false)}
+                            >
+                              OK
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>

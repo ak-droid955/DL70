@@ -526,6 +526,27 @@
   cursor: not-allowed;
 }
 
+.ideologyOk {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px;
+  border-radius: 100px;
+  border: none;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 3px 0 var(--ink-deep);
+  cursor: pointer;
+  animation: nextIn 0.2s ease both;
+}
+.ideologyOk:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
 .chip {
   padding: 3px 8px;
   border-radius: 100px;
