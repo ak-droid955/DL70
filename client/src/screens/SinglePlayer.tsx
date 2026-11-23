@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import aapSymbol from '../assets/parties/aap.png';
 import bjpSymbol from '../assets/parties/bjp.png';
 import incSymbol from '../assets/parties/inc.png';
+import sadSymbol from '../assets/parties/sad.png';
+import cpimSymbol from '../assets/parties/cpim.png';
+import bspSymbol from '../assets/parties/bsp.png';
 import arvindKejriwal from '../assets/candidates/aap/arvind-kejriwal.webp';
 import atishi from '../assets/candidates/aap/atishi.webp';
 import manishSisodia from '../assets/candidates/aap/manish-sisodia.webp';
@@ -84,6 +87,8 @@ const PARTIES: readonly {
   {
     id: 'sad',
     name: 'Shiromani Akali Dal',
+    symbol: sadSymbol,
+    symbolLabel: 'Scales',
     row: 1,
     stats: [
       { label: 'Last election', value: '—' },
@@ -97,6 +102,8 @@ const PARTIES: readonly {
   {
     id: 'cpim',
     name: 'Communist Party of India (Marxist)',
+    symbol: cpimSymbol,
+    symbolLabel: 'Hammer, sickle and star',
     row: 2,
     stats: [
       { label: 'Last election', value: '—' },
@@ -110,6 +117,8 @@ const PARTIES: readonly {
   {
     id: 'bsp',
     name: 'Bahujan Samaj Party',
+    symbol: bspSymbol,
+    symbolLabel: 'Elephant',
     row: 2,
     stats: [
       { label: 'Last election', value: '—' },

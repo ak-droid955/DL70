@@ -1,6 +1,8 @@
 import aapSymbol from '../assets/parties/aap.png';
 import bjpSymbol from '../assets/parties/bjp.png';
 import incSymbol from '../assets/parties/inc.png';
+import sadSymbol from '../assets/parties/sad.png';
+import bspSymbol from '../assets/parties/bsp.png';
 import { ELECTION_YEARS, HISTORY } from '../lib/electionHistory';
 import styles from './SeatStats.module.css';
 
@@ -19,7 +21,9 @@ const colorOf = (party: string) => PARTY_COLORS[party] ?? OTHER_COLOR;
 const PARTY_SYMBOLS: Record<string, { src: string; alt: string }> = {
   BJP: { src: bjpSymbol, alt: 'Lotus' },
   AAP: { src: aapSymbol, alt: 'Broom' },
-  INC: { src: incSymbol, alt: 'Hand' }
+  INC: { src: incSymbol, alt: 'Hand' },
+  BSP: { src: bspSymbol, alt: 'Elephant' },
+  SAD: { src: sadSymbol, alt: 'Scales' }
 };
 
 /** For a run of consecutive rows sharing the same key, returns the run's
