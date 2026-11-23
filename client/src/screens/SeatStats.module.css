@@ -43,6 +43,13 @@
   width: 10px;
   padding: 0 !important;
 }
+/* Shrink-to-fit: the party cell takes only the width it needs, leaving the
+   rest of the row to the winner's name. */
+.partyTd {
+  width: 1%;
+  white-space: nowrap;
+  padding-right: 10px !important;
+}
 .partyCell {
   display: inline-flex;
   align-items: center;

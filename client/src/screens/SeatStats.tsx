@@ -83,7 +83,7 @@ export default function SeatStats({ acNo }: { acNo: string }) {
                 {partyRun > 0 && (
                   <>
                     <td rowSpan={partyRun} className={styles.bar} style={{ background: colorOf(r.party) }} />
-                    <td rowSpan={partyRun}>
+                    <td rowSpan={partyRun} className={styles.partyTd}>
                       <span className={styles.partyCell}>
                         {PARTY_SYMBOLS[r.party] && (
                           <img
