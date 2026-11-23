@@ -16,6 +16,6 @@
 .label {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 0.42px;
+  font-size: 0.28px;
   fill: var(--ink);
 }

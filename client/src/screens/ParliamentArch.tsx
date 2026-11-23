@@ -44,7 +44,7 @@ export default function ParliamentArch({ seats, label }: { seats: number; label:
       {dots.map((d) => (
         <circle key={d.key} className={styles.dot} cx={d.x} cy={d.y} r={DOT} />
       ))}
-      <text className={styles.label} x="0" y="-0.02" textAnchor="middle">
+      <text className={styles.label} x="0" y="-0.06" textAnchor="middle">
         {label}
       </text>
     </svg>
