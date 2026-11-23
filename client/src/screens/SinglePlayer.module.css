@@ -727,7 +727,19 @@ span.candidateSymbol {
   }
 }
 
-/* Empty card under the candidate picker, until its contents are decided. */
-.emptyCard {
-  min-height: 220px;
+/* Card under the candidate picker, split by a T: a full-width top strip,
+   then two halves divided down the middle. Sections are empty for now. */
+.tCard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 70px minmax(160px, auto);
+  padding: 0;
+  overflow: hidden;
+}
+.tTop {
+  grid-column: 1 / -1;
+  border-bottom: 2.5px solid var(--ink);
+}
+.tLeft {
+  border-right: 2.5px solid var(--ink);
 }

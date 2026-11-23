@@ -352,8 +352,13 @@ export default function SinglePlayer() {
             )}
           </div>
 
-          {/* Second card under the candidate picker, empty for now. */}
-          <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.emptyCard}`} />
+          {/* Second card under the candidate picker, split by a T into a top
+              strip and two halves below. All three sections are empty for now. */}
+          <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.tCard}`}>
+            <div className={styles.tTop} />
+            <div className={styles.tLeft} />
+            <div className={styles.tRight} />
+          </div>
         </div>
       </RoomShell>
     );
