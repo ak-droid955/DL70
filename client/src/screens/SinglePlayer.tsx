@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import aapSymbol from '../assets/parties/aap.png';
 import bjpSymbol from '../assets/parties/bjp.png';
 import incSymbol from '../assets/parties/inc.png';
@@ -13,6 +13,8 @@ import kapilMishra from '../assets/candidates/bjp/kapil-mishra.webp';
 import parveshVerma from '../assets/candidates/bjp/parvesh-verma.webp';
 import rekhaGupta from '../assets/candidates/bjp/rekha-gupta.webp';
 import { PROFANITY_MESSAGE, hasProfanity } from '../lib/profanity';
+import { useGame } from '../state/GameProvider';
+import ConstituencyMap from './ConstituencyMap';
 import RoomShell, { shellStyles } from './RoomShell';
 import styles from './SinglePlayer.module.css';
 
@@ -190,6 +192,9 @@ export default function SinglePlayer() {
   const [page, setPage] = useState<'pick' | 'candidate'>('pick');
   // Which of the party's candidates is picked on the candidate page.
   const [candidate, setCandidate] = useState<number | null>(null);
+  // Seat outlines for the mini map on the candidate page.
+  const { state } = useGame();
+  const seats = useMemo(() => Object.values(state.staticSeats ?? {}), [state.staticSeats]);
   // The side panel opens on every party click and can be closed without
   // clearing the selection.
   const [panelOpen, setPanelOpen] = useState(false);
@@ -353,13 +358,16 @@ export default function SinglePlayer() {
           </div>
 
           {/* Second card under the candidate picker, split by a T into a
-              titled top strip and two halves below, which are empty for now. */}
+              titled top strip and two halves below: the left is empty for now,
+              the right holds a mini map of the 70 seats. */}
           <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.tCard}`}>
             <div className={styles.tTop}>
               <h2 className={`${styles.heading} ${styles.tTitle}`}>Add Your Candidates</h2>
             </div>
             <div className={styles.tLeft} />
-            <div className={styles.tRight} />
+            <div className={styles.tRight}>
+              {seats.length > 0 && <ConstituencyMap seats={seats} className={styles.miniMap} />}
+            </div>
           </div>
         </div>
       </RoomShell>

@@ -728,7 +728,8 @@ span.candidateSymbol {
 }
 
 /* Card under the candidate picker, split by a T: a full-width top strip,
-   then two halves divided down the middle. The halves are empty for now. */
+   then two halves divided down the middle: the left is empty for now, the
+   right holds a mini map of the 70 seats. */
 .tCard {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -750,4 +751,19 @@ span.candidateSymbol {
 }
 .tLeft {
   border-right: 2.5px solid var(--ink);
+}
+.tRight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  min-width: 0;
+}
+/* Mini map of the 70 seats, on the card's paper rather than the dark
+   backdrop the landing page gives the same map. */
+.miniMap {
+  width: 100%;
+  height: auto;
+  max-height: 260px;
+  background: transparent;
 }

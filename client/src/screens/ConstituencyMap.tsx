@@ -24,7 +24,7 @@ function ringsOf(geometry: GeoJSON.Geometry): Ring[] {
  *  as inline SVG from the seat geometry the app already loads. The design
  *  iframes a Leaflet map here; an SVG needs no tiles, no second document and
  *  no map interaction — the map is purely illustrative. */
-export default function ConstituencyMap({ seats }: { seats: StaticSeat[] }) {
+export default function ConstituencyMap({ seats, className }: { seats: StaticSeat[]; className?: string }) {
   const { paths, viewBox } = useMemo(() => {
     const all = seats.map((seat) => ({ seat, rings: ringsOf(seat.geometry) })).filter((s) => s.rings.length > 0);
     if (all.length === 0) return { paths: [], viewBox: '0 0 100 100' };
@@ -75,7 +75,7 @@ export default function ConstituencyMap({ seats }: { seats: StaticSeat[] }) {
   }, [seats]);
 
   return (
-    <svg className={styles.map} viewBox={viewBox} role="img" aria-label="Map of Delhi's 70 assembly constituencies">
+    <svg className={`${styles.map} ${className ?? ''}`} viewBox={viewBox} role="img" aria-label="Map of Delhi's 70 assembly constituencies">
       {paths.map((p) => (
         <path key={p.acNo} className={styles.seat} d={p.d} fill={p.fill} stroke={p.stroke}>
           <title>{p.name}</title>
