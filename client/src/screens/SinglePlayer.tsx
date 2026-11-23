@@ -384,7 +384,11 @@ export default function SinglePlayer() {
             )}
           </div>
 
-          {/* Second card under the candidate picker, split by a T into a
+          {/* Card between the CM candidate picker and Add Your Candidates,
+              empty for now. */}
+          <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.emptyCard}`} />
+
+          {/* Card under the candidate picker, split by a T into a
               titled top strip and two halves below: an arch diagram of the 70
               seats over a district-by-district seat list on the left, and on
               the right a mini map that names the seat clicked. Seats ticked in

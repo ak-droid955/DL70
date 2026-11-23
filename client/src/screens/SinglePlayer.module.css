@@ -727,6 +727,12 @@ span.candidateSymbol {
   }
 }
 
+/* Empty card between the CM candidate picker and Add Your Candidates,
+   until its contents are decided. */
+.emptyCard {
+  min-height: 220px;
+}
+
 /* Card under the candidate picker, split by a T: a full-width top strip,
    then two halves divided down the middle: an arch diagram and district
    list on the left, a mini map of the 70 seats on the right. */
