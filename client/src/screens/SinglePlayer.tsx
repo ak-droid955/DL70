@@ -584,6 +584,8 @@ export default function SinglePlayer() {
               )}
               <span className={styles.name}>{customName}</span>
             </button>
+            {/* Second row starts after the Custom Party tile. */}
+            <span className={styles.gridBreak} aria-hidden="true" />
             {PARTIES.filter((party) => party.row === 2).map((party) => {
               const isSelected = selected === party.id;
               return (

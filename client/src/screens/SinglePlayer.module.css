@@ -110,6 +110,44 @@
   -webkit-line-clamp: 2;
 }
 
+/* Party picker on tablets and desktops: each tile is only as wide as its
+   name, which stays on one line, so the rows wrap by content. The break
+   element starts the second row after the Custom Party tile. */
+@media (min-width: 761px) {
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .gridBreak {
+    flex-basis: 100%;
+    height: 0;
+  }
+  .grid .slot {
+    flex: 0 0 auto;
+    aspect-ratio: auto;
+    min-width: 110px;
+    gap: 8px;
+    padding: 10px 10px;
+  }
+  .grid .logo,
+  .grid .plus {
+    width: 56px;
+  }
+  .grid .plus {
+    border-width: 2px;
+    font-size: 30px;
+  }
+  .grid .name {
+    display: block;
+    font-size: 12.5px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 240px;
+  }
+}
+
 /* Empty box where a party's symbol will go once it's added. */
 .symbolPlaceholder {
   display: block;
@@ -256,6 +294,15 @@
   .grid {
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+  .gridBreak {
+    display: none;
+  }
+  .grid .name {
+    display: block;
+    font-size: 13px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
   .slot {
     aspect-ratio: auto;
