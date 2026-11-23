@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import aapSymbol from '../assets/parties/aap.png';
 import bjpSymbol from '../assets/parties/bjp.png';
 import incSymbol from '../assets/parties/inc.png';
+import arvindKejriwal from '../assets/candidates/aap/arvind-kejriwal.webp';
+import atishi from '../assets/candidates/aap/atishi.webp';
+import manishSisodia from '../assets/candidates/aap/manish-sisodia.webp';
+import saurabhBharadwaj from '../assets/candidates/aap/saurabh-bharadwaj.webp';
 import harshMalhotra from '../assets/candidates/bjp/harsh-malhotra.webp';
 import kapilMishra from '../assets/candidates/bjp/kapil-mishra.webp';
 import parveshVerma from '../assets/candidates/bjp/parvesh-verma.webp';
@@ -161,6 +165,12 @@ const CANDIDATES: Partial<Record<PartyId, readonly Candidate[]>> = {
     { name: 'Parvesh Verma', image: parveshVerma },
     { name: 'Kapil Mishra', image: kapilMishra },
     { name: 'Harsh Malhotra', image: harshMalhotra }
+  ],
+  aap: [
+    { name: 'Arvind Kejriwal', image: arvindKejriwal },
+    { name: 'Atishi', image: atishi },
+    { name: 'Manish Sisodia', image: manishSisodia },
+    { name: 'Saurabh Bharadwaj', image: saurabhBharadwaj }
   ]
 };
 
