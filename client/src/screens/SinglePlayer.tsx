@@ -25,12 +25,15 @@ type StatRow = { label: string; value: string | readonly string[] };
 
 // Each party's election symbol (square, transparent-background PNGs) and the
 // stats shown in the floating details card when the party is picked. Vote
-// share is from the 2025 Delhi assembly election.
+// share is from the 2025 Delhi assembly election. Parties without a symbol
+// yet show an empty placeholder box. Row 1 sits before the Custom Party tile,
+// row 2 on the line below it.
 const PARTIES: readonly {
-  id: 'bjp' | 'aap' | 'inc';
+  id: 'bjp' | 'aap' | 'inc' | 'sad' | 'cpim' | 'bsp' | 'jdu' | 'cjp';
   name: string;
-  symbol: string;
-  symbolLabel: string;
+  symbol?: string;
+  symbolLabel?: string;
+  row: 1 | 2;
   stats: readonly StatRow[];
 }[] = [
   {
@@ -38,6 +41,7 @@ const PARTIES: readonly {
     name: 'Bharatiya Janata Party',
     symbol: bjpSymbol,
     symbolLabel: 'Lotus',
+    row: 1,
     stats: [
       { label: 'Last election', value: '45.6%' },
       { label: 'Ideologies', value: ['Hindu nationalism', 'Conservatism'] },
@@ -52,6 +56,7 @@ const PARTIES: readonly {
     name: 'Aam Aadmi Party',
     symbol: aapSymbol,
     symbolLabel: 'Broom',
+    row: 1,
     stats: [
       { label: 'Last election', value: '43.6%' },
       { label: 'Ideologies', value: ['Populism', 'Anti-corruption'] },
@@ -66,6 +71,7 @@ const PARTIES: readonly {
     name: 'Indian National Congress',
     symbol: incSymbol,
     symbolLabel: 'Hand',
+    row: 1,
     stats: [
       { label: 'Last election', value: '6.3%' },
       { label: 'Ideologies', value: ['Secularism', 'Social liberalism'] },
@@ -74,8 +80,82 @@ const PARTIES: readonly {
       { label: 'Jurisdiction', value: 'National' },
       { label: 'Founded', value: '1885' }
     ]
+  },
+  {
+    id: 'sad',
+    name: 'Shiromani Akali Dal',
+    row: 1,
+    stats: [
+      { label: 'Last election', value: '—' },
+      { label: 'Ideologies', value: ['Sikh interests', 'Regionalism'] },
+      { label: 'Founders', value: '—' },
+      { label: 'Delhi CMs', value: '—' },
+      { label: 'Jurisdiction', value: 'State (Punjab)' },
+      { label: 'Founded', value: '1920' }
+    ]
+  },
+  {
+    id: 'cpim',
+    name: 'Communist Party of India (Marxist)',
+    row: 2,
+    stats: [
+      { label: 'Last election', value: '—' },
+      { label: 'Ideologies', value: ['Communism', 'Marxism–Leninism'] },
+      { label: 'Founders', value: '—' },
+      { label: 'Delhi CMs', value: '—' },
+      { label: 'Jurisdiction', value: 'National' },
+      { label: 'Founded', value: '1964' }
+    ]
+  },
+  {
+    id: 'bsp',
+    name: 'Bahujan Samaj Party',
+    row: 2,
+    stats: [
+      { label: 'Last election', value: '—' },
+      { label: 'Ideologies', value: ['Ambedkarism', 'Social justice'] },
+      { label: 'Founders', value: ['Kanshi Ram'] },
+      { label: 'Delhi CMs', value: '—' },
+      { label: 'Jurisdiction', value: 'National' },
+      { label: 'Founded', value: '1984' }
+    ]
+  },
+  {
+    id: 'jdu',
+    name: 'Janata Dal (United)',
+    row: 2,
+    stats: [
+      { label: 'Last election', value: '—' },
+      { label: 'Ideologies', value: ['Socialism', 'Secularism'] },
+      { label: 'Founders', value: ['George Fernandes', 'Sharad Yadav', 'Nitish Kumar'] },
+      { label: 'Delhi CMs', value: '—' },
+      { label: 'Jurisdiction', value: 'State (Bihar)' },
+      { label: 'Founded', value: '2003' }
+    ]
+  },
+  {
+    id: 'cjp',
+    name: 'Cockroach Janata Party',
+    row: 2,
+    stats: [
+      { label: 'Last election', value: '—' },
+      { label: 'Ideologies', value: '—' },
+      { label: 'Founders', value: '—' },
+      { label: 'Delhi CMs', value: '—' },
+      { label: 'Jurisdiction', value: '—' },
+      { label: 'Founded', value: '—' }
+    ]
   }
 ];
+
+/** A party's symbol, or an empty placeholder box until one is added. */
+function PartySymbol({ src, label, className }: { src?: string; label?: string; className: string }) {
+  return src ? (
+    <img className={className} src={src} alt={`${label ?? 'Party'} symbol`} />
+  ) : (
+    <span className={`${className} ${styles.symbolPlaceholder}`} aria-hidden="true" />
+  );
+}
 
 // Build-your-own option, shown after the real parties with a plus mark.
 const CUSTOM_PARTY: { id: 'custom'; name: string; stats: readonly StatRow[] } = {
@@ -344,7 +424,7 @@ export default function SinglePlayer() {
   // play as. Start Game doesn't do anything yet.
   if (page === 'candidate' && selected) {
     const party = real
-      ? { name: real.name, symbol: real.symbol, alt: `${real.symbolLabel} symbol`, custom: false }
+      ? { name: real.name, symbol: real.symbol, alt: `${real.symbolLabel ?? 'Party'} symbol`, custom: false }
       : { name: customName, symbol: customSymbol, alt: 'Your party symbol', custom: true };
     const partyColor = PARTY_COLORS[selected] ?? 'var(--ink)';
     return (
@@ -389,10 +469,15 @@ export default function SinglePlayer() {
                             src={party.symbol}
                             alt={party.alt}
                           />
-                        ) : (
+                        ) : party.custom ? (
                           <span className={`${styles.plus} ${styles.candidateSymbol}`} aria-hidden="true">
                             +
                           </span>
+                        ) : (
+                          <span
+                            className={`${styles.candidateSymbol} ${styles.symbolPlaceholder}`}
+                            aria-hidden="true"
+                          />
                         )}
                         <span className={styles.candidateName}>{c.name}</span>
                       </span>
@@ -419,7 +504,7 @@ export default function SinglePlayer() {
                         className={`${styles.slot} ${styles.partnerSlot} ${on ? styles.slotSelected : ''}`}
                         onClick={() => togglePartner(p.id)}
                       >
-                        <img className={styles.logo} src={p.symbol} alt={`${p.symbolLabel} symbol`} />
+                        <PartySymbol src={p.symbol} label={p.symbolLabel} className={styles.logo} />
                         <span className={styles.name}>{p.name}</span>
                       </button>
                     );
@@ -467,7 +552,7 @@ export default function SinglePlayer() {
         <div className={`${shellStyles.card} ${styles.card}`}>
           <h1 className={styles.heading}>Select Your Party</h1>
           <div ref={partyGridRef} className={styles.grid} role="radiogroup" aria-label="Party">
-            {PARTIES.map((party) => {
+            {PARTIES.filter((party) => party.row === 1).map((party) => {
               const isSelected = selected === party.id;
               return (
                 <button
@@ -478,7 +563,7 @@ export default function SinglePlayer() {
                   className={`${styles.slot} ${isSelected ? styles.slotSelected : ''}`}
                   onClick={() => pick(party.id)}
                 >
-                  <img className={styles.logo} src={party.symbol} alt={`${party.symbolLabel} symbol`} />
+                  <PartySymbol src={party.symbol} label={party.symbolLabel} className={styles.logo} />
                   <span className={styles.name}>{party.name}</span>
                 </button>
               );
@@ -499,6 +584,22 @@ export default function SinglePlayer() {
               )}
               <span className={styles.name}>{customName}</span>
             </button>
+            {PARTIES.filter((party) => party.row === 2).map((party) => {
+              const isSelected = selected === party.id;
+              return (
+                <button
+                  key={party.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  className={`${styles.slot} ${isSelected ? styles.slotSelected : ''}`}
+                  onClick={() => pick(party.id)}
+                >
+                  <PartySymbol src={party.symbol} label={party.symbolLabel} className={styles.logo} />
+                  <span className={styles.name}>{party.name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -578,7 +679,7 @@ export default function SinglePlayer() {
               ×
             </button>
             {real ? (
-              <img className={styles.panelLogo} src={real.symbol} alt={`${real.symbolLabel} symbol`} />
+              <PartySymbol src={real.symbol} label={real.symbolLabel} className={styles.panelLogo} />
             ) : (
               // Custom Party: the plus (or the uploaded symbol) opens the
               // file picker / photo gallery.

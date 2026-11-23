@@ -40,7 +40,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -100,11 +100,24 @@
   font-size: 14px;
   line-height: 1.25;
   color: var(--ink);
-  white-space: nowrap;
-  /* A long Custom Party name is cut off rather than spilling out. */
+  /* Long names wrap to two lines; anything longer (a long Custom Party
+     name) is cut off rather than spilling out. */
   max-width: 100%;
   overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Empty box where a party's symbol will go once it's added. */
+.symbolPlaceholder {
+  display: block;
+  aspect-ratio: 1;
+  box-sizing: border-box;
+  border: 2px dashed var(--paper-border);
+  border-radius: 10px;
+  background: oklch(97% 0.008 75);
 }
 
 .modeInfoStack {
@@ -751,18 +764,20 @@ span.candidateSymbol {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 16px;
-  margin-top: 14px;
+  gap: 10px 12px;
+  margin-top: 12px;
 }
 .partnerSlot {
-  width: 190px;
+  width: 150px;
   aspect-ratio: auto;
-  padding: 12px 8px;
+  gap: 6px;
+  padding: 8px 6px;
 }
 .partnerSlot .logo {
-  width: 64px;
+  width: 40px;
 }
 .partnerSlot .name {
+  font-size: 12.5px;
   white-space: normal;
 }
 @media (max-width: 760px) {
