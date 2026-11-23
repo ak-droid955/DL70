@@ -765,3 +765,15 @@ span.candidateSymbol {
   padding: 16px;
   min-width: 0;
 }
+/* Phones: too narrow for two halves side by side, so the map moves under
+   the arch and district list. */
+@media (max-width: 640px) {
+  .tCard {
+    grid-template-columns: 1fr;
+    grid-template-rows: 70px auto auto;
+  }
+  .tLeft {
+    border-right: none;
+    border-bottom: 2.5px solid var(--ink);
+  }
+}

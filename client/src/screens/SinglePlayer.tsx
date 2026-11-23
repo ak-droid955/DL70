@@ -215,6 +215,12 @@ export default function SinglePlayer() {
       else next.add(acNo);
       return next;
     });
+  const setSeats = (acNos: string[], on: boolean) =>
+    setTickedSeats((cur) => {
+      const next = new Set(cur);
+      acNos.forEach((n) => (on ? next.add(n) : next.delete(n)));
+      return next;
+    });
   // The side panel opens on every party click and can be closed without
   // clearing the selection.
   const [panelOpen, setPanelOpen] = useState(false);
@@ -389,7 +395,7 @@ export default function SinglePlayer() {
             </div>
             <div className={styles.tLeft}>
               <ParliamentArch seats={70} label="70" filled={tickedSeats.size} fillColor={partyColor} />
-              {seats.length > 0 && <DistrictList seats={seats} ticked={tickedSeats} onToggle={toggleSeat} />}
+              {seats.length > 0 && <DistrictList seats={seats} ticked={tickedSeats} onToggle={toggleSeat} onSetAll={setSeats} />}
             </div>
             <div className={styles.tRight}>
               {seats.length > 0 && (

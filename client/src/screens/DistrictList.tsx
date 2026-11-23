@@ -8,11 +8,14 @@ import styles from './DistrictList.module.css';
 export default function DistrictList({
   seats,
   ticked,
-  onToggle
+  onToggle,
+  onSetAll
 }: {
   seats: StaticSeat[];
   ticked: ReadonlySet<string>;
   onToggle: (acNo: string) => void;
+  /** Ticks (or unticks) every listed seat at once. */
+  onSetAll: (acNos: string[], on: boolean) => void;
 }) {
   const byAcNo = new Map(seats.map((s) => [s.acNo, s]));
   return (
@@ -20,10 +23,32 @@ export default function DistrictList({
       {DISTRICTS.map((d) => {
         const members = d.acNos.map((n) => byAcNo.get(n)).filter((s): s is StaticSeat => Boolean(s));
         const tickedHere = members.filter((s) => ticked.has(s.acNo)).length;
+        const allTicked = members.length > 0 && tickedHere === members.length;
         return (
           <details key={d.name} className={styles.district}>
             <summary className={styles.summary}>
               <span>{d.name}</span>
+              {/* Ticks every seat in the district; unticks them all when
+                  they're all ticked. Clicks here don't open or close the
+                  dropdown. */}
+              <label className={styles.selectAll} onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="checkbox"
+                  className={styles.tick}
+                  checked={allTicked}
+                  ref={(el) => {
+                    if (el) el.indeterminate = tickedHere > 0 && !allTicked;
+                  }}
+                  onChange={() =>
+                    onSetAll(
+                      members.map((s) => s.acNo),
+                      !allTicked
+                    )
+                  }
+                  aria-label={`Select all in ${d.name}`}
+                />
+                <span>Select all</span>
+              </label>
               <span className={styles.count}>
                 {tickedHere > 0 ? `${tickedHere}/${members.length}` : members.length}
               </span>

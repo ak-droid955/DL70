@@ -16,6 +16,7 @@
 
 .summary {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
@@ -43,9 +44,21 @@
   border-radius: 8px;
 }
 
-/* Seat count, pushed to the right ahead of the arrow. */
-.count {
+/* "Select all" tick, pushed to the right ahead of the seat count. */
+.selectAll {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Seat count, ahead of the arrow. */
+.count {
   padding: 1px 8px;
   border-radius: 100px;
   border: 1.5px solid var(--ink);
