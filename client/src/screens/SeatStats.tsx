@@ -1,3 +1,6 @@
+import aapSymbol from '../assets/parties/aap.png';
+import bjpSymbol from '../assets/parties/bjp.png';
+import incSymbol from '../assets/parties/inc.png';
 import { ELECTION_YEARS, HISTORY } from '../lib/electionHistory';
 import styles from './SeatStats.module.css';
 
@@ -11,16 +14,12 @@ const PARTY_COLORS: Record<string, string> = {
 const OTHER_COLOR = '#9a948c';
 const colorOf = (party: string) => PARTY_COLORS[party] ?? OTHER_COLOR;
 
-// Full names for the short party labels in the results data.
-const PARTY_NAMES: Record<string, string> = {
-  BJP: 'Bharatiya Janata Party',
-  AAP: 'Aam Aadmi Party',
-  INC: 'Indian National Congress',
-  BSP: 'Bahujan Samaj Party',
-  LJP: 'Lok Janshakti Party',
-  'JD(U)': 'Janata Dal (United)',
-  SAD: 'Shiromani Akali Dal',
-  IND: 'Independent'
+// Election symbols for the parties the game has art for; others show just
+// their short name.
+const PARTY_SYMBOLS: Record<string, { src: string; alt: string }> = {
+  BJP: { src: bjpSymbol, alt: 'Lotus' },
+  AAP: { src: aapSymbol, alt: 'Broom' },
+  INC: { src: incSymbol, alt: 'Hand' }
 };
 
 /** For a run of consecutive rows sharing the same key, returns the run's
@@ -84,7 +83,18 @@ export default function SeatStats({ acNo }: { acNo: string }) {
                 {partyRun > 0 && (
                   <>
                     <td rowSpan={partyRun} className={styles.bar} style={{ background: colorOf(r.party) }} />
-                    <td rowSpan={partyRun}>{PARTY_NAMES[r.party] ?? r.party}</td>
+                    <td rowSpan={partyRun}>
+                      <span className={styles.partyCell}>
+                        {PARTY_SYMBOLS[r.party] && (
+                          <img
+                            className={styles.symbol}
+                            src={PARTY_SYMBOLS[r.party].src}
+                            alt={`${PARTY_SYMBOLS[r.party].alt} symbol`}
+                          />
+                        )}
+                        {r.party}
+                      </span>
+                    </td>
                   </>
                 )}
               </tr>
