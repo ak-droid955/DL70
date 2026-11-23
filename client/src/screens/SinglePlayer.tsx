@@ -335,10 +335,9 @@ export default function SinglePlayer() {
                             +
                           </span>
                         )}
-                        <span className={styles.candidatePartyName}>{party.name}</span>
+                        <span className={styles.candidateName}>{c.name}</span>
                       </span>
                     </button>
-                    <span className={styles.lineupLabel}>{c.name}</span>
                   </div>
                 );
               })}

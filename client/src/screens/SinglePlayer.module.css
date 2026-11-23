@@ -693,7 +693,7 @@ span.candidateSymbol {
   border-width: 2px;
   font-size: 16px;
 }
-.candidatePartyName {
+.candidateName {
   font-family: var(--font-ui);
   font-weight: 700;
   font-size: 12px;
