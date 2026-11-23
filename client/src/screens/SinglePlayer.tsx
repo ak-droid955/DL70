@@ -302,7 +302,7 @@ export default function SinglePlayer() {
             <button type="button" className={styles.cardBack} onClick={() => setPage('pick')}>
               ← Back
             </button>
-            <h1 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your Candidate</h1>
+            <h1 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your CM Candidate</h1>
             <p className={styles.candidateSub}>{party.name}</p>
 
             <div className={styles.lineup} role="radiogroup" aria-label="Candidate">
