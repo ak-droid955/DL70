@@ -367,7 +367,7 @@ export default function SinglePlayer() {
               <h2 className={`${styles.heading} ${styles.tTitle}`}>Add Your Candidates</h2>
             </div>
             <div className={styles.tLeft}>
-              <ParliamentArch seats={70} label="7" />
+              <ParliamentArch seats={70} label="70" />
             </div>
             <div className={styles.tRight}>
               {seats.length > 0 && <MiniSeatMap seats={seats} />}
