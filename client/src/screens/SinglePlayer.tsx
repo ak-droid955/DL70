@@ -157,7 +157,7 @@ const MODES = [
 
 type ModeId = (typeof MODES)[number]['id'];
 
-// Leaders you can play as on the 1 vs Many page, per party. A party without
+// Leaders you can play as on the candidate page, per party. A party without
 // its own list yet gets numbered placeholder slots with blank pictures.
 type Candidate = { name: string; image?: string };
 const PLACEHOLDER_CANDIDATES: readonly Candidate[] = [1, 2, 3, 4].map((n) => ({ name: `Candidate ${n}` }));
@@ -184,11 +184,11 @@ const CANDIDATES: Partial<Record<PartyId, readonly Candidate[]>> = {
 export default function SinglePlayer() {
   const [selected, setSelected] = useState<PartyId | null>(null);
   const [mode, setMode] = useState<ModeId | null>(null);
-  // Which page of the flow is showing: the party/mode picker, or the page
-  // that follows Next for the 1 vs Many mode. Kept in this component so the
-  // picks survive going back.
-  const [page, setPage] = useState<'pick' | 'one-vs-many'>('pick');
-  // Which of the party's candidate slots is picked on the 1 vs Many page.
+  // Which page of the flow is showing: the party/mode picker, or the
+  // candidate picker that follows Next for 1 vs Many and Alliance Mode. Kept
+  // in this component so the picks survive going back.
+  const [page, setPage] = useState<'pick' | 'candidate'>('pick');
+  // Which of the party's candidates is picked on the candidate page.
   const [candidate, setCandidate] = useState<number | null>(null);
   // The side panel opens on every party click and can be closed without
   // clearing the selection.
@@ -283,15 +283,15 @@ export default function SinglePlayer() {
   const detail = selected === CUSTOM_PARTY.id ? CUSTOM_PARTY : real;
 
   const goNext = () => {
-    if (mode === 'one-vs-many') {
+    if (mode === 'one-vs-many' || mode === 'alliance') {
       setPanelOpen(false);
-      setPage('one-vs-many');
+      setPage('candidate');
     }
   };
 
-  // 1 vs Many: pick which of your own party's leaders you play as. Start
-  // Game doesn't do anything yet.
-  if (page === 'one-vs-many' && selected) {
+  // 1 vs Many and Alliance Mode: pick which of your own party's leaders you
+  // play as. Start Game doesn't do anything yet.
+  if (page === 'candidate' && selected) {
     const party = real
       ? { name: real.name, symbol: real.symbol, alt: `${real.symbolLabel} symbol`, custom: false }
       : { name: customName, symbol: customSymbol, alt: 'Your party symbol', custom: true };
