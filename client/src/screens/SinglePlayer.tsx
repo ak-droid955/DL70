@@ -347,7 +347,7 @@ export default function SinglePlayer() {
     const partyColor = PARTY_COLORS[selected] ?? 'var(--ink)';
     return (
       <RoomShell variant="booth">
-        <div className={styles.column}>
+        <div className={`${styles.column} ${styles.candidateColumn}`}>
           <div className={`${shellStyles.card} ${styles.card} ${styles.candidateCard}`}>
             <button type="button" className={styles.cardBack} onClick={() => setPage('pick')}>
               ← Back
