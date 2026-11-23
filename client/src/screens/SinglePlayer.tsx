@@ -402,6 +402,32 @@ export default function SinglePlayer() {
               })}
             </div>
 
+            {/* Alliance Mode: pick partner parties from those you didn't
+                choose to play as, in the same card below a divider. Several
+                can be picked. */}
+            {mode === 'alliance' && (
+              <div className={styles.partnerSection}>
+                <h2 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your Alliance Partner</h2>
+                <div className={styles.partnerGrid}>
+                  {PARTIES.filter((p) => p.id !== selected).map((p) => {
+                    const on = partners.has(p.id);
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        aria-pressed={on}
+                        className={`${styles.slot} ${styles.partnerSlot} ${on ? styles.slotSelected : ''}`}
+                        onClick={() => togglePartner(p.id)}
+                      >
+                        <img className={styles.logo} src={p.symbol} alt={`${p.symbolLabel} symbol`} />
+                        <span className={styles.name}>{p.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {candidate === null ? (
               <p className={styles.nextHint}>Select a candidate to continue.</p>
             ) : (
@@ -410,31 +436,6 @@ export default function SinglePlayer() {
               </button>
             )}
           </div>
-
-          {/* Alliance Mode: pick partner parties from those you didn't
-              choose to play as. Several can be picked. */}
-          {mode === 'alliance' && (
-            <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.candidateCard}`}>
-              <h2 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your Alliance Partner</h2>
-              <div className={styles.partnerGrid}>
-                {PARTIES.filter((p) => p.id !== selected).map((p) => {
-                  const on = partners.has(p.id);
-                  return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      aria-pressed={on}
-                      className={`${styles.slot} ${styles.partnerSlot} ${on ? styles.slotSelected : ''}`}
-                      onClick={() => togglePartner(p.id)}
-                    >
-                      <img className={styles.logo} src={p.symbol} alt={`${p.symbolLabel} symbol`} />
-                      <span className={styles.name}>{p.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
           {/* Card under the candidate picker, split by a T into a
               titled top strip and two halves below: an arch diagram of the 70

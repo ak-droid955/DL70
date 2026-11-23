@@ -741,7 +741,12 @@ span.candidateSymbol {
 }
 
 /* Alliance partner picker: the parties you didn't choose, as tiles like
-   the party picker's. */
+   the party picker's, set off from the CM candidates by a divider line. */
+.partnerSection {
+  margin: 16px -20px 0;
+  padding: 14px 20px 0;
+  border-top: 2.5px solid var(--ink);
+}
 .partnerGrid {
   display: flex;
   flex-wrap: wrap;
