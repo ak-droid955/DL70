@@ -728,7 +728,7 @@ span.candidateSymbol {
 }
 
 /* Card under the candidate picker, split by a T: a full-width top strip,
-   then two halves divided down the middle. Sections are empty for now. */
+   then two halves divided down the middle. The halves are empty for now. */
 .tCard {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -738,7 +738,15 @@ span.candidateSymbol {
 }
 .tTop {
   grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
   border-bottom: 2.5px solid var(--ink);
+}
+.tTitle {
+  margin: 0;
+  text-align: center;
 }
 .tLeft {
   border-right: 2.5px solid var(--ink);
