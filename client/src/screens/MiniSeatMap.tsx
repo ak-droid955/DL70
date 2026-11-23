@@ -2,10 +2,12 @@ import { useMemo, useState } from 'react';
 import { projectSeats } from '../lib/seatPaths';
 import type { StaticSeat } from '../lib/types';
 import styles from './MiniSeatMap.module.css';
+import SeatStats from './SeatStats';
 
 /** Small, uncoloured map of the 70 assembly constituencies. Seats in
  *  `highlighted` fill with `highlightColor`. Clicking (or pressing
- *  Enter/Space on) a seat selects it and shows its name below the map.
+ *  Enter/Space on) a seat selects it and shows its name and past election
+ *  results below the map.
  *  Separate from the landing page's coloured ConstituencyMap. */
 export default function MiniSeatMap({
   seats,
@@ -49,6 +51,7 @@ export default function MiniSeatMap({
       <p className={`${styles.label} ${selectedSeat ? '' : styles.labelHint}`} aria-live="polite">
         {selectedSeat ? selectedSeat.name : 'Click a constituency'}
       </p>
+      {selectedSeat && <SeatStats acNo={selectedSeat.acNo} />}
     </div>
   );
 }
