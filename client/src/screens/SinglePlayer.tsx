@@ -253,12 +253,65 @@ export default function SinglePlayer() {
     }
   };
 
-  // 1 vs Many: an empty card for now; its contents are still to come.
+  // 1 vs Many: pick your candidate and see your opponents. Your card's
+  // picture area is left blank until candidate images are added, and the
+  // opponent slots and Start Game don't do anything yet.
   if (page === 'one-vs-many' && selected) {
+    const you = real
+      ? { name: real.name, symbol: real.symbol, alt: `${real.symbolLabel} symbol`, custom: false }
+      : { name: customName, symbol: customSymbol, alt: 'Your party symbol', custom: true };
+    const rivals = PARTIES.filter((p) => p.id !== selected);
     return (
       <RoomShell variant="booth">
         <div className={styles.column}>
-          <div className={`${shellStyles.card} ${styles.card} ${styles.emptyCard}`} />
+          <div className={`${shellStyles.card} ${styles.card} ${styles.candidateCard}`}>
+            <button type="button" className={styles.cardBack} onClick={() => setPage('pick')}>
+              ← Back
+            </button>
+            <h1 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your Candidate</h1>
+            <p className={styles.candidateSub}>1 vs Many · Choose your opponents</p>
+
+            <div className={styles.lineup}>
+              <div className={styles.lineupSlot}>
+                <button type="button" className={styles.candidateBox} aria-label="Choose your candidate">
+                  <span className={styles.candidatePhoto} aria-hidden="true" />
+                  <span className={styles.candidateParty}>
+                    {you.symbol ? (
+                      <img
+                        className={`${styles.candidateSymbol} ${you.custom ? styles.customLogo : ''}`}
+                        src={you.symbol}
+                        alt={you.alt}
+                      />
+                    ) : (
+                      <span className={`${styles.plus} ${styles.candidateSymbol}`} aria-hidden="true">
+                        +
+                      </span>
+                    )}
+                    <span className={styles.candidatePartyName}>{you.name}</span>
+                  </span>
+                </button>
+                <span className={styles.lineupLabel}>You</span>
+              </div>
+
+              {rivals.map((r) => (
+                <div key={r.id} className={styles.lineupSlot}>
+                  <button
+                    type="button"
+                    className={styles.opponentSlot}
+                    aria-label={`Choose ${r.name} candidate`}
+                  >
+                    <span aria-hidden="true">+</span>
+                  </button>
+                  <span className={styles.lineupLabel}>Computer</span>
+                  <span className={styles.lineupParty}>{r.name}</span>
+                </div>
+              ))}
+            </div>
+
+            <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`}>
+              Start Game
+            </button>
+          </div>
         </div>
       </RoomShell>
     );
