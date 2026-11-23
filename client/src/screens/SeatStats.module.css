@@ -5,8 +5,12 @@
   gap: 14px;
 }
 
+/* Sized to its contents rather than the panel, so the Name and Party
+   columns are only as wide as their longest entry. */
 .table {
-  width: 100%;
+  width: auto;
+  max-width: 100%;
+  align-self: flex-start;
   border-collapse: collapse;
   font-size: 13px;
   color: var(--ink);
@@ -43,10 +47,7 @@
   width: 10px;
   padding: 0 !important;
 }
-/* Shrink-to-fit: the party cell takes only the width it needs, leaving the
-   rest of the row to the winner's name. */
 .partyTd {
-  width: 1%;
   white-space: nowrap;
   padding-right: 10px !important;
 }
