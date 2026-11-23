@@ -37,6 +37,8 @@ type StatRow = { label: string; value: string | readonly string[] };
 const PARTIES: readonly {
   id: 'bjp' | 'aap' | 'inc' | 'sad' | 'cpim' | 'bsp' | 'jdu' | 'rjd' | 'cjp';
   name: string;
+  /** Initials shown on the party and alliance partner tiles. */
+  short: string;
   symbol?: string;
   symbolLabel?: string;
   row: 1 | 2;
@@ -45,6 +47,7 @@ const PARTIES: readonly {
   {
     id: 'bjp',
     name: 'Bharatiya Janata Party',
+    short: 'BJP',
     symbol: bjpSymbol,
     symbolLabel: 'Lotus',
     row: 1,
@@ -60,6 +63,7 @@ const PARTIES: readonly {
   {
     id: 'aap',
     name: 'Aam Aadmi Party',
+    short: 'AAP',
     symbol: aapSymbol,
     symbolLabel: 'Broom',
     row: 1,
@@ -75,6 +79,7 @@ const PARTIES: readonly {
   {
     id: 'inc',
     name: 'Indian National Congress',
+    short: 'INC',
     symbol: incSymbol,
     symbolLabel: 'Hand',
     row: 1,
@@ -90,6 +95,7 @@ const PARTIES: readonly {
   {
     id: 'sad',
     name: 'Shiromani Akali Dal',
+    short: 'SAD',
     symbol: sadSymbol,
     symbolLabel: 'Scales',
     row: 1,
@@ -105,6 +111,7 @@ const PARTIES: readonly {
   {
     id: 'cpim',
     name: 'Communist Party of India (Marxist)',
+    short: 'CPI(M)',
     symbol: cpimSymbol,
     symbolLabel: 'Hammer, sickle and star',
     row: 2,
@@ -120,6 +127,7 @@ const PARTIES: readonly {
   {
     id: 'bsp',
     name: 'Bahujan Samaj Party',
+    short: 'BSP',
     symbol: bspSymbol,
     symbolLabel: 'Elephant',
     row: 2,
@@ -135,6 +143,7 @@ const PARTIES: readonly {
   {
     id: 'jdu',
     name: 'Janata Dal (United)',
+    short: 'JD(U)',
     symbol: jduSymbol,
     symbolLabel: 'Arrow',
     row: 2,
@@ -150,6 +159,7 @@ const PARTIES: readonly {
   {
     id: 'rjd',
     name: 'Rashtriya Janata Dal',
+    short: 'RJD',
     symbol: rjdSymbol,
     symbolLabel: 'Lantern',
     row: 2,
@@ -165,6 +175,7 @@ const PARTIES: readonly {
   {
     id: 'cjp',
     name: 'Cockroach Janata Party',
+    short: 'CJP',
     symbol: cjpSymbol,
     symbolLabel: 'Cockroach',
     row: 2,
@@ -534,9 +545,11 @@ export default function SinglePlayer() {
                         aria-pressed={on}
                         className={`${styles.slot} ${styles.partnerSlot} ${on ? styles.slotSelected : ''}`}
                         onClick={() => togglePartner(p.id)}
+                        aria-label={p.name}
+                        title={p.name}
                       >
                         <PartySymbol src={p.symbol} label={p.symbolLabel} className={styles.logo} />
-                        <span className={styles.name}>{p.name}</span>
+                        <span className={styles.name}>{p.short}</span>
                       </button>
                     );
                   })}
@@ -593,9 +606,11 @@ export default function SinglePlayer() {
                   aria-checked={isSelected}
                   className={`${styles.slot} ${isSelected ? styles.slotSelected : ''}`}
                   onClick={() => pick(party.id)}
+                  aria-label={party.name}
+                  title={party.name}
                 >
                   <PartySymbol src={party.symbol} label={party.symbolLabel} className={styles.logo} />
-                  <span className={styles.name}>{party.name}</span>
+                  <span className={styles.name}>{party.short}</span>
                 </button>
               );
             })}
@@ -627,9 +642,11 @@ export default function SinglePlayer() {
                   aria-checked={isSelected}
                   className={`${styles.slot} ${isSelected ? styles.slotSelected : ''}`}
                   onClick={() => pick(party.id)}
+                  aria-label={party.name}
+                  title={party.name}
                 >
                   <PartySymbol src={party.symbol} label={party.symbolLabel} className={styles.logo} />
-                  <span className={styles.name}>{party.name}</span>
+                  <span className={styles.name}>{party.short}</span>
                 </button>
               );
             })}
