@@ -1,4 +1,4 @@
-import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import aapSymbol from '../assets/parties/aap.png';
 import bjpSymbol from '../assets/parties/bjp.png';
 import incSymbol from '../assets/parties/inc.png';
@@ -157,14 +157,6 @@ const MODES = [
 
 type ModeId = (typeof MODES)[number]['id'];
 
-// Each party's colour, behind its leaders' white silhouettes on the
-// 1 vs Many page. A Custom Party uses the page's ink colour.
-const PARTY_COLORS: Partial<Record<PartyId, string>> = {
-  bjp: '#f47c20',
-  aap: '#0f5fa8',
-  inc: '#1a9ad6'
-};
-
 // Leaders you can play as on the 1 vs Many page, per party. A party without
 // its own list yet gets numbered placeholder slots with blank pictures.
 type Candidate = { name: string; image?: string };
@@ -303,7 +295,6 @@ export default function SinglePlayer() {
     const party = real
       ? { name: real.name, symbol: real.symbol, alt: `${real.symbolLabel} symbol`, custom: false }
       : { name: customName, symbol: customSymbol, alt: 'Your party symbol', custom: true };
-    const partyColor = { '--party-color': PARTY_COLORS[selected] ?? 'var(--ink)' } as CSSProperties;
     return (
       <RoomShell variant="booth">
         <div className={styles.column}>
@@ -328,12 +319,7 @@ export default function SinglePlayer() {
                       onClick={() => setCandidate(i)}
                     >
                       {c.image ? (
-                        <img
-                          className={`${styles.candidatePhoto} ${styles.candidateImg}`}
-                          style={partyColor}
-                          src={c.image}
-                          alt=""
-                        />
+                        <img className={`${styles.candidatePhoto} ${styles.candidateImg}`} src={c.image} alt="" />
                       ) : (
                         <span className={styles.candidatePhoto} aria-hidden="true" />
                       )}

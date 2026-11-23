@@ -629,9 +629,8 @@
   width: 150px;
 }
 
-/* A candidate: a portrait card with the leader's white silhouette on the
-   party's colour (blank for placeholder slots), and the party symbol and
-   leader's name in the strip below. */
+/* Your candidate: a portrait card. The picture area stays blank until
+   candidate images are added; the strip below shows your party. */
 .candidateBox {
   width: 150px;
   aspect-ratio: 3 / 4;
@@ -662,8 +661,8 @@
   display: block;
   min-height: 0;
   width: calc(100% - 16px);
-  border: none;
-  background: var(--party-color);
+  border-style: solid;
+  background: #fff;
   object-fit: cover;
   object-position: center top;
 }
