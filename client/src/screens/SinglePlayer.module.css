@@ -726,3 +726,8 @@ span.candidateSymbol {
     width: 130px;
   }
 }
+
+/* Empty card under the candidate picker, until its contents are decided. */
+.emptyCard {
+  min-height: 220px;
+}

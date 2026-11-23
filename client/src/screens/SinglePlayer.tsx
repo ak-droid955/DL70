@@ -351,6 +351,9 @@ export default function SinglePlayer() {
               </button>
             )}
           </div>
+
+          {/* Second card under the candidate picker, empty for now. */}
+          <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.emptyCard}`} />
         </div>
       </RoomShell>
     );
