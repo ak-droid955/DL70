@@ -38,11 +38,15 @@
   font-family: var(--font-ui);
   font-weight: 700;
   font-size: 15px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
   text-align: center;
   color: var(--ink);
 }
 .labelHint {
   font-weight: 600;
   font-size: 13px;
+  letter-spacing: normal;
+  text-transform: none;
   color: var(--ink-muted);
 }

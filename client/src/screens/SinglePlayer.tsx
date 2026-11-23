@@ -15,6 +15,7 @@ import rekhaGupta from '../assets/candidates/bjp/rekha-gupta.webp';
 import { PROFANITY_MESSAGE, hasProfanity } from '../lib/profanity';
 import { useGame } from '../state/GameProvider';
 import MiniSeatMap from './MiniSeatMap';
+import ParliamentArch from './ParliamentArch';
 import RoomShell, { shellStyles } from './RoomShell';
 import styles from './SinglePlayer.module.css';
 
@@ -358,13 +359,16 @@ export default function SinglePlayer() {
           </div>
 
           {/* Second card under the candidate picker, split by a T into a
-              titled top strip and two halves below: the left is empty for now,
-              the right holds a mini map of the 70 seats that names the one clicked. */}
+              titled top strip and two halves below: an arch diagram of the 70
+              seats on the left, and on the right a mini map that names the
+              seat clicked. */}
           <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.tCard}`}>
             <div className={styles.tTop}>
               <h2 className={`${styles.heading} ${styles.tTitle}`}>Add Your Candidates</h2>
             </div>
-            <div className={styles.tLeft} />
+            <div className={styles.tLeft}>
+              <ParliamentArch seats={70} label="7" />
+            </div>
             <div className={styles.tRight}>
               {seats.length > 0 && <MiniSeatMap seats={seats} />}
             </div>

@@ -728,8 +728,8 @@ span.candidateSymbol {
 }
 
 /* Card under the candidate picker, split by a T: a full-width top strip,
-   then two halves divided down the middle: the left is empty for now, the
-   right holds a mini map of the 70 seats. */
+   then two halves divided down the middle: an arch diagram of the seats on
+   the left, a mini map of the 70 seats on the right. */
 .tCard {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -750,6 +750,11 @@ span.candidateSymbol {
   text-align: center;
 }
 .tLeft {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  min-width: 0;
   border-right: 2.5px solid var(--ink);
 }
 .tRight {

@@ -1,0 +1,21 @@
+.arch {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+}
+
+/* White seats, outlined so they read on the card's paper. */
+.dot {
+  fill: #fff;
+  stroke: var(--ink);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.42px;
+  fill: var(--ink);
+}
