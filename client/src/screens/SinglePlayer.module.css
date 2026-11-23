@@ -630,6 +630,7 @@
 }
 .lineupLabel {
   margin-top: 8px;
+  max-width: 100%;
   font-family: var(--font-ui);
   font-weight: 700;
   font-size: 14px;
@@ -665,6 +666,15 @@
   border-radius: 8px;
   border: 2px dashed var(--paper-border);
   background: oklch(96% 0.01 75);
+}
+.candidateImg {
+  display: block;
+  min-height: 0;
+  width: calc(100% - 16px);
+  border-style: solid;
+  background: #fff;
+  object-fit: cover;
+  object-position: center top;
 }
 .candidateParty {
   display: flex;

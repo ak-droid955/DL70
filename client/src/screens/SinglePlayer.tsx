@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import aapSymbol from '../assets/parties/aap.png';
 import bjpSymbol from '../assets/parties/bjp.png';
 import incSymbol from '../assets/parties/inc.png';
+import harshMalhotra from '../assets/candidates/bjp/harsh-malhotra.webp';
+import kapilMishra from '../assets/candidates/bjp/kapil-mishra.webp';
+import parveshVerma from '../assets/candidates/bjp/parvesh-verma.webp';
+import rekhaGupta from '../assets/candidates/bjp/rekha-gupta.webp';
 import { PROFANITY_MESSAGE, hasProfanity } from '../lib/profanity';
 import RoomShell, { shellStyles } from './RoomShell';
 import styles from './SinglePlayer.module.css';
@@ -147,9 +151,18 @@ const MODES = [
 
 type ModeId = (typeof MODES)[number]['id'];
 
-// Placeholder candidate slots for the picked party on the 1 vs Many page,
-// until real candidate names and images are added.
-const CANDIDATE_SLOTS = ['Candidate 1', 'Candidate 2', 'Candidate 3', 'Candidate 4'] as const;
+// Leaders you can play as on the 1 vs Many page, per party. A party without
+// its own list yet gets numbered placeholder slots with blank pictures.
+type Candidate = { name: string; image?: string };
+const PLACEHOLDER_CANDIDATES: readonly Candidate[] = [1, 2, 3, 4].map((n) => ({ name: `Candidate ${n}` }));
+const CANDIDATES: Partial<Record<PartyId, readonly Candidate[]>> = {
+  bjp: [
+    { name: 'Rekha Gupta', image: rekhaGupta },
+    { name: 'Parvesh Verma', image: parveshVerma },
+    { name: 'Kapil Mishra', image: kapilMishra },
+    { name: 'Harsh Malhotra', image: harshMalhotra }
+  ]
+};
 
 /** Single-player entry page: pick the party you will play as, and a mode. */
 export default function SinglePlayer() {
@@ -260,9 +273,8 @@ export default function SinglePlayer() {
     }
   };
 
-  // 1 vs Many: pick which of your own party's candidates you play as. The
-  // cards' picture areas stay blank until candidate images are added, and
-  // Start Game doesn't do anything yet.
+  // 1 vs Many: pick which of your own party's leaders you play as. Start
+  // Game doesn't do anything yet.
   if (page === 'one-vs-many' && selected) {
     const party = real
       ? { name: real.name, symbol: real.symbol, alt: `${real.symbolLabel} symbol`, custom: false }
@@ -278,19 +290,23 @@ export default function SinglePlayer() {
             <p className={styles.candidateSub}>{party.name}</p>
 
             <div className={styles.lineup} role="radiogroup" aria-label="Candidate">
-              {CANDIDATE_SLOTS.map((label, i) => {
+              {(CANDIDATES[selected] ?? PLACEHOLDER_CANDIDATES).map((c, i) => {
                 const isSelected = candidate === i;
                 return (
-                  <div key={label} className={styles.lineupSlot}>
+                  <div key={c.name} className={styles.lineupSlot}>
                     <button
                       type="button"
                       role="radio"
                       aria-checked={isSelected}
-                      aria-label={label}
+                      aria-label={c.name}
                       className={`${styles.candidateBox} ${isSelected ? styles.candidateBoxSelected : ''}`}
                       onClick={() => setCandidate(i)}
                     >
-                      <span className={styles.candidatePhoto} aria-hidden="true" />
+                      {c.image ? (
+                        <img className={`${styles.candidatePhoto} ${styles.candidateImg}`} src={c.image} alt="" />
+                      ) : (
+                        <span className={styles.candidatePhoto} aria-hidden="true" />
+                      )}
                       <span className={styles.candidateParty}>
                         {party.symbol ? (
                           <img
@@ -306,7 +322,7 @@ export default function SinglePlayer() {
                         <span className={styles.candidatePartyName}>{party.name}</span>
                       </span>
                     </button>
-                    <span className={styles.lineupLabel}>{label}</span>
+                    <span className={styles.lineupLabel}>{c.name}</span>
                   </div>
                 );
               })}
