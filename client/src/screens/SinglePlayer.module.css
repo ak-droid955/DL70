@@ -727,10 +727,26 @@ span.candidateSymbol {
   }
 }
 
-/* Empty card between the CM candidate picker and Add Your Candidates,
-   until its contents are decided. */
-.emptyCard {
-  min-height: 220px;
+/* Alliance partner picker: the parties you didn't choose, as tiles like
+   the party picker's. */
+.partnerGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 22px;
+}
+.partnerSlot {
+  width: 200px;
+}
+@media (max-width: 760px) {
+  .partnerGrid {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .partnerSlot {
+    width: 100%;
+  }
 }
 
 /* Card under the candidate picker, split by a T: a full-width top strip,

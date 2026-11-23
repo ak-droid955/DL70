@@ -202,6 +202,15 @@ export default function SinglePlayer() {
   const [page, setPage] = useState<'pick' | 'candidate'>('pick');
   // Which of the party's candidates is picked on the candidate page.
   const [candidate, setCandidate] = useState<number | null>(null);
+  // Parties picked as alliance partners (Alliance Mode only).
+  const [partners, setPartners] = useState<ReadonlySet<PartyId>>(() => new Set());
+  const togglePartner = (id: PartyId) =>
+    setPartners((cur) => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   // Seat outlines for the mini map on the candidate page.
   const { state } = useGame();
   const seats = useMemo(() => Object.values(state.staticSeats ?? {}), [state.staticSeats]);
@@ -279,7 +288,16 @@ export default function SinglePlayer() {
   };
 
   const pick = (id: PartyId) => {
-    if (id !== selected) setCandidate(null);
+    if (id !== selected) {
+      setCandidate(null);
+      // A party can't be its own alliance partner.
+      setPartners((cur) => {
+        if (!cur.has(id)) return cur;
+        const next = new Set(cur);
+        next.delete(id);
+        return next;
+      });
+    }
     setSelected(id);
     setPanelOpen(true);
     setIdeologyPickerOpen(false);
@@ -384,9 +402,30 @@ export default function SinglePlayer() {
             )}
           </div>
 
-          {/* Card between the CM candidate picker and Add Your Candidates,
-              empty for now. */}
-          <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.emptyCard}`} />
+          {/* Alliance Mode: pick partner parties from those you didn't
+              choose to play as. Several can be picked. */}
+          {mode === 'alliance' && (
+            <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.candidateCard}`}>
+              <h2 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your Alliance Partner</h2>
+              <div className={styles.partnerGrid}>
+                {PARTIES.filter((p) => p.id !== selected).map((p) => {
+                  const on = partners.has(p.id);
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      aria-pressed={on}
+                      className={`${styles.slot} ${styles.partnerSlot} ${on ? styles.slotSelected : ''}`}
+                      onClick={() => togglePartner(p.id)}
+                    >
+                      <img className={styles.logo} src={p.symbol} alt={`${p.symbolLabel} symbol`} />
+                      <span className={styles.name}>{p.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Card under the candidate picker, split by a T into a
               titled top strip and two halves below: an arch diagram of the 70
