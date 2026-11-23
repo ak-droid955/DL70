@@ -582,7 +582,7 @@
 
 /* The candidate page's cards are narrower and tighter than the picker's. */
 .candidateColumn {
-  max-width: 760px;
+  max-width: 700px;
 }
 .candidateCard {
   position: relative;
@@ -624,20 +624,20 @@
   justify-content: center;
   align-items: flex-start;
   flex-wrap: wrap;
-  gap: 28px 32px;
+  gap: 28px 24px;
 }
 .lineupSlot {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  width: 150px;
+  width: 140px;
 }
 
 /* Your candidate: a portrait card. The picture area stays blank until
    candidate images are added; the strip below shows your party. */
 .candidateBox {
-  width: 150px;
+  width: 140px;
   aspect-ratio: 3 / 4;
   display: flex;
   flex-direction: column;
