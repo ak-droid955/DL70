@@ -14,7 +14,7 @@ import parveshVerma from '../assets/candidates/bjp/parvesh-verma.webp';
 import rekhaGupta from '../assets/candidates/bjp/rekha-gupta.webp';
 import { PROFANITY_MESSAGE, hasProfanity } from '../lib/profanity';
 import { useGame } from '../state/GameProvider';
-import ConstituencyMap from './ConstituencyMap';
+import MiniSeatMap from './MiniSeatMap';
 import RoomShell, { shellStyles } from './RoomShell';
 import styles from './SinglePlayer.module.css';
 
@@ -359,14 +359,14 @@ export default function SinglePlayer() {
 
           {/* Second card under the candidate picker, split by a T into a
               titled top strip and two halves below: the left is empty for now,
-              the right holds a mini map of the 70 seats. */}
+              the right holds a mini map of the 70 seats that names the one clicked. */}
           <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.tCard}`}>
             <div className={styles.tTop}>
               <h2 className={`${styles.heading} ${styles.tTitle}`}>Add Your Candidates</h2>
             </div>
             <div className={styles.tLeft} />
             <div className={styles.tRight}>
-              {seats.length > 0 && <ConstituencyMap seats={seats} className={styles.miniMap} />}
+              {seats.length > 0 && <MiniSeatMap seats={seats} />}
             </div>
           </div>
         </div>

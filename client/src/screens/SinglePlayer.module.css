@@ -759,11 +759,3 @@ span.candidateSymbol {
   padding: 16px;
   min-width: 0;
 }
-/* Mini map of the 70 seats, on the card's paper rather than the dark
-   backdrop the landing page gives the same map. */
-.miniMap {
-  width: 100%;
-  height: auto;
-  max-height: 260px;
-  background: transparent;
-}
