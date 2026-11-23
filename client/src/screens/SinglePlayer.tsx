@@ -6,6 +6,8 @@ import arvindKejriwal from '../assets/candidates/aap/arvind-kejriwal.webp';
 import atishi from '../assets/candidates/aap/atishi.webp';
 import manishSisodia from '../assets/candidates/aap/manish-sisodia.webp';
 import saurabhBharadwaj from '../assets/candidates/aap/saurabh-bharadwaj.webp';
+import devenderYadav from '../assets/candidates/inc/devender-yadav.webp';
+import sandeepDikshit from '../assets/candidates/inc/sandeep-dikshit.webp';
 import harshMalhotra from '../assets/candidates/bjp/harsh-malhotra.webp';
 import kapilMishra from '../assets/candidates/bjp/kapil-mishra.webp';
 import parveshVerma from '../assets/candidates/bjp/parvesh-verma.webp';
@@ -171,6 +173,10 @@ const CANDIDATES: Partial<Record<PartyId, readonly Candidate[]>> = {
     { name: 'Atishi', image: atishi },
     { name: 'Manish Sisodia', image: manishSisodia },
     { name: 'Saurabh Bharadwaj', image: saurabhBharadwaj }
+  ],
+  inc: [
+    { name: 'Sandeep Dikshit', image: sandeepDikshit },
+    { name: 'Devender Yadav', image: devenderYadav }
   ]
 };
 
