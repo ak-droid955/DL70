@@ -9,7 +9,7 @@
 
 .column {
   width: 100%;
-  max-width: 880px;
+  max-width: 920px;
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease;
@@ -17,16 +17,16 @@
 
 /* While the floating party card is open on a wide screen, slide the cards
    left just enough to clear it (card 300px + 24px gap + 16px breathing room:
-   the column's right edge, 50vw + 440px, must stay left of 100vw - 340px).
+   the column's right edge, 50vw + 460px, must stay left of 100vw - 340px).
    Narrower screens don't have the room, so the card simply floats over. */
-@media (min-width: 1220px) {
+@media (min-width: 1260px) {
   .columnShifted {
-    transform: translateX(min(0px, calc(50vw - 780px)));
+    transform: translateX(min(0px, calc(50vw - 800px)));
   }
 }
 
 .card {
-  max-width: 880px;
+  max-width: 920px;
 }
 
 .heading {
@@ -118,7 +118,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
   }
   .gridBreak {
     flex-basis: 100%;
@@ -127,9 +127,9 @@
   .grid .slot {
     flex: 0 0 auto;
     aspect-ratio: auto;
-    min-width: 110px;
+    min-width: 104px;
     gap: 8px;
-    padding: 10px 10px;
+    padding: 10px 8px;
   }
   .grid .logo,
   .grid .plus {
@@ -141,7 +141,7 @@
   }
   .grid .name {
     display: block;
-    font-size: 12.5px;
+    font-size: 12px;
     white-space: nowrap;
     text-overflow: ellipsis;
     max-width: 240px;

@@ -5,6 +5,9 @@ import incSymbol from '../assets/parties/inc.png';
 import sadSymbol from '../assets/parties/sad.png';
 import cpimSymbol from '../assets/parties/cpim.png';
 import bspSymbol from '../assets/parties/bsp.png';
+import jduSymbol from '../assets/parties/jdu.png';
+import rjdSymbol from '../assets/parties/rjd.png';
+import cjpSymbol from '../assets/parties/cjp.png';
 import arvindKejriwal from '../assets/candidates/aap/arvind-kejriwal.webp';
 import atishi from '../assets/candidates/aap/atishi.webp';
 import manishSisodia from '../assets/candidates/aap/manish-sisodia.webp';
@@ -32,7 +35,7 @@ type StatRow = { label: string; value: string | readonly string[] };
 // yet show an empty placeholder box. Row 1 sits before the Custom Party tile,
 // row 2 on the line below it.
 const PARTIES: readonly {
-  id: 'bjp' | 'aap' | 'inc' | 'sad' | 'cpim' | 'bsp' | 'jdu' | 'cjp';
+  id: 'bjp' | 'aap' | 'inc' | 'sad' | 'cpim' | 'bsp' | 'jdu' | 'rjd' | 'cjp';
   name: string;
   symbol?: string;
   symbolLabel?: string;
@@ -132,6 +135,8 @@ const PARTIES: readonly {
   {
     id: 'jdu',
     name: 'Janata Dal (United)',
+    symbol: jduSymbol,
+    symbolLabel: 'Arrow',
     row: 2,
     stats: [
       { label: 'Last election', value: '—' },
@@ -143,8 +148,25 @@ const PARTIES: readonly {
     ]
   },
   {
+    id: 'rjd',
+    name: 'Rashtriya Janata Dal',
+    symbol: rjdSymbol,
+    symbolLabel: 'Lantern',
+    row: 2,
+    stats: [
+      { label: 'Last election', value: '—' },
+      { label: 'Ideologies', value: ['Socialism', 'Social justice'] },
+      { label: 'Founders', value: ['Lalu Prasad Yadav'] },
+      { label: 'Delhi CMs', value: '—' },
+      { label: 'Jurisdiction', value: 'State (Bihar)' },
+      { label: 'Founded', value: '1997' }
+    ]
+  },
+  {
     id: 'cjp',
     name: 'Cockroach Janata Party',
+    symbol: cjpSymbol,
+    symbolLabel: 'Cockroach',
     row: 2,
     stats: [
       { label: 'Last election', value: '—' },
