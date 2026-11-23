@@ -6,11 +6,12 @@
 }
 
 /* Sized to its contents rather than the panel, so the Name and Party
-   columns are only as wide as their longest entry. */
+   columns are only as wide as their longest entry, and centred in any
+   space left over. */
 .table {
   width: auto;
   max-width: 100%;
-  align-self: flex-start;
+  align-self: center;
   border-collapse: collapse;
   font-size: 13px;
   color: var(--ink);
