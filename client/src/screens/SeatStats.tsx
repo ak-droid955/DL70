@@ -11,6 +11,28 @@ const PARTY_COLORS: Record<string, string> = {
 const OTHER_COLOR = '#9a948c';
 const colorOf = (party: string) => PARTY_COLORS[party] ?? OTHER_COLOR;
 
+// Full names for the short party labels in the results data.
+const PARTY_NAMES: Record<string, string> = {
+  BJP: 'Bharatiya Janata Party',
+  AAP: 'Aam Aadmi Party',
+  INC: 'Indian National Congress',
+  BSP: 'Bahujan Samaj Party',
+  LJP: 'Lok Janshakti Party',
+  'JD(U)': 'Janata Dal (United)',
+  SAD: 'Shiromani Akali Dal',
+  IND: 'Independent'
+};
+
+/** For a run of consecutive rows sharing the same key, returns the run's
+ *  length at its first row and 0 at the rest, so the cell can be drawn once
+ *  with that rowSpan (as election tables merge repeat winners). */
+function runStarting<T>(rows: readonly T[], i: number, key: (r: T) => string): number {
+  if (i > 0 && key(rows[i - 1]) === key(rows[i])) return 0;
+  let n = 1;
+  while (i + n < rows.length && key(rows[i + n]) === key(rows[i])) n += 1;
+  return n;
+}
+
 /** One pie slice as an SVG path, angles in turns (0 = top, clockwise). */
 function slicePath(start: number, end: number): string {
   const r = 1;
@@ -40,18 +62,34 @@ export default function SeatStats({ acNo }: { acNo: string }) {
     <div className={styles.stats}>
       <table className={styles.table}>
         <caption className={styles.caption}>Previous winners</caption>
+        <thead>
+          <tr>
+            <th scope="col">Year</th>
+            <th scope="col">Name</th>
+            <th scope="col" colSpan={2}>
+              Party
+            </th>
+          </tr>
+        </thead>
         <tbody>
-          {rows.map((r) => (
-            <tr key={r.year}>
-              <th scope="row">{r.year}</th>
-              <td>{r.winner}</td>
-              <td>
-                <span className={styles.party} style={{ background: colorOf(r.party) }}>
-                  {r.party}
-                </span>
-              </td>
-            </tr>
-          ))}
+          {rows.map((r, i) => {
+            const partyRun = runStarting(rows, i, (x) => x.party);
+            const nameRun = runStarting(rows, i, (x) => `${x.party}|${x.winner}`);
+            return (
+              <tr key={r.year}>
+                <th scope="row" className={styles.year}>
+                  {r.year}
+                </th>
+                {nameRun > 0 && <td rowSpan={nameRun}>{r.winner}</td>}
+                {partyRun > 0 && (
+                  <>
+                    <td rowSpan={partyRun} className={styles.bar} style={{ background: colorOf(r.party) }} />
+                    <td rowSpan={partyRun}>{PARTY_NAMES[r.party] ?? r.party}</td>
+                  </>
+                )}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
