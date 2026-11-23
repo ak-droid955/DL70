@@ -619,7 +619,7 @@
   justify-content: center;
   align-items: flex-start;
   flex-wrap: wrap;
-  gap: 28px 40px;
+  gap: 28px 32px;
 }
 .lineupSlot {
   display: flex;
@@ -636,15 +636,6 @@
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--ink);
-}
-.lineupParty {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink-muted);
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* Your candidate: a portrait card. The picture area stays blank until
@@ -706,31 +697,12 @@ span.candidateSymbol {
   overflow-wrap: anywhere;
 }
 
-/* Opponents: round "+" slots, played by the computer. Vertically centred
-   against the portrait card's 200px height. */
-.opponentSlot {
-  width: 112px;
-  height: 112px;
-  margin: 44px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: 3px solid var(--ink);
-  outline: 2px solid var(--paper-border);
-  outline-offset: 4px;
-  background: var(--card-paper);
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 52px;
-  line-height: 1;
-  cursor: pointer;
-  transition: transform 0.12s ease, background 0.12s ease;
-}
-.opponentSlot:hover {
-  transform: translateY(-2px);
-  background: oklch(95% 0.012 75);
+.candidateBoxSelected,
+.candidateBoxSelected:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 0 var(--ink);
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
 }
 
 .startBtn {
@@ -752,11 +724,5 @@ span.candidateSymbol {
   }
   .candidateBox {
     width: 130px;
-  }
-  .opponentSlot {
-    width: 92px;
-    height: 92px;
-    margin: 20px 0;
-    font-size: 42px;
   }
 }
