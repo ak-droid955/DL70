@@ -161,6 +161,14 @@ const MODES = [
 
 type ModeId = (typeof MODES)[number]['id'];
 
+// Each party's colour, used for the seats ticked on the candidate page. A
+// Custom Party uses the page's ink colour.
+const PARTY_COLORS: Partial<Record<PartyId, string>> = {
+  bjp: '#f47c20',
+  aap: '#0f5fa8',
+  inc: '#1a9ad6'
+};
+
 // Leaders you can play as on the candidate page, per party. A party without
 // its own list yet gets numbered placeholder slots with blank pictures.
 type Candidate = { name: string; image?: string };
@@ -197,6 +205,16 @@ export default function SinglePlayer() {
   // Seat outlines for the mini map on the candidate page.
   const { state } = useGame();
   const seats = useMemo(() => Object.values(state.staticSeats ?? {}), [state.staticSeats]);
+  // Constituencies ticked in the district list; shown in the party's colour
+  // on the mini map and the arch diagram.
+  const [tickedSeats, setTickedSeats] = useState<ReadonlySet<string>>(() => new Set());
+  const toggleSeat = (acNo: string) =>
+    setTickedSeats((cur) => {
+      const next = new Set(cur);
+      if (next.has(acNo)) next.delete(acNo);
+      else next.add(acNo);
+      return next;
+    });
   // The side panel opens on every party click and can be closed without
   // clearing the selection.
   const [panelOpen, setPanelOpen] = useState(false);
@@ -302,6 +320,7 @@ export default function SinglePlayer() {
     const party = real
       ? { name: real.name, symbol: real.symbol, alt: `${real.symbolLabel} symbol`, custom: false }
       : { name: customName, symbol: customSymbol, alt: 'Your party symbol', custom: true };
+    const partyColor = PARTY_COLORS[selected] ?? 'var(--ink)';
     return (
       <RoomShell variant="booth">
         <div className={styles.column}>
@@ -362,17 +381,20 @@ export default function SinglePlayer() {
           {/* Second card under the candidate picker, split by a T into a
               titled top strip and two halves below: an arch diagram of the 70
               seats over a district-by-district seat list on the left, and on
-              the right a mini map that names the seat clicked. */}
+              the right a mini map that names the seat clicked. Seats ticked in
+              the list show in the party's colour on both the arch and map. */}
           <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.tCard}`}>
             <div className={styles.tTop}>
               <h2 className={`${styles.heading} ${styles.tTitle}`}>Add Your Candidates</h2>
             </div>
             <div className={styles.tLeft}>
-              <ParliamentArch seats={70} label="70" />
-              {seats.length > 0 && <DistrictList seats={seats} />}
+              <ParliamentArch seats={70} label="70" filled={tickedSeats.size} fillColor={partyColor} />
+              {seats.length > 0 && <DistrictList seats={seats} ticked={tickedSeats} onToggle={toggleSeat} />}
             </div>
             <div className={styles.tRight}>
-              {seats.length > 0 && <MiniSeatMap seats={seats} />}
+              {seats.length > 0 && (
+                <MiniSeatMap seats={seats} highlighted={tickedSeats} highlightColor={partyColor} />
+              )}
             </div>
           </div>
         </div>

@@ -3,10 +3,19 @@ import { projectSeats } from '../lib/seatPaths';
 import type { StaticSeat } from '../lib/types';
 import styles from './MiniSeatMap.module.css';
 
-/** Small, uncoloured map of the 70 assembly constituencies. Clicking (or
- *  pressing Enter/Space on) a seat selects it and shows its name below the
- *  map. Separate from the landing page's coloured ConstituencyMap. */
-export default function MiniSeatMap({ seats }: { seats: StaticSeat[] }) {
+/** Small, uncoloured map of the 70 assembly constituencies. Seats in
+ *  `highlighted` fill with `highlightColor`. Clicking (or pressing
+ *  Enter/Space on) a seat selects it and shows its name below the map.
+ *  Separate from the landing page's coloured ConstituencyMap. */
+export default function MiniSeatMap({
+  seats,
+  highlighted,
+  highlightColor
+}: {
+  seats: StaticSeat[];
+  highlighted: ReadonlySet<string>;
+  highlightColor: string;
+}) {
   const { paths, viewBox } = useMemo(() => projectSeats(seats), [seats]);
   const [selected, setSelected] = useState<string | null>(null);
   const selectedSeat = paths.find((p) => p.acNo === selected);
@@ -20,6 +29,7 @@ export default function MiniSeatMap({ seats }: { seats: StaticSeat[] }) {
             <path
               key={p.acNo}
               className={`${styles.seat} ${isSelected ? styles.seatSelected : ''}`}
+              style={highlighted.has(p.acNo) && !isSelected ? { fill: highlightColor } : undefined}
               d={p.d}
               role="button"
               tabIndex={0}
