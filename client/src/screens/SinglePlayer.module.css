@@ -628,16 +628,6 @@
   gap: 6px;
   width: 150px;
 }
-.lineupLabel {
-  margin-top: 8px;
-  max-width: 100%;
-  font-family: var(--font-ui);
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--ink);
-}
 
 /* Your candidate: a portrait card. The picture area stays blank until
    candidate images are added; the strip below shows your party. */
