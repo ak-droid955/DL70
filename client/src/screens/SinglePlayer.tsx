@@ -335,6 +335,8 @@ export default function SinglePlayer() {
     if (mode === 'one-vs-many' || mode === 'alliance') {
       setPanelOpen(false);
       setPage('candidate');
+      // Open the new page at its top rather than wherever Next was.
+      window.scrollTo(0, 0);
     }
   };
 
@@ -349,7 +351,14 @@ export default function SinglePlayer() {
       <RoomShell variant="booth">
         <div className={`${styles.column} ${styles.candidateColumn}`}>
           <div className={`${shellStyles.card} ${styles.card} ${styles.candidateCard}`}>
-            <button type="button" className={styles.cardBack} onClick={() => setPage('pick')}>
+            <button
+              type="button"
+              className={styles.cardBack}
+              onClick={() => {
+                setPage('pick');
+                window.scrollTo(0, 0);
+              }}
+            >
               ← Back
             </button>
             <h1 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your CM Candidate</h1>

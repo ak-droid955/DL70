@@ -587,7 +587,15 @@
 .candidateCard {
   position: relative;
   text-align: center;
-  padding: 22px 22px 24px;
+  padding: 18px 20px 18px;
+}
+/* Tighter gaps between the candidate page's cards, so the CM candidate and
+   alliance partner cards both fit on screen without scrolling. */
+.candidateColumn > * + * {
+  margin-top: 14px;
+}
+.candidateCard .nextHint {
+  margin-top: 10px;
 }
 .cardBack {
   position: absolute;
@@ -610,7 +618,7 @@
   margin: 0;
 }
 .candidateSub {
-  margin: 8px 0 26px;
+  margin: 4px 0 14px;
   font-family: var(--font-ui);
   font-weight: 700;
   font-size: clamp(16px, 2.4vw, 19px);
@@ -631,13 +639,13 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  width: 140px;
+  width: 120px;
 }
 
 /* Your candidate: a portrait card. The picture area stays blank until
    candidate images are added; the strip below shows your party. */
 .candidateBox {
-  width: 140px;
+  width: 120px;
   aspect-ratio: 3 / 4;
   display: flex;
   flex-direction: column;
@@ -712,7 +720,7 @@ span.candidateSymbol {
 
 .startBtn {
   max-width: 360px;
-  margin: 30px auto 0;
+  margin: 14px auto 0;
 }
 
 @media (max-width: 640px) {
@@ -739,10 +747,18 @@ span.candidateSymbol {
   flex-wrap: wrap;
   justify-content: center;
   gap: 16px;
-  margin-top: 22px;
+  margin-top: 14px;
 }
 .partnerSlot {
-  width: 200px;
+  width: 190px;
+  aspect-ratio: auto;
+  padding: 12px 8px;
+}
+.partnerSlot .logo {
+  width: 64px;
+}
+.partnerSlot .name {
+  white-space: normal;
 }
 @media (max-width: 760px) {
   .partnerGrid {
