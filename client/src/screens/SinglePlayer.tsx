@@ -736,7 +736,7 @@ export default function SinglePlayer() {
           {/* The CM candidate picker, with Back / Start Game at its foot. In
               Alliance Mode the alliance partner picker sits beside it in a
               box of its own. */}
-          <div className={mode === 'alliance' ? styles.pickerPair : undefined}>
+          <div className={mode === 'alliance' ? styles.pickerPair : styles.soloPicker}>
           <div className={`${shellStyles.card} ${styles.card} ${styles.candidateCard}`}>
             <div className={styles.cmSection}>
             <h1 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your CM Candidate</h1>
