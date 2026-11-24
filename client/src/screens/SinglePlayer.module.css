@@ -9,7 +9,8 @@
 
 .column {
   width: 100%;
-  max-width: 920px;
+  /* Just wide enough for the party picker's row of five tiles. */
+  max-width: 620px;
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease;
@@ -17,11 +18,11 @@
 
 /* While the floating party card is open on a wide screen, slide the cards
    left just enough to clear it (card 300px + 24px gap + 16px breathing room:
-   the column's right edge, 50vw + 460px, must stay left of 100vw - 340px).
+   the column's right edge, 50vw + 310px, must stay left of 100vw - 340px).
    Narrower screens don't have the room, so the card simply floats over. */
 @media (min-width: 1260px) {
   .columnShifted {
-    transform: translateX(min(0px, calc(50vw - 800px)));
+    transform: translateX(min(0px, calc(50vw - 650px)));
   }
 }
 
