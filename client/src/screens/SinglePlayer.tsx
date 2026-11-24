@@ -501,6 +501,18 @@ export default function SinglePlayer() {
       ? { name: real.name, symbol: real.symbol, alt: `${real.symbolLabel ?? 'Party'} symbol`, custom: false }
       : { name: customName, symbol: customSymbol, alt: 'Your party symbol', custom: true };
     const partyColor = PARTY_COLORS[selected] ?? 'var(--ink)';
+    // Next reveals the "Add Your Candidates" box; Start Game then takes its
+    // place (and doesn't do anything yet).
+    const nextOrStart =
+      !showSeats ? (
+        <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`} onClick={() => setShowSeats(true)}>
+          Next →
+        </button>
+      ) : (
+        <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`}>
+          Start Game
+        </button>
+      );
     return (
       <RoomShell variant="booth">
         <div className={`${styles.column} ${styles.candidateColumn}`}>
@@ -569,20 +581,12 @@ export default function SinglePlayer() {
               >
                 ← Back
               </button>
-              {candidate === null || (mode === 'alliance' && partners.size === 0) ? (
-                <p className={styles.nextHint}>
-                  {mode === 'alliance'
-                    ? 'Select a candidate and an alliance partner to continue.'
-                    : 'Select a candidate to continue.'}
-                </p>
-              ) : !showSeats ? (
-                <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`} onClick={() => setShowSeats(true)}>
-                  Next →
-                </button>
-              ) : (
-                <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`}>
-                  Start Game
-                </button>
+              {/* Alliance Mode: Next / Start Game live in the alliance
+                  partner box instead. */}
+              {candidate === null ? (
+                <p className={styles.nextHint}>Select a candidate to continue.</p>
+              ) : mode === 'alliance' ? null : (
+                nextOrStart
               )}
             </div>
           </div>
@@ -616,6 +620,11 @@ export default function SinglePlayer() {
                   })}
                 </div>
               </div>
+              {/* Next appears here once a partner (and a CM candidate) is
+                  picked. */}
+              {partners.size > 0 && candidate !== null && (
+                <div className={styles.cardFooter}>{nextOrStart}</div>
+              )}
             </div>
           )}
           </div>
