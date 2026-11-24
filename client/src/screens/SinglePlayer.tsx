@@ -728,6 +728,9 @@ export default function SinglePlayer() {
               Many has a district-by-district seat list (ticked seats show in
               the party's colour on the arch and map); Alliance Mode has
               seat-sharing sliders instead, shown on the arch. */}
+          {/* Add Your Candidates, with the opponent picker to its right on
+              wide screens (below it on narrower ones). */}
+          <div className={styles.seatsRow}>
           {showSeats && (
           <div ref={seatsCardRef} className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.tCard}`}>
             <div className={styles.tTop}>
@@ -822,6 +825,7 @@ export default function SinglePlayer() {
               </div>
             </div>
           )}
+          </div>
         </div>
       </RoomShell>
     );
