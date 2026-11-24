@@ -306,12 +306,9 @@ const PARTY_COLORS: Partial<Record<PartyId, string>> = {
 // its own list yet gets numbered placeholder slots with blank pictures.
 type Candidate = { name: string; image?: string };
 const PLACEHOLDER_CANDIDATES: readonly Candidate[] = [1, 2, 3, 4].map((n) => ({ name: `Candidate ${n}` }));
-// Parties whose leaders aren't named yet: numbered slots that share a generic
-// leader silhouette.
-const SILHOUETTE_CANDIDATES: readonly Candidate[] = PLACEHOLDER_CANDIDATES.map((c) => ({
-  ...c,
-  image: placeholderLeader
-}));
+// Smaller parties field one candidate, their Delhi unit's head, shown with a
+// generic leader silhouette until a portrait is added.
+const delhiChief = (name: string): readonly Candidate[] => [{ name, image: placeholderLeader }];
 const CANDIDATES: Partial<Record<PartyId, readonly Candidate[]>> = {
   bjp: [
     { name: 'Rekha Gupta', image: rekhaGupta },
@@ -333,11 +330,13 @@ const CANDIDATES: Partial<Record<PartyId, readonly Candidate[]>> = {
     { name: 'Abhijeet Dipke', image: abhijeetDipke },
     { name: 'Ashutosh Ranka', image: ashutoshRanka }
   ],
-  sad: SILHOUETTE_CANDIDATES,
-  cpim: SILHOUETTE_CANDIDATES,
-  bsp: SILHOUETTE_CANDIDATES,
-  jdu: SILHOUETTE_CANDIDATES,
-  rjd: SILHOUETTE_CANDIDATES
+  // Delhi unit heads: SAD president, CPI(M) state secretary, RJD state
+  // president. JD(U) and BSP names to come.
+  sad: delhiChief('Paramjit Singh Sarna'),
+  cpim: delhiChief('Anurag Saxena'),
+  rjd: delhiChief('Manoj Chaudhary'),
+  jdu: delhiChief('Candidate'),
+  bsp: delhiChief('Candidate')
 };
 
 /** Single-player entry page: pick the party you will play as, and a mode. */
