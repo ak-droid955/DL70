@@ -854,8 +854,8 @@ export default function SinglePlayer() {
 
           {/* Opponent selection, to the right of the alliance partner box (of
               the CM box in 1 vs Many) on wide screens, below them on narrower
-              ones: two options, then the picked one's explainer. */}
-          {showSeats && (
+              ones: two options, then the picked one's explainer. Shown from
+              the start. */}
             <div
               className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.opponentCard} ${activeOpponents ? '' : styles.modeCardCompact}`}
             >
@@ -889,7 +889,6 @@ export default function SinglePlayer() {
                 )}
               </div>
             </div>
-          )}
           </div>
 
           {/* Shown once Next is pressed: a card split by a T into a titled
