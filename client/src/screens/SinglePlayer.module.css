@@ -801,59 +801,69 @@ span.candidateSymbol {
   border-top: 2.5px solid var(--ink);
 }
 
-/* Alliance Mode: the CM candidate and alliance partner pickers side by side,
-   divided by a vertical line that runs the card's full height. */
-.splitPickers {
+/* Alliance Mode: the CM candidate and alliance partner pickers as two
+   separate boxes side by side, of equal height. */
+.pickerPair {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
-  margin: -18px -20px 0;
+  gap: 14px;
+  align-items: stretch;
 }
-.splitPickers .cmSection {
-  padding: 18px 14px 4px;
-  border-right: 2.5px solid var(--ink);
+.pickerPair > .candidateCard {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 18px 14px;
 }
-.splitPickers .partnerSection {
+.pickerPair .cardFooter {
+  margin: auto -14px 0;
+  padding: 14px 14px 0;
+}
+.pickerPair .cmSection {
+  margin-bottom: 16px;
+}
+.pickerPair .partnerSection {
   margin: 0;
-  padding: 18px 14px 4px;
+  padding: 0;
   border-top: none;
 }
-.splitPickers .candidateHeading {
+.pickerPair .candidateHeading {
   font-size: 22px;
 }
-.splitPickers .lineup {
+.pickerPair .lineup {
   flex-wrap: nowrap;
   gap: 8px;
 }
 /* Smaller candidate cards, all in one row, so the CM side is no taller than
    the alliance partner list beside it. */
-.splitPickers .lineupSlot,
-.splitPickers .candidateBox {
+.pickerPair .lineupSlot,
+.pickerPair .candidateBox {
   width: 80px;
 }
-.splitPickers .candidateBox {
+.pickerPair .candidateBox {
   aspect-ratio: auto;
   border-radius: 10px;
   border-width: 2px;
   box-shadow: 0 3px 0 var(--ink);
 }
-.splitPickers .candidatePhoto {
+.pickerPair .candidatePhoto {
   flex: none;
   aspect-ratio: 1;
   margin: 5px 5px 0;
   border-radius: 6px;
 }
-.splitPickers .candidateImg {
+.pickerPair .candidateImg {
   width: calc(100% - 10px);
 }
-.splitPickers .candidateParty {
+.pickerPair .candidateParty {
   gap: 4px;
   padding: 5px;
 }
-.splitPickers .candidateSymbol {
+.pickerPair .candidateSymbol {
   width: 16px;
   height: 16px;
 }
-.splitPickers .candidateName {
+.pickerPair .candidateName {
   font-size: 10px;
 }
 
@@ -975,29 +985,23 @@ span.candidateSymbol {
   }
 }
 
-/* Phones: the two pickers stack, divided by a horizontal line instead. The
-   card's side padding is 16px here, so the full-bleed sections match it. */
+/* Phones: the two boxes stack. The card's side padding is 16px here. */
 @media (max-width: 640px) {
-  .splitPickers {
+  .pickerPair {
     grid-template-columns: 1fr;
-    margin: -18px -16px 0;
   }
-  .splitPickers .cmSection,
-  .splitPickers .partnerSection {
-    padding-left: 8px;
-    padding-right: 8px;
+  .pickerPair > .candidateCard {
+    padding: 18px 10px;
   }
-  .splitPickers .lineup {
+  .pickerPair .lineup {
     gap: 6px;
   }
   .cardFooter {
     margin: 16px -16px 0;
     padding: 14px 16px 0;
   }
-  .splitPickers .cmSection {
-    border-right: none;
-  }
-  .splitPickers .partnerSection {
-    border-top: 2.5px solid var(--ink);
+  .pickerPair .cardFooter {
+    margin: auto -10px 0;
+    padding: 14px 10px 0;
   }
 }

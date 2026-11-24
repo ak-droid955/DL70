@@ -497,11 +497,11 @@ export default function SinglePlayer() {
     return (
       <RoomShell variant="booth">
         <div className={`${styles.column} ${styles.candidateColumn}`}>
+          {/* The CM candidate picker, with Back / Start Game at its foot. In
+              Alliance Mode the alliance partner picker sits beside it in a
+              box of its own. */}
+          <div className={mode === 'alliance' ? styles.pickerPair : undefined}>
           <div className={`${shellStyles.card} ${styles.card} ${styles.candidateCard}`}>
-            {/* In Alliance Mode the CM candidate and alliance partner pickers
-                sit side by side, split by a line; in 1 vs Many only the first
-                shows. */}
-            <div className={mode === 'alliance' ? styles.splitPickers : undefined}>
             <div className={styles.cmSection}>
             <h1 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your CM Candidate</h1>
             <p className={styles.candidateSub}>{party.name}</p>
@@ -551,9 +551,31 @@ export default function SinglePlayer() {
 
             </div>
 
-            {/* Alliance Mode: pick partner parties from those you didn't
-                choose to play as. Several can be picked. */}
-            {mode === 'alliance' && (
+            <div className={styles.cardFooter}>
+              <button
+                type="button"
+                className={styles.cardBack}
+                onClick={() => {
+                  setPage('pick');
+                  window.scrollTo(0, 0);
+                }}
+              >
+                ← Back
+              </button>
+              {candidate === null ? (
+                <p className={styles.nextHint}>Select a candidate to continue.</p>
+              ) : (
+                <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`}>
+                  Start Game
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Alliance Mode: pick partner parties from those you didn't
+              choose to play as. Several can be picked. */}
+          {mode === 'alliance' && (
+            <div className={`${shellStyles.card} ${styles.card} ${styles.candidateCard}`}>
               <div className={styles.partnerSection}>
                 <h2 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your Alliance Partner</h2>
                 <div className={styles.partnerGrid}>
@@ -579,29 +601,8 @@ export default function SinglePlayer() {
                   })}
                 </div>
               </div>
-            )}
-
             </div>
-
-            <div className={styles.cardFooter}>
-              <button
-                type="button"
-                className={styles.cardBack}
-                onClick={() => {
-                  setPage('pick');
-                  window.scrollTo(0, 0);
-                }}
-              >
-                ← Back
-              </button>
-              {candidate === null ? (
-                <p className={styles.nextHint}>Select a candidate to continue.</p>
-              ) : (
-                <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`}>
-                  Start Game
-                </button>
-              )}
-            </div>
+          )}
           </div>
 
           {/* Card under the candidate picker, split by a T into a
