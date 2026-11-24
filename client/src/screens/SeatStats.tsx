@@ -6,16 +6,17 @@ import bspSymbol from '../assets/parties/bsp.png';
 import { ELECTION_YEARS, HISTORY } from '../lib/electionHistory';
 import styles from './SeatStats.module.css';
 
-// Slice/legend colours: Wikipedia's party colours (Module:Political party).
+// Slice/legend colours: Wikipedia's party colours (Module:Political party),
+// except AAP in dark blue and JD(U) in purple.
 // Any party not listed falls back to a neutral grey.
 const PARTY_COLORS: Record<string, string> = {
   BJP: '#FF9933',
-  AAP: '#0072B0',
+  AAP: '#0A3A86',
   INC: '#00BFFF',
   SAD: '#0F204A',
   'CPI(M)': '#CC0D0D',
   BSP: '#22409A',
-  'JD(U)': '#05472A',
+  'JD(U)': '#6B2D9A',
   RJD: '#056D05',
   CJP: '#5A2F12',
   LJP: '#0093DD',

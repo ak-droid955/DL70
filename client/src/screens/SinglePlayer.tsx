@@ -286,17 +286,17 @@ const MODES = [
 type ModeId = (typeof MODES)[number]['id'];
 
 // Each party's colour (Wikipedia's party colours, from Module:Political
-// party), used for the seats ticked on the candidate page (map and arch);
-// the party picker stays uncoloured. A
-// Custom Party uses the page's ink colour.
+// party, except AAP in dark blue and JD(U) in purple), used for the seats
+// ticked on the candidate page (map and arch); the party picker stays
+// uncoloured. A Custom Party uses the page's ink colour.
 const PARTY_COLORS: Partial<Record<PartyId, string>> = {
   bjp: '#FF9933',
-  aap: '#0072B0',
+  aap: '#0A3A86',
   inc: '#00BFFF',
   sad: '#0F204A',
   cpim: '#CC0D0D',
   bsp: '#22409A',
-  jdu: '#05472A',
+  jdu: '#6B2D9A',
   rjd: '#056D05',
   cjp: '#5A2F12'
 };
