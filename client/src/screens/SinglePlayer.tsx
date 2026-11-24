@@ -659,9 +659,6 @@ export default function SinglePlayer() {
       .map((a) => ({ ...a, members: a.members.filter((id) => opponentIds.has(id)) }))
       .filter((a) => a.members.length >= 2);
     const pickedSeatName = seats.find((st) => st.acNo === pickedSeat)?.name;
-    // Your side's rows, each with a tick box for who contests the seat: in
-    // Alliance Mode one ally (ticking another hands the seat over); in 1 vs
-    // Many your party, ticked or not as in the district list.
     // Your side's candidate in the clicked seat: in Alliance Mode the ally it
     // went to; in 1 vs Many your party, if the seat is ticked.
     const holder = pickedSeat
@@ -672,15 +669,21 @@ export default function SinglePlayer() {
           : undefined
       : undefined;
     const ownRows: ContestRow[] = holder ? [{ party: holder }] : [];
-    const seatContest = pickedSeat && pickedSeatName && (
-      <SeatContest
-        seat={pickedSeatName}
-        groups={[
-          { label: mode === 'alliance' ? 'Your alliance' : 'Your party', rows: ownRows },
-          { label: 'Opponents', rows: opponentParties.map((p) => ({ party: p })) }
-        ]}
-      />
-    );
+    // The clicked seat's table: just your side's candidate (opponents aren't
+    // listed). An unticked 1 vs Many seat has no one yet.
+    const seatContest =
+      pickedSeat &&
+      pickedSeatName &&
+      (ownRows.length > 0 ? (
+        <SeatContest
+          seat={pickedSeatName}
+          groups={[{ label: mode === 'alliance' ? 'Your alliance' : 'Your party', rows: ownRows }]}
+        />
+      ) : (
+        <p className={styles.changeHint}>
+          {pickedSeatName}: tick it in the district list to contest it.
+        </p>
+      ));
     // Alliance Mode, under the sliders: a "Change contestant party" dropdown
     // with a tick box per ally for the clicked seat. Ticking another ally
     // hands the seat over (not taking the current one below the minimum).
