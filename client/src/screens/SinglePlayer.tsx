@@ -285,12 +285,19 @@ const MODES = [
 
 type ModeId = (typeof MODES)[number]['id'];
 
-// Each party's colour, used for the seats ticked on the candidate page. A
+// Each party's colour, used for the seats ticked on the candidate page (map
+// and arch); the party picker stays uncoloured. A
 // Custom Party uses the page's ink colour.
 const PARTY_COLORS: Partial<Record<PartyId, string>> = {
   bjp: '#f47c20',
   aap: '#0f5fa8',
-  inc: '#1a9ad6'
+  inc: '#1a9ad6',
+  sad: '#e8b10e',
+  cpim: '#d1242b',
+  bsp: '#2b3a8f',
+  jdu: '#1f7a3c',
+  rjd: '#6fbf3a',
+  cjp: '#7b4a2b'
 };
 
 // Leaders you can play as on the candidate page, per party. A party without

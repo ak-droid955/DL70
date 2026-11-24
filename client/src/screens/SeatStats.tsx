@@ -11,7 +11,13 @@ import styles from './SeatStats.module.css';
 const PARTY_COLORS: Record<string, string> = {
   BJP: '#f47c20',
   AAP: '#0f5fa8',
-  INC: '#1a9ad6'
+  INC: '#1a9ad6',
+  SAD: '#e8b10e',
+  'CPI(M)': '#d1242b',
+  BSP: '#2b3a8f',
+  'JD(U)': '#1f7a3c',
+  RJD: '#6fbf3a',
+  CJP: '#7b4a2b'
 };
 const OTHER_COLOR = '#9a948c';
 const colorOf = (party: string) => PARTY_COLORS[party] ?? OTHER_COLOR;
