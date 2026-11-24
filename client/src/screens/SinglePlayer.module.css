@@ -658,9 +658,7 @@
   margin-top: 10px;
 }
 .cardBack {
-  position: absolute;
-  top: 20px;
-  left: 20px;
+  flex: none;
   padding: 7px 14px;
   border-radius: 100px;
   border: 2px solid var(--ink);
@@ -784,11 +782,6 @@ span.candidateSymbol {
 }
 
 @media (max-width: 640px) {
-  .cardBack {
-    position: static;
-    display: block;
-    margin-bottom: 14px;
-  }
   .lineup {
     gap: 20px 16px;
   }
@@ -806,6 +799,55 @@ span.candidateSymbol {
   margin: 16px -20px 0;
   padding: 14px 20px 0;
   border-top: 2.5px solid var(--ink);
+}
+
+/* Alliance Mode: the CM candidate and alliance partner pickers side by side,
+   divided by a vertical line that runs the card's full height. */
+.splitPickers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: -18px -20px 0;
+}
+.splitPickers .cmSection {
+  padding: 18px 14px 4px;
+  border-right: 2.5px solid var(--ink);
+}
+.splitPickers .partnerSection {
+  margin: 0;
+  padding: 18px 14px 4px;
+  border-top: none;
+}
+.splitPickers .candidateHeading {
+  font-size: 22px;
+}
+.splitPickers .lineup {
+  gap: 14px;
+}
+.splitPickers .partnerGrid {
+  gap: 10px;
+  margin-top: 14px;
+}
+.splitPickers .partnerSlot {
+  width: 92px;
+}
+
+/* Back on the left, then the hint or Start Game, under both pickers. */
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 16px -20px 0;
+  padding: 14px 20px 0;
+  border-top: 2.5px solid var(--ink);
+}
+.cardFooter .nextHint,
+.cardFooter .startBtn {
+  margin: 0;
+}
+.cardFooter .startBtn {
+  flex: 1;
+  max-width: 320px;
 }
 .partnerGrid {
   display: flex;
@@ -885,5 +927,33 @@ span.candidateSymbol {
   .tLeft {
     border-right: none;
     border-bottom: 2.5px solid var(--ink);
+  }
+}
+
+/* Phones: the two pickers stack, divided by a horizontal line instead. */
+@media (max-width: 640px) {
+  .splitPickers {
+    grid-template-columns: 1fr;
+  }
+  .splitPickers .cmSection {
+    border-right: none;
+  }
+  .splitPickers .partnerSection {
+    border-top: 2.5px solid var(--ink);
+  }
+  .splitPickers .partnerGrid {
+    flex-direction: row;
+    gap: 8px;
+  }
+  .splitPickers .partnerSlot {
+    width: calc((100% - 16px) / 3);
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 4px;
+    text-align: center;
+  }
+  .splitPickers .partnerSlot .logo {
+    width: 36px;
   }
 }

@@ -498,16 +498,11 @@ export default function SinglePlayer() {
       <RoomShell variant="booth">
         <div className={`${styles.column} ${styles.candidateColumn}`}>
           <div className={`${shellStyles.card} ${styles.card} ${styles.candidateCard}`}>
-            <button
-              type="button"
-              className={styles.cardBack}
-              onClick={() => {
-                setPage('pick');
-                window.scrollTo(0, 0);
-              }}
-            >
-              ← Back
-            </button>
+            {/* In Alliance Mode the CM candidate and alliance partner pickers
+                sit side by side, split by a line; in 1 vs Many only the first
+                shows. */}
+            <div className={mode === 'alliance' ? styles.splitPickers : undefined}>
+            <div className={styles.cmSection}>
             <h1 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your CM Candidate</h1>
             <p className={styles.candidateSub}>{party.name}</p>
 
@@ -554,9 +549,10 @@ export default function SinglePlayer() {
               })}
             </div>
 
+            </div>
+
             {/* Alliance Mode: pick partner parties from those you didn't
-                choose to play as, in the same card below a divider. Several
-                can be picked. */}
+                choose to play as. Several can be picked. */}
             {mode === 'alliance' && (
               <div className={styles.partnerSection}>
                 <h2 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your Alliance Partner</h2>
@@ -582,13 +578,27 @@ export default function SinglePlayer() {
               </div>
             )}
 
-            {candidate === null ? (
-              <p className={styles.nextHint}>Select a candidate to continue.</p>
-            ) : (
-              <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`}>
-                Start Game
+            </div>
+
+            <div className={styles.cardFooter}>
+              <button
+                type="button"
+                className={styles.cardBack}
+                onClick={() => {
+                  setPage('pick');
+                  window.scrollTo(0, 0);
+                }}
+              >
+                ← Back
               </button>
-            )}
+              {candidate === null ? (
+                <p className={styles.nextHint}>Select a candidate to continue.</p>
+              ) : (
+                <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`}>
+                  Start Game
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Card under the candidate picker, split by a T into a
