@@ -358,6 +358,13 @@ export default function SinglePlayer() {
       else next.add(id);
       return next;
     });
+  // Whether Next has been pressed on the candidate page, revealing the "Add
+  // Your Candidates" box. Scrolls it into view when it appears.
+  const [showSeats, setShowSeats] = useState(false);
+  const seatsCardRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (showSeats) seatsCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [showSeats]);
   // Seat outlines for the mini map on the candidate page.
   const { state } = useGame();
   const seats = useMemo(() => Object.values(state.staticSeats ?? {}), [state.staticSeats]);
@@ -562,8 +569,16 @@ export default function SinglePlayer() {
               >
                 ← Back
               </button>
-              {candidate === null ? (
-                <p className={styles.nextHint}>Select a candidate to continue.</p>
+              {candidate === null || (mode === 'alliance' && partners.size === 0) ? (
+                <p className={styles.nextHint}>
+                  {mode === 'alliance'
+                    ? 'Select a candidate and an alliance partner to continue.'
+                    : 'Select a candidate to continue.'}
+                </p>
+              ) : !showSeats ? (
+                <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`} onClick={() => setShowSeats(true)}>
+                  Next →
+                </button>
               ) : (
                 <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`}>
                   Start Game
@@ -605,12 +620,13 @@ export default function SinglePlayer() {
           )}
           </div>
 
-          {/* Card under the candidate picker, split by a T into a
-              titled top strip and two halves below: an arch diagram of the 70
-              seats over a district-by-district seat list on the left, and on
-              the right a mini map that names the seat clicked. Seats ticked in
-              the list show in the party's colour on both the arch and map. */}
-          <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.tCard}`}>
+          {/* Shown once Next is pressed: a card split by a T into a titled
+              top strip and two halves below: an arch diagram of the 70 seats
+              over a district-by-district seat list on the left, and a mini map
+              on the right. Seats ticked in the list show in the party's colour
+              on both the arch and map. */}
+          {showSeats && (
+          <div ref={seatsCardRef} className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.tCard}`}>
             <div className={styles.tTop}>
               <h2 className={`${styles.heading} ${styles.tTitle}`}>Add Your Candidates</h2>
             </div>
@@ -624,6 +640,7 @@ export default function SinglePlayer() {
               )}
             </div>
           </div>
+          )}
         </div>
       </RoomShell>
     );
