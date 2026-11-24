@@ -27,6 +27,7 @@ import DistrictList from './DistrictList';
 import MiniSeatMap from './MiniSeatMap';
 import ParliamentArch from './ParliamentArch';
 import RoomShell, { shellStyles } from './RoomShell';
+import SeatContest, { type ContestParty } from './SeatContest';
 import SeatShare from './SeatShare';
 import styles from './SinglePlayer.module.css';
 
@@ -415,6 +416,8 @@ export default function SinglePlayer() {
   // Alliance Mode: a random order of the seats, dealt out in turn to your
   // party and each partner by their seat share. Shuffle deals a new order.
   const [shuffles, setShuffles] = useState(0);
+  // Seat clicked on the candidate page's map, whose contest is shown below it.
+  const [pickedSeat, setPickedSeat] = useState<string | null>(null);
   const seatOrder = useMemo(() => {
     const order = seats.map((s) => s.acNo);
     for (let i = order.length - 1; i > 0; i--) {
@@ -580,15 +583,59 @@ export default function SinglePlayer() {
       all: `Face every other party in the game: ${rivalNames(rivals)}.`
     };
     const activeOpponents = OPPONENT_OPTIONS.find((o) => o.id === opponents);
+    // Your party, as a row in a seat's contest table.
+    const youContest: ContestParty = {
+      id: selected,
+      short: real ? real.short : customName,
+      name: party.name,
+      symbol: party.symbol,
+      symbolLabel: real?.symbolLabel,
+      color: partyColor
+    };
     // Which party contests each seat on the map, dealt from the shuffled order.
     const seatColors: Record<string, string> = {};
+    const seatParty: Record<string, ContestParty> = {};
     {
       let at = 0;
-      for (const { count, color } of [{ count: yourSeats, color: partyColor }, ...partnerList.map((p) => ({ count: p.seats, color: p.color }))]) {
-        seatOrder.slice(at, at + count).forEach((acNo) => (seatColors[acNo] = color));
-        at += count;
+      for (const p of [{ ...youContest, seats: yourSeats }, ...partnerList]) {
+        seatOrder.slice(at, at + p.seats).forEach((acNo) => {
+          seatColors[acNo] = p.color;
+          seatParty[acNo] = p;
+        });
+        at += p.seats;
       }
     }
+    // Everyone contesting the clicked seat: your side's candidate (your party,
+    // or in Alliance Mode whichever ally the seat went to; in 1 vs Many only
+    // if the seat is ticked), then the opponents picked, if any.
+    const opponentParties: ContestParty[] = (
+      opponents === 'standard' ? standardRivals : opponents === 'all' ? rivals : []
+    ).map((p) => ({
+      id: p.id,
+      short: p.short,
+      name: p.name,
+      symbol: p.symbol,
+      symbolLabel: p.symbolLabel,
+      color: PARTY_COLORS[p.id] ?? 'var(--ink-muted)'
+    }));
+    const pickedSeatName = seats.find((st) => st.acNo === pickedSeat)?.name;
+    const ownSide = pickedSeat
+      ? mode === 'alliance'
+        ? seatParty[pickedSeat]
+        : tickedSeats.has(pickedSeat)
+          ? youContest
+          : undefined
+      : undefined;
+    const contesting = [...(ownSide ? [ownSide] : []), ...opponentParties];
+    const seatContest = pickedSeat && pickedSeatName && (
+      contesting.length > 0 ? (
+        <SeatContest seat={pickedSeatName} parties={contesting} />
+      ) : (
+        <p className={styles.contestEmpty}>
+          {pickedSeatName}: no one contesting yet. Tick the seat or pick your opponents.
+        </p>
+      )
+    );
     // Next reveals the "Add Your Candidates" box; Start Game then takes its
     // place (and doesn't do anything yet).
     const nextOrStart =
@@ -777,13 +824,23 @@ export default function SinglePlayer() {
               {seats.length > 0 && (
                 mode === 'alliance' ? (
                   <div className={styles.shareMap}>
-                    <MiniSeatMap seats={seats} seatColors={seatColors} />
+                    <MiniSeatMap seats={seats} seatColors={seatColors} selected={pickedSeat} onSelect={setPickedSeat} />
                     <button type="button" className={styles.cardBack} onClick={() => setShuffles((n) => n + 1)}>
                       🔀 Shuffle seats
                     </button>
+                    {seatContest}
                   </div>
                 ) : (
-                  <MiniSeatMap seats={seats} highlighted={tickedSeats} highlightColor={partyColor} />
+                  <div className={styles.shareMap}>
+                    <MiniSeatMap
+                      seats={seats}
+                      highlighted={tickedSeats}
+                      highlightColor={partyColor}
+                      selected={pickedSeat}
+                      onSelect={setPickedSeat}
+                    />
+                    {seatContest}
+                  </div>
                 )
               )}
             </div>

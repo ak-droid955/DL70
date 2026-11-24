@@ -11,12 +11,18 @@ export default function MiniSeatMap({
   seats,
   highlighted,
   highlightColor,
-  seatColors
+  seatColors,
+  selected,
+  onSelect
 }: {
   seats: StaticSeat[];
   highlighted?: ReadonlySet<string>;
   highlightColor?: string;
   seatColors?: Readonly<Record<string, string>>;
+  /** With `onSelect`, seats can be clicked (or picked with Enter/Space);
+   *  `selected` gets a heavier outline. */
+  selected?: string | null;
+  onSelect?: (acNo: string) => void;
 }) {
   const { paths, viewBox } = useMemo(() => projectSeats(seats), [seats]);
 
@@ -26,7 +32,7 @@ export default function MiniSeatMap({
         {paths.map((p) => (
           <path
             key={p.acNo}
-            className={styles.seat}
+            className={`${styles.seat} ${onSelect ? styles.seatClickable : ''} ${p.acNo === selected ? styles.seatPicked : ''}`}
             style={
               seatColors?.[p.acNo]
                 ? { fill: seatColors[p.acNo] }
@@ -35,6 +41,19 @@ export default function MiniSeatMap({
                   : undefined
             }
             d={p.d}
+            {...(onSelect && {
+              role: 'button',
+              tabIndex: 0,
+              'aria-label': p.name,
+              'aria-pressed': p.acNo === selected,
+              onClick: () => onSelect(p.acNo),
+              onKeyDown: (e: React.KeyboardEvent) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelect(p.acNo);
+                }
+              }
+            })}
           />
         ))}
       </svg>
