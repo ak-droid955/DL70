@@ -29,7 +29,7 @@ import ParliamentArch from './ParliamentArch';
 import RoomShell, { shellStyles } from './RoomShell';
 import SeatContest, { type ContestParty, type ContestRow } from './SeatContest';
 import SeatShare from './SeatShare';
-import OpponentAlliances from './OpponentAlliances';
+import OpponentAlliances, { type OpponentAlliance } from './OpponentAlliances';
 import styles from './SinglePlayer.module.css';
 
 // One row in the party details card. An array value renders as chips.
@@ -386,8 +386,8 @@ export default function SinglePlayer() {
   const [partners, setPartners] = useState<ReadonlySet<PartyId>>(() => new Set());
   // Standard or all-party opposition, picked under Add Your Candidates.
   const [opponents, setOpponents] = useState<OpponentsId | null>(null);
-  // Alliances among the opponents: groups of two or more party ids.
-  const [opponentAlliances, setOpponentAlliances] = useState<string[][]>([]);
+  // Alliances among the opponents: named groups of two or more party ids.
+  const [opponentAlliances, setOpponentAlliances] = useState<OpponentAlliance[]>([]);
   // Seats each alliance partner contests; your party takes the rest.
   const [shares, setShares] = useState<Shares>({});
   const togglePartner = (id: PartyId) => {
@@ -656,8 +656,8 @@ export default function SinglePlayer() {
     // (the opponent option or your partners may have changed since).
     const opponentIds = new Set(opponentParties.map((p) => p.id));
     const validOpponentAlliances = opponentAlliances
-      .map((g) => g.filter((id) => opponentIds.has(id)))
-      .filter((g) => g.length >= 2);
+      .map((a) => ({ ...a, members: a.members.filter((id) => opponentIds.has(id)) }))
+      .filter((a) => a.members.length >= 2);
     const pickedSeatName = seats.find((st) => st.acNo === pickedSeat)?.name;
     // Your side's rows, each with a tick box for who contests the seat: in
     // Alliance Mode one ally (ticking another hands the seat over); in 1 vs

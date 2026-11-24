@@ -32,6 +32,9 @@
 }
 .allianceLabel {
   width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-ui);
   font-weight: 700;
   font-size: 11px;
@@ -151,4 +154,62 @@
 .add {
   flex: none;
   align-self: stretch;
+}
+
+/* Renaming an alliance. */
+.rename {
+  padding: 0 2px;
+  border: none;
+  background: none;
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+.rename:hover {
+  color: var(--ink);
+}
+.nameEdit {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.nameInput {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: white;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+}
+.nameInputBad {
+  border-color: #c0392b;
+}
+.nameSave {
+  flex: none;
+  padding: 5px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+.nameSave:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.nameError {
+  width: 100%;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #c0392b;
 }
