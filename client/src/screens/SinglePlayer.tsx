@@ -851,6 +851,45 @@ export default function SinglePlayer() {
               )}
             </div>
           )}
+
+          {/* Opponent selection, to the right of the alliance partner box (of
+              the CM box in 1 vs Many) on wide screens, below them on narrower
+              ones: two options, then the picked one's explainer. */}
+          {showSeats && (
+            <div
+              className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.opponentCard} ${activeOpponents ? '' : styles.modeCardCompact}`}
+            >
+              <h2 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your Opponents</h2>
+              <div className={styles.modeSplit}>
+                <div className={styles.modes} role="radiogroup" aria-label="Opponents">
+                  {OPPONENT_OPTIONS.map((o) => {
+                    const isSelected = opponents === o.id;
+                    return (
+                      <button
+                        key={o.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={isSelected}
+                        className={`${styles.modeBtn} ${isSelected ? styles.modeBtnSelected : ''}`}
+                        onClick={() => setOpponents(o.id)}
+                      >
+                        {o.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {activeOpponents && (
+                  <div className={styles.modeRow}>
+                    <div className={`${styles.modeInfo} ${styles.modeInfoShown}`} key={activeOpponents.id}>
+                      <h3 className={styles.modeInfoTitle}>{activeOpponents.label}</h3>
+                      <p className={styles.modeInfoTagline}>{activeOpponents.tagline}</p>
+                      <p className={styles.modeInfoText}>{opponentText[activeOpponents.id]}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           </div>
 
           {/* Shown once Next is pressed: a card split by a T into a titled
@@ -859,8 +898,6 @@ export default function SinglePlayer() {
               Many has a district-by-district seat list (ticked seats show in
               the party's colour on the arch and map); Alliance Mode has
               seat-sharing sliders instead, shown on the arch. */}
-          {/* Add Your Candidates, with the opponent picker to its right on
-              wide screens (below it on narrower ones). */}
           <div className={styles.seatsRow}>
           {showSeats && (
           <div ref={seatsCardRef} className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.tCard}`}>
@@ -933,44 +970,6 @@ export default function SinglePlayer() {
           </div>
           )}
 
-          {/* Opponent selection, under Add Your Candidates: two options on the
-              left; past a divider, the picked one's explainer on the right.
-              Compact until one is picked, like the mode card. */}
-          {showSeats && (
-            <div
-              className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.opponentCard} ${activeOpponents ? '' : styles.modeCardCompact}`}
-            >
-              <h2 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your Opponents</h2>
-              <div className={styles.modeSplit}>
-                <div className={styles.modes} role="radiogroup" aria-label="Opponents">
-                  {OPPONENT_OPTIONS.map((o) => {
-                    const isSelected = opponents === o.id;
-                    return (
-                      <button
-                        key={o.id}
-                        type="button"
-                        role="radio"
-                        aria-checked={isSelected}
-                        className={`${styles.modeBtn} ${isSelected ? styles.modeBtnSelected : ''}`}
-                        onClick={() => setOpponents(o.id)}
-                      >
-                        {o.label}
-                      </button>
-                    );
-                  })}
-                </div>
-                {activeOpponents && (
-                  <div className={styles.modeRow}>
-                    <div className={`${styles.modeInfo} ${styles.modeInfoShown}`} key={activeOpponents.id}>
-                      <h3 className={styles.modeInfoTitle}>{activeOpponents.label}</h3>
-                      <p className={styles.modeInfoTagline}>{activeOpponents.tagline}</p>
-                      <p className={styles.modeInfoText}>{opponentText[activeOpponents.id]}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
           </div>
         </div>
       </RoomShell>

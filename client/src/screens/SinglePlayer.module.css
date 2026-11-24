@@ -1130,46 +1130,6 @@ span.candidateSymbol {
   }
 }
 
-/* Wide screens: Add Your Candidates (700px) with the opponent picker
-   (340px) to its right, the pair centred on the page. The picker then
-   stacks its buttons over the explainer, divided by a horizontal line. */
-.seatsRow:empty {
-  display: none;
-}
-@media (min-width: 1200px) {
-  .seatsRow {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    margin-left: -177px;
-    margin-right: -177px;
-  }
-  .seatsRow > .tCard {
-    flex: 0 0 700px;
-    margin-top: 0;
-  }
-  .seatsRow > .opponentCard,
-  .seatsRow > .opponentCard.modeCardCompact {
-    flex: 0 0 340px;
-    max-width: none;
-    margin-top: 0;
-  }
-  .seatsRow > .opponentCard .modeSplit {
-    grid-template-columns: 1fr;
-  }
-  .seatsRow > .opponentCard .modes {
-    padding-right: 0;
-  }
-  .seatsRow > .opponentCard .modeRow {
-    margin-top: 16px;
-    padding: 16px 0 0;
-    border-left: none;
-    border-top: 2.5px solid var(--ink);
-  }
-  .seatsRow > .opponentCard .candidateHeading {
-    font-size: 22px;
-  }
-}
 
 /* "Change contestant party" dropdown under the seat-sharing sliders. */
 .changeBox {
@@ -1229,24 +1189,75 @@ span.candidateSymbol {
   text-align: center;
 }
 
-/* Wide screens: the CM candidate and alliance partner boxes keep their
-   sizes but move left, so the CM box's left edge lines up with Add Your
-   Candidates below. */
-@media (min-width: 1200px) {
-  .pickerPair {
-    grid-template-columns: minmax(0, 1fr) 312px;
-    width: 830px;
-    margin: 0 0 0 -177px;
-  }
-}
 /* Add Your Candidates isn't held to the mode card's width. */
 .tCard {
   max-width: none;
 }
-/* 1 vs Many, wide screens: the CM candidate box alone, same size, moved left
-   to line up with Add Your Candidates below. */
+
+/* The opponent picker sits in the top row with the CM candidate (and
+   alliance partner) boxes. Narrower screens put it on its own row below
+   them; it stacks its buttons over the explainer. */
+.opponentCard {
+  margin-top: 0;
+}
+.pickerPair > .opponentCard {
+  grid-column: 1 / -1;
+}
+.soloPicker > .opponentCard {
+  margin-top: 14px;
+}
+.seatsRow:empty {
+  display: none;
+}
+/* Wide screens: one row of CM candidate (504px), alliance partner (312px)
+   and opponents (300px) boxes, or CM (700px) and opponents in 1 vs Many,
+   centred; Add Your Candidates below lines up with the CM box. */
 @media (min-width: 1200px) {
+  .pickerPair {
+    grid-template-columns: 504px 312px 300px;
+    width: 1144px;
+    margin: 0 0 0 -222px;
+  }
   .soloPicker {
-    margin: 0 177px 0 -177px;
+    display: grid;
+    grid-template-columns: 700px 300px;
+    gap: 14px;
+    width: 1014px;
+    margin: 0 0 0 -157px;
+  }
+  .pickerPair > .opponentCard {
+    grid-column: auto;
+  }
+  .soloPicker > .opponentCard {
+    margin-top: 0;
+  }
+  .seatsRow {
+    width: 700px;
+  }
+  .pickerPair ~ .seatsRow {
+    margin-left: -222px;
+  }
+  .soloPicker ~ .seatsRow {
+    margin-left: -157px;
+  }
+  .pickerPair > .opponentCard,
+  .soloPicker > .opponentCard,
+  .opponentCard.modeCardCompact {
+    max-width: none;
+  }
+  .opponentCard .modeSplit {
+    grid-template-columns: 1fr;
+  }
+  .opponentCard .modes {
+    padding-right: 0;
+  }
+  .opponentCard .modeRow {
+    margin-top: 16px;
+    padding: 16px 0 0;
+    border-left: none;
+    border-top: 2.5px solid var(--ink);
+  }
+  .opponentCard .candidateHeading {
+    font-size: 20px;
   }
 }
