@@ -867,6 +867,24 @@ span.candidateSymbol {
   font-size: 10px;
 }
 
+/* Wide screens: the CM candidate box reaches further out to the left, so
+   its candidate cards can be wider and names don't break mid-word. The
+   alliance partner box keeps its size and place. */
+@media (min-width: 1000px) {
+  .pickerPair {
+    grid-template-columns: minmax(0, 1fr) 312px;
+    margin-left: -130px;
+  }
+  .pickerPair .lineupSlot,
+  .pickerPair .candidateBox {
+    width: 100px;
+  }
+  .pickerPair .candidateName {
+    font-size: 11px;
+    overflow-wrap: normal;
+  }
+}
+
 /* Back on the left, then the hint or Start Game, under both pickers. */
 .cardFooter {
   display: flex;
