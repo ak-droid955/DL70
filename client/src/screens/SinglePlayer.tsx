@@ -807,6 +807,9 @@ export default function SinglePlayer() {
             nothing acts on the chosen mode yet. */}
         <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard}`}>
           <h2 className={styles.heading}>Select Mode</h2>
+          {/* Mode buttons on the left; past a divider, the picked mode's
+              explainer and Next on the right. */}
+          <div className={styles.modeSplit}>
           <div className={styles.modes} role="radiogroup" aria-label="Game mode">
             {MODES.map((m) => {
               const isSelected = mode === m.id;
@@ -828,8 +831,8 @@ export default function SinglePlayer() {
           {/* Explainer for the picked mode. */}
           {/* All three explainers share one grid cell so the box is always as
               tall as the longest one; only the picked mode's is visible. */}
-          {/* The picked mode's explainer, with Next (or the hint) beside it. */}
           <div className={styles.modeRow}>
+          {!activeMode && <p className={styles.modePrompt}>Pick a mode to see what it's about.</p>}
           {activeMode && (
             <div className={styles.modeInfoStack}>
               {MODES.map((m) => {
@@ -858,6 +861,7 @@ export default function SinglePlayer() {
               Next →
             </button>
           )}
+          </div>
           </div>
         </div>
       </div>

@@ -238,6 +238,7 @@
 .modes {
   display: grid;
   grid-template-columns: 1fr;
+  align-content: start;
   gap: 12px;
 }
 
@@ -1040,42 +1041,53 @@ span.candidateSymbol {
   color: var(--ink-muted);
 }
 
-/* Mode explainer with Next (or the hint) on its right. Phones stack them. */
+/* Mode card: the buttons in a column on the left, at the width they had
+   in a row of three; a divider; then the picked mode's explainer with Next
+   (or the hint) under it. Phones stack everything. */
+.modeSplit {
+  display: grid;
+  grid-template-columns: 176px minmax(0, 1fr);
+}
+.modeSplit .modes {
+  padding-right: 20px;
+}
 .modeRow {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 18px;
-}
-.modeRow:empty {
-  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  min-width: 0;
+  padding-left: 20px;
+  border-left: 2.5px solid var(--ink);
 }
 .modeRow .modeInfoStack {
-  flex: 1;
-  min-width: 0;
   margin-top: 0;
 }
 .modeRow .nextBtn {
-  flex: none;
-  width: auto;
   margin-top: 0;
-  padding: 14px 26px;
-  white-space: nowrap;
 }
 .modeRow .nextHint {
-  flex: none;
-  max-width: 150px;
   margin: 0;
 }
+.modePrompt {
+  margin: auto 0;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
 @media (max-width: 640px) {
+  .modeSplit {
+    grid-template-columns: 1fr;
+  }
+  .modeSplit .modes {
+    padding-right: 0;
+  }
   .modeRow {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .modeRow .nextBtn {
-    width: 100%;
-  }
-  .modeRow .nextHint {
-    max-width: none;
+    margin-top: 16px;
+    padding: 16px 0 0;
+    border-left: none;
+    border-top: 2.5px solid var(--ink);
   }
 }
