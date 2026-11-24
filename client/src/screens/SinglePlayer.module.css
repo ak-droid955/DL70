@@ -805,7 +805,7 @@ span.candidateSymbol {
    divided by a vertical line that runs the card's full height. */
 .splitPickers {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.2fr 1fr;
   margin: -18px -20px 0;
 }
 .splitPickers .cmSection {
@@ -821,7 +821,40 @@ span.candidateSymbol {
   font-size: 22px;
 }
 .splitPickers .lineup {
-  gap: 14px;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+/* Smaller candidate cards, all in one row, so the CM side is no taller than
+   the alliance partner list beside it. */
+.splitPickers .lineupSlot,
+.splitPickers .candidateBox {
+  width: 80px;
+}
+.splitPickers .candidateBox {
+  aspect-ratio: auto;
+  border-radius: 10px;
+  border-width: 2px;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.splitPickers .candidatePhoto {
+  flex: none;
+  aspect-ratio: 1;
+  margin: 5px 5px 0;
+  border-radius: 6px;
+}
+.splitPickers .candidateImg {
+  width: calc(100% - 10px);
+}
+.splitPickers .candidateParty {
+  gap: 4px;
+  padding: 5px;
+}
+.splitPickers .candidateSymbol {
+  width: 16px;
+  height: 16px;
+}
+.splitPickers .candidateName {
+  font-size: 10px;
 }
 
 /* Back on the left, then the hint or Start Game, under both pickers. */
@@ -942,10 +975,24 @@ span.candidateSymbol {
   }
 }
 
-/* Phones: the two pickers stack, divided by a horizontal line instead. */
+/* Phones: the two pickers stack, divided by a horizontal line instead. The
+   card's side padding is 16px here, so the full-bleed sections match it. */
 @media (max-width: 640px) {
   .splitPickers {
     grid-template-columns: 1fr;
+    margin: -18px -16px 0;
+  }
+  .splitPickers .cmSection,
+  .splitPickers .partnerSection {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .splitPickers .lineup {
+    gap: 6px;
+  }
+  .cardFooter {
+    margin: 16px -16px 0;
+    padding: 14px 16px 0;
   }
   .splitPickers .cmSection {
     border-right: none;
