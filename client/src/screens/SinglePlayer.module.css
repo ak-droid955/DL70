@@ -1229,35 +1229,22 @@ span.candidateSymbol {
   text-align: center;
 }
 
-/* Wide screens: line the CM candidate and alliance partner boxes up with
-   Add Your Candidates (700px) and the opponent picker (340px) below. */
+/* Wide screens: the CM candidate and alliance partner boxes keep their
+   sizes but move left, so the CM box's left edge lines up with Add Your
+   Candidates below. */
 @media (min-width: 1200px) {
   .pickerPair {
-    grid-template-columns: 700px 340px;
-    margin: 0 -177px;
+    grid-template-columns: minmax(0, 1fr) 312px;
+    width: 830px;
+    margin: 0 0 0 -177px;
   }
 }
 /* Add Your Candidates isn't held to the mode card's width. */
 .tCard {
   max-width: none;
 }
-/* Mid-wide screens: the pickers above reach 65px past the column on each
-   side, so the boxes below do too, keeping their edges in line. */
-@media (min-width: 1000px) and (max-width: 1199px) {
-  .seatsRow {
-    margin: 0 -65px;
-  }
-  .seatsRow > .opponentCard:not(.modeCardCompact) {
-    max-width: none;
-  }
-}
-/* 1 vs Many: the CM candidate box alone, lined up with Add Your Candidates
-   below (its left edge on wide screens, both edges on mid-wide ones). */
-@media (min-width: 1000px) and (max-width: 1199px) {
-  .soloPicker {
-    margin: 0 -65px;
-  }
-}
+/* 1 vs Many, wide screens: the CM candidate box alone, same size, moved left
+   to line up with Add Your Candidates below. */
 @media (min-width: 1200px) {
   .soloPicker {
     margin: 0 177px 0 -177px;
