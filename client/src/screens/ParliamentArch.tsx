@@ -26,18 +26,27 @@ function seatsPerRow(total: number, radii: number[]): number[] {
 
 /** Arch-style parliament diagram: `seats` white circles in concentric
  *  half-rings, with `label` in the middle. The first `filled` seats, counted
- *  from the left edge of the arch, are coloured `fillColor`. */
+ *  from the left edge of the arch, are coloured `fillColor`. Alternatively
+ *  `segments` colours consecutive runs of seats, left to right. */
 export default function ParliamentArch({
   seats,
   label,
   filled = 0,
-  fillColor
+  fillColor,
+  segments
 }: {
   seats: number;
   label: string;
   filled?: number;
   fillColor?: string;
+  segments?: { count: number; color: string }[];
 }) {
+  // Colour of each seat, left to right.
+  const colors = useMemo(() => {
+    if (segments) return segments.flatMap((sg) => Array<string>(Math.max(0, sg.count)).fill(sg.color));
+    return fillColor ? Array<string>(filled).fill(fillColor) : [];
+  }, [segments, filled, fillColor]);
+  const ariaLabel = segments ? `${seats} seats shared` : `${filled} of ${seats} seats picked`;
   const dots = useMemo(() => {
     const radii = Array.from({ length: ROWS }, (_, i) => INNER + ((1 - INNER) * i) / (ROWS - 1));
     const counts = seatsPerRow(seats, radii);
@@ -54,12 +63,12 @@ export default function ParliamentArch({
   }, [seats]);
 
   return (
-    <svg className={styles.arch} viewBox="-1.08 -1.08 2.16 1.16" role="img" aria-label={`${filled} of ${seats} seats picked`}>
+    <svg className={styles.arch} viewBox="-1.08 -1.08 2.16 1.16" role="img" aria-label={ariaLabel}>
       {dots.map((d, i) => (
         <circle
           key={d.key}
           className={styles.dot}
-          style={i < filled && fillColor ? { fill: fillColor } : undefined}
+          style={colors[i] ? { fill: colors[i] } : undefined}
           cx={d.x}
           cy={d.y}
           r={DOT}

@@ -27,6 +27,7 @@ import DistrictList from './DistrictList';
 import MiniSeatMap from './MiniSeatMap';
 import ParliamentArch from './ParliamentArch';
 import RoomShell, { shellStyles } from './RoomShell';
+import SeatShare from './SeatShare';
 import styles from './SinglePlayer.module.css';
 
 // One row in the party details card. An array value renders as chips.
@@ -193,6 +194,33 @@ const PARTIES: readonly {
   }
 ];
 
+// Alliance Mode seat sharing: of Delhi's 70 seats, each alliance partner
+// gets at least 15% (rounded up to 11), and your own party keeps at least as
+// many. That allows up to 5 partners.
+const TOTAL_SEATS = 70;
+const MIN_PARTNER_SEATS = Math.ceil(TOTAL_SEATS * 0.15);
+const MAX_PARTNERS = Math.floor((TOTAL_SEATS - MIN_PARTNER_SEATS) / MIN_PARTNER_SEATS);
+const NO_SEATS: ReadonlySet<string> = new Set();
+
+type Shares = Partial<Record<PartyId, number>>;
+
+/** Seat shares for `ids`: existing shares kept, new partners at the
+ *  minimum, then the biggest shares trimmed (never below the minimum) until
+ *  your own party has at least the minimum left. */
+function fitShares(ids: PartyId[], cur: Shares): Shares {
+  const next: Shares = {};
+  ids.forEach((id) => (next[id] = cur[id] ?? MIN_PARTNER_SEATS));
+  let over = ids.reduce((a, id) => a + (next[id] ?? 0), 0) - (TOTAL_SEATS - MIN_PARTNER_SEATS);
+  while (over > 0) {
+    const big = ids.reduce((a, b) => ((next[b] ?? 0) > (next[a] ?? 0) ? b : a));
+    const cut = Math.min(over, (next[big] ?? 0) - MIN_PARTNER_SEATS);
+    if (cut <= 0) break;
+    next[big] = (next[big] ?? 0) - cut;
+    over -= cut;
+  }
+  return next;
+}
+
 /** A party's symbol, or an empty placeholder box until one is added. */
 function PartySymbol({ src, label, className }: { src?: string; label?: string; className: string }) {
   return src ? (
@@ -351,13 +379,28 @@ export default function SinglePlayer() {
   const [candidate, setCandidate] = useState<number | null>(null);
   // Parties picked as alliance partners (Alliance Mode only).
   const [partners, setPartners] = useState<ReadonlySet<PartyId>>(() => new Set());
-  const togglePartner = (id: PartyId) =>
-    setPartners((cur) => {
-      const next = new Set(cur);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  // Seats each alliance partner contests; your party takes the rest.
+  const [shares, setShares] = useState<Shares>({});
+  const togglePartner = (id: PartyId) => {
+    const next = new Set(partners);
+    if (next.has(id)) next.delete(id);
+    else if (next.size < MAX_PARTNERS) next.add(id);
+    else return;
+    setPartners(next);
+    setShares((cur) =>
+      fitShares(
+        PARTIES.map((p) => p.id).filter((p) => next.has(p)),
+        cur
+      )
+    );
+  };
+  const partnerSeats = (id: PartyId) => shares[id] ?? MIN_PARTNER_SEATS;
+  // Move one partner's slider, keeping the minimum for your own party.
+  const setShare = (id: PartyId, seats: number) => {
+    const others = [...partners].filter((p) => p !== id).reduce((a, p) => a + partnerSeats(p), 0);
+    const most = TOTAL_SEATS - MIN_PARTNER_SEATS - others;
+    setShares((cur) => ({ ...cur, [id]: Math.max(MIN_PARTNER_SEATS, Math.min(most, seats)) }));
+  };
   // Whether Next has been pressed on the candidate page, revealing the "Add
   // Your Candidates" box. Scrolls it into view when it appears.
   const [showSeats, setShowSeats] = useState(false);
@@ -501,6 +544,17 @@ export default function SinglePlayer() {
       ? { name: real.name, symbol: real.symbol, alt: `${real.symbolLabel ?? 'Party'} symbol`, custom: false }
       : { name: customName, symbol: customSymbol, alt: 'Your party symbol', custom: true };
     const partyColor = PARTY_COLORS[selected] ?? 'var(--ink)';
+    // Alliance Mode: each partner's seat share, and what's left for you.
+    const partnerList = PARTIES.filter((p) => partners.has(p.id)).map((p) => ({
+      id: p.id,
+      short: p.short,
+      name: p.name,
+      symbol: p.symbol,
+      symbolLabel: p.symbolLabel,
+      color: PARTY_COLORS[p.id] ?? 'var(--ink-muted)',
+      seats: partnerSeats(p.id)
+    }));
+    const yourSeats = TOTAL_SEATS - partnerList.reduce((a, p) => a + p.seats, 0);
     // Next reveals the "Add Your Candidates" box; Start Game then takes its
     // place (and doesn't do anything yet).
     const nextOrStart =
@@ -600,10 +654,11 @@ export default function SinglePlayer() {
                 <div className={styles.partnerGrid}>
                   {PARTIES.filter((p) => p.id !== selected).map((p) => {
                     const on = partners.has(p.id);
+                    const full = !on && partners.size >= MAX_PARTNERS;
                     return (
                       <label
                         key={p.id}
-                        className={`${styles.partnerRow} ${on ? styles.partnerRowOn : ''}`}
+                        className={`${styles.partnerRow} ${on ? styles.partnerRowOn : ''} ${full ? styles.partnerRowOff : ''}`}
                         title={p.name}
                       >
                         <PartySymbol src={p.symbol} label={p.symbolLabel} className={styles.partnerSymbol} />
@@ -612,6 +667,7 @@ export default function SinglePlayer() {
                           type="checkbox"
                           className={styles.partnerTick}
                           checked={on}
+                          disabled={full}
                           onChange={() => togglePartner(p.id)}
                           aria-label={p.name}
                         />
@@ -619,6 +675,11 @@ export default function SinglePlayer() {
                     );
                   })}
                 </div>
+                {partners.size >= MAX_PARTNERS && (
+                  <p className={styles.partnerLimit}>
+                    Up to {MAX_PARTNERS} alliance partners: each must get at least 15% of the seats.
+                  </p>
+                )}
               </div>
               {/* Next appears here once a partner (and a CM candidate) is
                   picked. */}
@@ -631,21 +692,56 @@ export default function SinglePlayer() {
 
           {/* Shown once Next is pressed: a card split by a T into a titled
               top strip and two halves below: an arch diagram of the 70 seats
-              over a district-by-district seat list on the left, and a mini map
-              on the right. Seats ticked in the list show in the party's colour
-              on both the arch and map. */}
+              on the left, and a mini map on the right. Under the arch, 1 vs
+              Many has a district-by-district seat list (ticked seats show in
+              the party's colour on the arch and map); Alliance Mode has
+              seat-sharing sliders instead, shown on the arch. */}
           {showSeats && (
           <div ref={seatsCardRef} className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.tCard}`}>
             <div className={styles.tTop}>
               <h2 className={`${styles.heading} ${styles.tTitle}`}>Add Your Candidates</h2>
             </div>
             <div className={styles.tLeft}>
-              <ParliamentArch seats={70} label="70" filled={tickedSeats.size} fillColor={partyColor} />
-              {seats.length > 0 && <DistrictList seats={seats} ticked={tickedSeats} onToggle={toggleSeat} onSetAll={setSeats} />}
+              {mode === 'alliance' ? (
+                <>
+                  <ParliamentArch
+                    seats={TOTAL_SEATS}
+                    label={String(TOTAL_SEATS)}
+                    segments={[
+                      { count: yourSeats, color: partyColor },
+                      ...partnerList.map((p) => ({ count: p.seats, color: p.color }))
+                    ]}
+                  />
+                  <SeatShare
+                    total={TOTAL_SEATS}
+                    min={MIN_PARTNER_SEATS}
+                    you={{
+                      id: selected,
+                      short: real ? real.short : customName,
+                      name: party.name,
+                      symbol: party.symbol,
+                      symbolLabel: real?.symbolLabel,
+                      color: partyColor,
+                      seats: yourSeats
+                    }}
+                    partners={partnerList}
+                    onChange={(id, n) => setShare(id as PartyId, n)}
+                  />
+                </>
+              ) : (
+                <>
+                  <ParliamentArch seats={TOTAL_SEATS} label={String(TOTAL_SEATS)} filled={tickedSeats.size} fillColor={partyColor} />
+                  {seats.length > 0 && <DistrictList seats={seats} ticked={tickedSeats} onToggle={toggleSeat} onSetAll={setSeats} />}
+                </>
+              )}
             </div>
             <div className={styles.tRight}>
               {seats.length > 0 && (
-                <MiniSeatMap seats={seats} highlighted={tickedSeats} highlightColor={partyColor} />
+                <MiniSeatMap
+                  seats={seats}
+                  highlighted={mode === 'alliance' ? NO_SEATS : tickedSeats}
+                  highlightColor={partyColor}
+                />
               )}
             </div>
           </div>
