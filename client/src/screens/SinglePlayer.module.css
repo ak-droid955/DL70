@@ -1038,3 +1038,43 @@ span.candidateSymbol {
   line-height: 1.35;
   color: var(--ink-muted);
 }
+
+/* Mode explainer with Next (or the hint) on its right. Phones stack them. */
+.modeRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+.modeRow:empty {
+  display: none;
+}
+.modeRow .modeInfoStack {
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
+}
+.modeRow .nextBtn {
+  flex: none;
+  width: auto;
+  margin-top: 0;
+  padding: 14px 26px;
+  white-space: nowrap;
+}
+.modeRow .nextHint {
+  flex: none;
+  max-width: 150px;
+  margin: 0;
+}
+@media (max-width: 640px) {
+  .modeRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .modeRow .nextBtn {
+    width: 100%;
+  }
+  .modeRow .nextHint {
+    max-width: none;
+  }
+}

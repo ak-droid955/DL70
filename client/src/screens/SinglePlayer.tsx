@@ -828,6 +828,8 @@ export default function SinglePlayer() {
           {/* Explainer for the picked mode. */}
           {/* All three explainers share one grid cell so the box is always as
               tall as the longest one; only the picked mode's is visible. */}
+          {/* The picked mode's explainer, with Next (or the hint) beside it. */}
+          <div className={styles.modeRow}>
           {activeMode && (
             <div className={styles.modeInfoStack}>
               {MODES.map((m) => {
@@ -856,6 +858,7 @@ export default function SinglePlayer() {
               Next →
             </button>
           )}
+          </div>
         </div>
       </div>
 
