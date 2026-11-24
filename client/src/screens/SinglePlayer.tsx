@@ -184,11 +184,11 @@ const PARTIES: readonly {
     row: 2,
     stats: [
       { label: 'Last election', value: '—' },
-      { label: 'Ideologies', value: '—' },
-      { label: 'Founders', value: '—' },
+      { label: 'Ideologies', value: ['Social justice', 'Populism', 'Liberalism', 'Secularism'] },
+      { label: 'Founders', value: ['Abhijeet Dipke', 'Ashutosh Ranka', 'Saurav Das'] },
       { label: 'Delhi CMs', value: '—' },
       { label: 'Jurisdiction', value: '—' },
-      { label: 'Founded', value: '—' }
+      { label: 'Founded', value: '2026' }
     ]
   }
 ];
