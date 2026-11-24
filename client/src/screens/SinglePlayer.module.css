@@ -1098,3 +1098,13 @@ span.candidateSymbol {
     border-top: 2.5px solid var(--ink);
   }
 }
+
+/* Alliance Mode map, coloured by which party contests each seat, with a
+   button to deal the seats out again. */
+.shareMap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}

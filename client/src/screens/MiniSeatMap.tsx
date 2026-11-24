@@ -4,16 +4,19 @@ import type { StaticSeat } from '../lib/types';
 import styles from './MiniSeatMap.module.css';
 
 /** Small, uncoloured map of the 70 assembly constituencies. Seats in
- *  `highlighted` fill with `highlightColor`.
+ *  `highlighted` fill with `highlightColor`; `seatColors` (seat number to
+ *  colour) fills seats individually instead.
  *  Separate from the landing page's coloured ConstituencyMap. */
 export default function MiniSeatMap({
   seats,
   highlighted,
-  highlightColor
+  highlightColor,
+  seatColors
 }: {
   seats: StaticSeat[];
-  highlighted: ReadonlySet<string>;
-  highlightColor: string;
+  highlighted?: ReadonlySet<string>;
+  highlightColor?: string;
+  seatColors?: Readonly<Record<string, string>>;
 }) {
   const { paths, viewBox } = useMemo(() => projectSeats(seats), [seats]);
 
@@ -24,7 +27,13 @@ export default function MiniSeatMap({
           <path
             key={p.acNo}
             className={styles.seat}
-            style={highlighted.has(p.acNo) ? { fill: highlightColor } : undefined}
+            style={
+              seatColors?.[p.acNo]
+                ? { fill: seatColors[p.acNo] }
+                : highlighted?.has(p.acNo) && highlightColor
+                  ? { fill: highlightColor }
+                  : undefined
+            }
             d={p.d}
           />
         ))}

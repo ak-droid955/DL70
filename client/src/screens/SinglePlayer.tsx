@@ -200,7 +200,6 @@ const PARTIES: readonly {
 const TOTAL_SEATS = 70;
 const MIN_PARTNER_SEATS = Math.ceil(TOTAL_SEATS * 0.15);
 const MAX_PARTNERS = Math.floor((TOTAL_SEATS - MIN_PARTNER_SEATS) / MIN_PARTNER_SEATS);
-const NO_SEATS: ReadonlySet<string> = new Set();
 
 type Shares = Partial<Record<PartyId, number>>;
 
@@ -400,6 +399,18 @@ export default function SinglePlayer() {
   // Seat outlines for the mini map on the candidate page.
   const { state } = useGame();
   const seats = useMemo(() => Object.values(state.staticSeats ?? {}), [state.staticSeats]);
+  // Alliance Mode: a random order of the seats, dealt out in turn to your
+  // party and each partner by their seat share. Shuffle deals a new order.
+  const [shuffles, setShuffles] = useState(0);
+  const seatOrder = useMemo(() => {
+    const order = seats.map((s) => s.acNo);
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    return order;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seats, shuffles]);
   // Constituencies ticked in the district list; shown in the party's colour
   // on the mini map and the arch diagram.
   const [tickedSeats, setTickedSeats] = useState<ReadonlySet<string>>(() => new Set());
@@ -544,6 +555,15 @@ export default function SinglePlayer() {
       seats: partnerSeats(p.id)
     }));
     const yourSeats = TOTAL_SEATS - partnerList.reduce((a, p) => a + p.seats, 0);
+    // Which party contests each seat on the map, dealt from the shuffled order.
+    const seatColors: Record<string, string> = {};
+    {
+      let at = 0;
+      for (const { count, color } of [{ count: yourSeats, color: partyColor }, ...partnerList.map((p) => ({ count: p.seats, color: p.color }))]) {
+        seatOrder.slice(at, at + count).forEach((acNo) => (seatColors[acNo] = color));
+        at += count;
+      }
+    }
     // Next reveals the "Add Your Candidates" box; Start Game then takes its
     // place (and doesn't do anything yet).
     const nextOrStart =
@@ -726,11 +746,16 @@ export default function SinglePlayer() {
             </div>
             <div className={styles.tRight}>
               {seats.length > 0 && (
-                <MiniSeatMap
-                  seats={seats}
-                  highlighted={mode === 'alliance' ? NO_SEATS : tickedSeats}
-                  highlightColor={partyColor}
-                />
+                mode === 'alliance' ? (
+                  <div className={styles.shareMap}>
+                    <MiniSeatMap seats={seats} seatColors={seatColors} />
+                    <button type="button" className={styles.cardBack} onClick={() => setShuffles((n) => n + 1)}>
+                      🔀 Shuffle seats
+                    </button>
+                  </div>
+                ) : (
+                  <MiniSeatMap seats={seats} highlighted={tickedSeats} highlightColor={partyColor} />
+                )
               )}
             </div>
           </div>
