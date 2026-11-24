@@ -16,12 +16,14 @@ export type ShareParty = {
 export default function SeatShare({
   total,
   min,
+  minShare,
   you,
   partners,
   onChange
 }: {
   total: number;
   min: number;
+  minShare: number;
   you: ShareParty;
   partners: ShareParty[];
   onChange: (id: string, seats: number) => void;
@@ -55,7 +57,7 @@ export default function SeatShare({
         </div>
       ))}
       <p className={styles.note}>
-        Each alliance partner must get at least 15% of the seats ({min} of {total}).
+        Each alliance partner must get at least {Math.round(minShare * 100)}% of the seats ({min} of {total}).
       </p>
     </div>
   );

@@ -195,10 +195,11 @@ const PARTIES: readonly {
 ];
 
 // Alliance Mode seat sharing: of Delhi's 70 seats, each alliance partner
-// gets at least 15% (rounded up to 11), and your own party keeps at least as
-// many. That allows up to 5 partners.
+// gets at least 10% (7 seats), and your own party keeps at least as
+// many. That allows up to 9 partners, i.e. every other party.
 const TOTAL_SEATS = 70;
-const MIN_PARTNER_SEATS = Math.ceil(TOTAL_SEATS * 0.15);
+const MIN_PARTNER_SHARE = 0.1;
+const MIN_PARTNER_SEATS = Math.ceil(TOTAL_SEATS * MIN_PARTNER_SHARE);
 const MAX_PARTNERS = Math.floor((TOTAL_SEATS - MIN_PARTNER_SEATS) / MIN_PARTNER_SEATS);
 
 type Shares = Partial<Record<PartyId, number>>;
@@ -498,7 +499,8 @@ export default function SinglePlayer() {
 
   const pick = (id: PartyId) => {
     if (id !== selected) {
-      setCandidate(null);
+      // A party with a single candidate has them picked already.
+      setCandidate(CANDIDATES[id]?.length === 1 ? 0 : null);
       // A party can't be its own alliance partner.
       setPartners((cur) => {
         if (!cur.has(id)) return cur;
@@ -707,9 +709,9 @@ export default function SinglePlayer() {
                     );
                   })}
                 </div>
-                {partners.size >= MAX_PARTNERS && (
+                {partners.size >= MAX_PARTNERS && PARTIES.length - 1 > MAX_PARTNERS && (
                   <p className={styles.partnerLimit}>
-                    Up to {MAX_PARTNERS} alliance partners: each must get at least 15% of the seats.
+                    Up to {MAX_PARTNERS} alliance partners: each must get at least {MIN_PARTNER_SHARE * 100}% of the seats.
                   </p>
                 )}
               </div>
@@ -750,6 +752,7 @@ export default function SinglePlayer() {
                   <SeatShare
                     total={TOTAL_SEATS}
                     min={MIN_PARTNER_SEATS}
+                    minShare={MIN_PARTNER_SHARE}
                     you={{
                       id: selected,
                       short: real ? real.short : customName,
