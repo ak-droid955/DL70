@@ -6,18 +6,20 @@ import bspSymbol from '../assets/parties/bsp.png';
 import { ELECTION_YEARS, HISTORY } from '../lib/electionHistory';
 import styles from './SeatStats.module.css';
 
-// Slice/legend colours for the parties that have won Delhi seats; anything
-// else (independents, small parties) shares a neutral grey.
+// Slice/legend colours: Wikipedia's party colours (Module:Political party).
+// Any party not listed falls back to a neutral grey.
 const PARTY_COLORS: Record<string, string> = {
-  BJP: '#f47c20',
-  AAP: '#0f5fa8',
-  INC: '#1a9ad6',
-  SAD: '#e8b10e',
-  'CPI(M)': '#d1242b',
-  BSP: '#2b3a8f',
-  'JD(U)': '#1f7a3c',
-  RJD: '#6fbf3a',
-  CJP: '#7b4a2b'
+  BJP: '#FF9933',
+  AAP: '#0072B0',
+  INC: '#00BFFF',
+  SAD: '#0F204A',
+  'CPI(M)': '#CC0D0D',
+  BSP: '#22409A',
+  'JD(U)': '#05472A',
+  RJD: '#056D05',
+  CJP: '#5A2F12',
+  LJP: '#0093DD',
+  IND: '#DCDCDC'
 };
 const OTHER_COLOR = '#9a948c';
 const colorOf = (party: string) => PARTY_COLORS[party] ?? OTHER_COLOR;
