@@ -805,7 +805,9 @@ export default function SinglePlayer() {
 
         {/* Game modes, in their own card below the party card. Single choice;
             nothing acts on the chosen mode yet. */}
-        <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard}`}>
+        {/* Until a mode is picked the card is only as wide as its buttons;
+            picking one widens it to show the explainer beside them. */}
+        <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${activeMode ? '' : styles.modeCardCompact}`}>
           <h2 className={styles.heading}>Select Mode</h2>
           {/* Mode buttons on the left; past a divider, the picked mode's
               explainer and Next on the right. */}
@@ -831,9 +833,8 @@ export default function SinglePlayer() {
           {/* Explainer for the picked mode. */}
           {/* All three explainers share one grid cell so the box is always as
               tall as the longest one; only the picked mode's is visible. */}
-          <div className={styles.modeRow}>
-          {!activeMode && <p className={styles.modePrompt}>Pick a mode to see what it's about.</p>}
           {activeMode && (
+          <div className={styles.modeRow}>
             <div className={styles.modeInfoStack}>
               {MODES.map((m) => {
                 const shown = m.id === activeMode.id;
@@ -850,7 +851,6 @@ export default function SinglePlayer() {
                 );
               })}
             </div>
-          )}
 
           {/* Next needs a mode, and a party too unless the mode is Historical
               Elections (which replays real parties, so none is picked).
@@ -862,6 +862,7 @@ export default function SinglePlayer() {
             </button>
           )}
           </div>
+          )}
           </div>
         </div>
       </div>

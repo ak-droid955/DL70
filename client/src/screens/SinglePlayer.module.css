@@ -245,6 +245,8 @@
 /* Sits under the party card; same frosted card, with breathing room. */
 .modeCard {
   margin-top: 22px;
+  max-width: 620px;
+  transition: max-width 0.3s ease;
 }
 
 .modeBtn {
@@ -1046,7 +1048,8 @@ span.candidateSymbol {
    (or the hint) under it. Phones stack everything. */
 .modeSplit {
   display: grid;
-  grid-template-columns: 176px minmax(0, 1fr);
+  /* 176px of buttons plus 20px of space before the divider. */
+  grid-template-columns: 196px minmax(0, 1fr);
 }
 .modeSplit .modes {
   padding-right: 20px;
@@ -1069,13 +1072,17 @@ span.candidateSymbol {
 .modeRow .nextHint {
   margin: 0;
 }
-.modePrompt {
-  margin: auto 0;
-  text-align: center;
-  font-family: var(--font-ui);
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--ink-muted);
+/* No mode picked yet: just the button column, no divider or explainer. */
+@media (min-width: 641px) {
+  .modeCardCompact {
+    max-width: 240px;
+  }
+  .modeCardCompact .modeSplit {
+    grid-template-columns: 176px;
+  }
+  .modeCardCompact .modeSplit .modes {
+    padding-right: 0;
+  }
 }
 @media (max-width: 640px) {
   .modeSplit {
