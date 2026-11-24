@@ -306,6 +306,16 @@ const MODES = [
 
 type ModeId = (typeof MODES)[number]['id'];
 
+// Who you play against on the candidate page: Delhi's main contenders, or
+// every other party in the game. Parties you play as or ally with are left
+// out either way.
+const STANDARD_PARTIES: readonly PartyId[] = ['bjp', 'aap', 'inc'];
+const OPPONENT_OPTIONS = [
+  { id: 'standard', label: 'Play Standard', tagline: 'The main contenders' },
+  { id: 'all', label: 'Play All', tagline: 'Every party in the race' }
+] as const;
+type OpponentsId = (typeof OPPONENT_OPTIONS)[number]['id'];
+
 // Each party's colour (Wikipedia's party colours, from Module:Political
 // party, except AAP in dark blue and JD(U) in purple), used for the seats
 // ticked on the candidate page (map and arch); the party picker stays
@@ -371,6 +381,8 @@ export default function SinglePlayer() {
   const [candidate, setCandidate] = useState<number | null>(null);
   // Parties picked as alliance partners (Alliance Mode only).
   const [partners, setPartners] = useState<ReadonlySet<PartyId>>(() => new Set());
+  // Standard or all-party opposition, picked under Add Your Candidates.
+  const [opponents, setOpponents] = useState<OpponentsId | null>(null);
   // Seats each alliance partner contests; your party takes the rest.
   const [shares, setShares] = useState<Shares>({});
   const togglePartner = (id: PartyId) => {
@@ -555,6 +567,17 @@ export default function SinglePlayer() {
       seats: partnerSeats(p.id)
     }));
     const yourSeats = TOTAL_SEATS - partnerList.reduce((a, p) => a + p.seats, 0);
+    // The parties you'd face under each opponent option.
+    const rivals = PARTIES.filter((p) => p.id !== selected && !(mode === 'alliance' && partners.has(p.id)));
+    const rivalNames = (list: typeof rivals) => list.map((p) => p.short).join(', ');
+    const standardRivals = rivals.filter((p) => STANDARD_PARTIES.includes(p.id));
+    const opponentText: Record<OpponentsId, string> = {
+      standard: standardRivals.length
+        ? `Face Delhi's main parties: ${rivalNames(standardRivals)}.`
+        : 'All of Delhi’s main parties are on your side. Pick Play All to face the rest.',
+      all: `Face every other party in the game: ${rivalNames(rivals)}.`
+    };
+    const activeOpponents = OPPONENT_OPTIONS.find((o) => o.id === opponents);
     // Which party contests each seat on the map, dealt from the shuffled order.
     const seatColors: Record<string, string> = {};
     {
@@ -759,6 +782,45 @@ export default function SinglePlayer() {
               )}
             </div>
           </div>
+          )}
+
+          {/* Opponent selection, under Add Your Candidates: two options on the
+              left; past a divider, the picked one's explainer on the right.
+              Compact until one is picked, like the mode card. */}
+          {showSeats && (
+            <div
+              className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.opponentCard} ${activeOpponents ? '' : styles.modeCardCompact}`}
+            >
+              <h2 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your Opponents</h2>
+              <div className={styles.modeSplit}>
+                <div className={styles.modes} role="radiogroup" aria-label="Opponents">
+                  {OPPONENT_OPTIONS.map((o) => {
+                    const isSelected = opponents === o.id;
+                    return (
+                      <button
+                        key={o.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={isSelected}
+                        className={`${styles.modeBtn} ${isSelected ? styles.modeBtnSelected : ''}`}
+                        onClick={() => setOpponents(o.id)}
+                      >
+                        {o.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {activeOpponents && (
+                  <div className={styles.modeRow}>
+                    <div className={`${styles.modeInfo} ${styles.modeInfoShown}`} key={activeOpponents.id}>
+                      <h3 className={styles.modeInfoTitle}>{activeOpponents.label}</h3>
+                      <p className={styles.modeInfoTagline}>{activeOpponents.tagline}</p>
+                      <p className={styles.modeInfoText}>{opponentText[activeOpponents.id]}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </RoomShell>

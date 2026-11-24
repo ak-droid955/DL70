@@ -1108,3 +1108,24 @@ span.candidateSymbol {
   align-items: center;
   gap: 12px;
 }
+
+/* Opponent picker on the candidate page: the mode card's layout, set off
+   from the card above, with its heading on the left like the mode card. */
+.opponentCard {
+  text-align: left;
+}
+.opponentCard .candidateHeading {
+  margin-bottom: 16px;
+}
+.opponentCard:not(.modeCardCompact) {
+  max-width: 700px;
+}
+/* Compact: wide enough for the heading on one line. */
+@media (min-width: 641px) {
+  .opponentCard.modeCardCompact {
+    max-width: 380px;
+  }
+  .opponentCard .candidateHeading {
+    white-space: nowrap;
+  }
+}
