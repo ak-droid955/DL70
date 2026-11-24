@@ -11,11 +11,14 @@ export default function RoomShell({
   variant,
   showBack = true,
   onExit,
+  onBack,
   children
 }: {
   variant: 'stage' | 'join' | 'booth';
   showBack?: boolean;
   onExit?: () => void;
+  /** Overrides where the back link goes (default: goHome). */
+  onBack?: () => void;
   children: ReactNode;
 }) {
   const { goHome } = useGame();
@@ -23,7 +26,7 @@ export default function RoomShell({
   return (
     <div className={styles.shell}>
       <div className={styles.backdrop} style={{ '--shell-photo': `url(${photo})` } as CSSProperties} />
-      <PageHeader onBack={showBack ? goHome : undefined} onExit={onExit} />
+      <PageHeader onBack={showBack ? (onBack ?? goHome) : undefined} onExit={onExit} />
       <ArchFrieze />
       <div className={styles.body}>{children}</div>
     </div>

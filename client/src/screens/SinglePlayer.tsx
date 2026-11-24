@@ -151,6 +151,9 @@ type ModeId = (typeof MODES)[number]['id'];
 export default function SinglePlayer() {
   const [selected, setSelected] = useState<PartyId | null>(null);
   const [mode, setMode] = useState<ModeId | null>(null);
+  // Set by Next: shows the chosen mode's page (empty for now). Back returns
+  // here with the party and mode picks kept.
+  const [started, setStarted] = useState(false);
   // The side panel opens on every party click and can be closed without
   // clearing the selection.
   const [panelOpen, setPanelOpen] = useState(false);
@@ -242,6 +245,10 @@ export default function SinglePlayer() {
   const real = PARTIES.find((p) => p.id === selected);
   const detail = selected === CUSTOM_PARTY.id ? CUSTOM_PARTY : real;
 
+  if (started && canProceed) {
+    return <RoomShell variant="booth" onBack={() => setStarted(false)}>{null}</RoomShell>;
+  }
+
   return (
     <RoomShell variant="booth">
       <div className={`${styles.column} ${panelOpen ? styles.columnShifted : ''}`}>
@@ -284,7 +291,7 @@ export default function SinglePlayer() {
         </div>
 
         {/* Game modes, in their own card below the party card. Single choice;
-            nothing acts on the chosen mode yet. */}
+            Next opens the chosen mode's page. */}
         <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard}`}>
           <h2 className={styles.heading}>Select Mode</h2>
           <div className={styles.modes} role="radiogroup" aria-label="Game mode">
@@ -329,10 +336,17 @@ export default function SinglePlayer() {
 
           {/* Next needs a mode, and a party too unless the mode is Historical
               Elections (which replays real parties, so none is picked).
-              What it leads to is still to come. */}
+              It opens the mode's page, which is still empty. */}
           {mode && !canProceed && <p className={styles.nextHint}>Select your party above to continue.</p>}
           {canProceed && (
-            <button type="button" className={styles.nextBtn}>
+            <button
+              type="button"
+              className={styles.nextBtn}
+              onClick={() => {
+                setPanelOpen(false);
+                setStarted(true);
+              }}
+            >
               Next →
             </button>
           )}
