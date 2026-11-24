@@ -330,13 +330,13 @@ const CANDIDATES: Partial<Record<PartyId, readonly Candidate[]>> = {
     { name: 'Abhijeet Dipke', image: abhijeetDipke },
     { name: 'Ashutosh Ranka', image: ashutoshRanka }
   ],
-  // Delhi unit heads: SAD president, CPI(M) state secretary, RJD state
-  // president. JD(U) and BSP names to come.
+  // Delhi unit heads: SAD president, CPI(M) state secretary, RJD, JD(U) and
+  // BSP state presidents.
   sad: delhiChief('Paramjit Singh Sarna'),
   cpim: delhiChief('Anurag Saxena'),
   rjd: delhiChief('Manoj Chaudhary'),
-  jdu: delhiChief('Candidate'),
-  bsp: delhiChief('Candidate')
+  jdu: delhiChief('Shailendra Kumar'),
+  bsp: delhiChief('Laxman Singh')
 };
 
 /** Single-player entry page: pick the party you will play as, and a mode. */
