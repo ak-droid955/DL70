@@ -1290,3 +1290,12 @@ span.candidateSymbol {
 .opponentStack > .opponentCard {
   max-width: none;
 }
+/* Wide screens, Alliance Mode: Add Your Candidates fills the width under
+   the CM candidate and alliance partner boxes, up to the opponent column. */
+@media (min-width: 1200px) {
+  .pickerPair > .tCard {
+    justify-self: stretch;
+    width: auto;
+    max-width: none;
+  }
+}
