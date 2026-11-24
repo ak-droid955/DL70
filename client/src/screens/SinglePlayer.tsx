@@ -29,6 +29,7 @@ import ParliamentArch from './ParliamentArch';
 import RoomShell, { shellStyles } from './RoomShell';
 import SeatContest, { type ContestParty, type ContestRow } from './SeatContest';
 import SeatShare from './SeatShare';
+import OpponentAlliances from './OpponentAlliances';
 import styles from './SinglePlayer.module.css';
 
 // One row in the party details card. An array value renders as chips.
@@ -385,6 +386,8 @@ export default function SinglePlayer() {
   const [partners, setPartners] = useState<ReadonlySet<PartyId>>(() => new Set());
   // Standard or all-party opposition, picked under Add Your Candidates.
   const [opponents, setOpponents] = useState<OpponentsId | null>(null);
+  // Alliances among the opponents: groups of two or more party ids.
+  const [opponentAlliances, setOpponentAlliances] = useState<string[][]>([]);
   // Seats each alliance partner contests; your party takes the rest.
   const [shares, setShares] = useState<Shares>({});
   const togglePartner = (id: PartyId) => {
@@ -649,6 +652,12 @@ export default function SinglePlayer() {
       symbolLabel: p.symbolLabel,
       color: PARTY_COLORS[p.id] ?? 'var(--ink-muted)'
     }));
+    // Opponent alliances, keeping only parties still among the opponents
+    // (the opponent option or your partners may have changed since).
+    const opponentIds = new Set(opponentParties.map((p) => p.id));
+    const validOpponentAlliances = opponentAlliances
+      .map((g) => g.filter((id) => opponentIds.has(id)))
+      .filter((g) => g.length >= 2);
     const pickedSeatName = seats.find((st) => st.acNo === pickedSeat)?.name;
     // Your side's rows, each with a tick box for who contests the seat: in
     // Alliance Mode one ally (ticking another hands the seat over); in 1 vs
@@ -855,7 +864,8 @@ export default function SinglePlayer() {
           {/* Opponent selection, to the right of the alliance partner box (of
               the CM box in 1 vs Many) on wide screens, below them on narrower
               ones: two options, then the picked one's explainer. Shown from
-              the start. */}
+              the start. Opponent Alliances sits right under it, as wide. */}
+          <div className={styles.opponentStack}>
             <div
               className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.opponentCard} ${activeOpponents ? '' : styles.modeCardCompact}`}
             >
@@ -889,6 +899,14 @@ export default function SinglePlayer() {
                 )}
               </div>
             </div>
+            <div className={`${shellStyles.card} ${styles.card} ${styles.allianceCard}`}>
+              <OpponentAlliances
+                parties={opponentParties}
+                alliances={validOpponentAlliances}
+                onChange={setOpponentAlliances}
+                hint={opponents ? undefined : 'Pick your opponents above first.'}
+              />
+            </div>
           </div>
 
           {/* Shown once Next is pressed: a card split by a T into a titled
@@ -896,8 +914,8 @@ export default function SinglePlayer() {
               on the left, and a mini map on the right. Under the arch, 1 vs
               Many has a district-by-district seat list (ticked seats show in
               the party's colour on the arch and map); Alliance Mode has
-              seat-sharing sliders instead, shown on the arch. */}
-          <div className={styles.seatsRow}>
+              seat-sharing sliders instead, shown on the arch. It sits in the
+              same grid as the boxes above, under the CM candidate box. */}
           {showSeats && (
           <div ref={seatsCardRef} className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.tCard}`}>
             <div className={styles.tTop}>
@@ -968,7 +986,6 @@ export default function SinglePlayer() {
             </div>
           </div>
           )}
-
           </div>
         </div>
       </RoomShell>

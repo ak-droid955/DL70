@@ -1194,55 +1194,74 @@ span.candidateSymbol {
   max-width: none;
 }
 
-/* The opponent picker sits in the top row with the CM candidate (and
-   alliance partner) boxes. Narrower screens put it on its own row below
-   them; it stacks its buttons over the explainer. */
+/* The opponent picker, with Opponent Alliances under it at the same width,
+   sits in the same grid as the CM candidate (and alliance partner) boxes,
+   and Add Your Candidates below those. Narrower screens give each its own
+   full-width row. */
 .opponentCard {
   margin-top: 0;
 }
-.pickerPair > .opponentCard {
+.opponentStack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.allianceCard {
+  padding: 18px 20px;
+  text-align: left;
+}
+.pickerPair > .opponentStack,
+.pickerPair > .tCard {
   grid-column: 1 / -1;
 }
-.soloPicker > .opponentCard {
+.pickerPair > .tCard {
+  justify-self: center;
+  width: 100%;
+  max-width: 700px;
+  margin-top: 0;
+}
+.soloPicker > .opponentStack,
+.soloPicker > .tCard {
   margin-top: 14px;
 }
-.seatsRow:empty {
-  display: none;
-}
-/* Wide screens: one row of CM candidate (504px), alliance partner (312px)
-   and opponents (300px) boxes, or CM (700px) and opponents in 1 vs Many,
-   centred; Add Your Candidates below lines up with the CM box. */
+/* Wide screens: CM candidate (504px), alliance partner (312px) and the
+   opponent column (300px) side by side, or CM (700px) and the opponent
+   column in 1 vs Many; Add Your Candidates (700px) under the CM box, while
+   the opponent column runs down beside it. */
 @media (min-width: 1200px) {
   .pickerPair {
     grid-template-columns: 504px 312px 300px;
+    grid-template-rows: auto 1fr;
     width: 1144px;
     margin: 0 0 0 -222px;
   }
   .soloPicker {
     display: grid;
     grid-template-columns: 700px 300px;
+    grid-template-rows: auto 1fr;
     gap: 14px;
     width: 1014px;
     margin: 0 0 0 -157px;
   }
-  .pickerPair > .opponentCard {
-    grid-column: auto;
-  }
-  .soloPicker > .opponentCard {
+  .pickerPair > .opponentStack,
+  .soloPicker > .opponentStack {
+    grid-column: -2;
+    grid-row: 1 / span 2;
+    align-self: start;
     margin-top: 0;
   }
-  .seatsRow {
+  .pickerPair > .tCard,
+  .soloPicker > .tCard {
+    grid-column: 1 / -2;
+    grid-row: 2;
+    justify-self: start;
+    align-self: start;
     width: 700px;
+    margin-top: 0;
   }
-  .pickerPair ~ .seatsRow {
-    margin-left: -222px;
-  }
-  .soloPicker ~ .seatsRow {
-    margin-left: -157px;
-  }
-  .pickerPair > .opponentCard,
-  .soloPicker > .opponentCard,
-  .opponentCard.modeCardCompact {
+  .opponentCard.modeCardCompact,
+  .opponentCard {
     max-width: none;
   }
   .opponentCard .modeSplit {
@@ -1260,4 +1279,14 @@ span.candidateSymbol {
   .opponentCard .candidateHeading {
     font-size: 20px;
   }
+}
+/* Below the wide layout the opponent column is as wide as Add Your
+   Candidates (700px, centred) and both of its boxes fill it. */
+.opponentStack {
+  justify-self: center;
+  width: 100%;
+  max-width: 700px;
+}
+.opponentStack > .opponentCard {
+  max-width: none;
 }
