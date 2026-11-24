@@ -30,6 +30,8 @@ export default function SeatContest({
   groups: { label: string; rows: ContestRow[] }[];
   note?: string;
 }) {
+  // The tick-box column only appears if some row has one.
+  const hasTicks = groups.some((g) => g.rows.some((r) => r.onTick));
   return (
     <div className={styles.stats}>
       <table className={`${styles.table} ${styles.contestTable}`}>
@@ -39,7 +41,7 @@ export default function SeatContest({
           .map((g) => (
             <tbody key={g.label}>
               <tr>
-                <th scope="colgroup" colSpan={3} className={styles.groupHead}>
+                <th scope="colgroup" colSpan={hasTicks ? 3 : 2} className={styles.groupHead}>
                   {g.label}
                 </th>
               </tr>
@@ -54,6 +56,7 @@ export default function SeatContest({
                       {p.short}
                     </span>
                   </td>
+                  {hasTicks && (
                   <td className={styles.tickTd}>
                     {onTick && (
                       <input
@@ -66,6 +69,7 @@ export default function SeatContest({
                       />
                     )}
                   </td>
+                  )}
                 </tr>
               ))}
             </tbody>

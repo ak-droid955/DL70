@@ -1170,3 +1170,61 @@ span.candidateSymbol {
     font-size: 22px;
   }
 }
+
+/* "Change contestant party" dropdown under the seat-sharing sliders. */
+.changeBox {
+  width: 100%;
+  border: 2px solid var(--paper-border);
+  border-radius: 10px;
+  background: var(--card-paper);
+}
+.changeBox[open] {
+  border-color: var(--ink);
+}
+.changeSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 12px;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+  list-style: none;
+}
+.changeSummary::-webkit-details-marker {
+  display: none;
+}
+.changeSummary::after {
+  content: '▾';
+  transition: transform 0.15s ease;
+}
+.changeBox[open] .changeSummary::after {
+  transform: rotate(180deg);
+}
+.changeBody {
+  padding: 0 12px 12px;
+}
+.changeBody .partnerGrid {
+  margin-top: 8px;
+}
+.changeSeat {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.changeHint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink-muted);
+  text-align: center;
+}

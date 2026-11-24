@@ -653,23 +653,16 @@ export default function SinglePlayer() {
     // Your side's rows, each with a tick box for who contests the seat: in
     // Alliance Mode one ally (ticking another hands the seat over); in 1 vs
     // Many your party, ticked or not as in the district list.
-    let ownRows: ContestRow[] = [];
-    let contestNote: string | undefined;
-    if (pickedSeat) {
-      if (mode === 'alliance') {
-        const holder = seatParty[pickedSeat];
-        const stuck = holder && !canGive(holder.id);
-        ownRows = side.map((p) => ({
-          party: p,
-          ticked: p.id === holder?.id,
-          locked: stuck,
-          onTick: () => moveSeat(pickedSeat, p.id)
-        }));
-        if (stuck) contestNote = `${holder.short} is at its minimum of ${MIN_PARTNER_SEATS} seats, so this seat stays with it.`;
-      } else {
-        ownRows = [{ party: youContest, ticked: tickedSeats.has(pickedSeat), onTick: () => toggleSeat(pickedSeat) }];
-      }
-    }
+    // Your side's candidate in the clicked seat: in Alliance Mode the ally it
+    // went to; in 1 vs Many your party, if the seat is ticked.
+    const holder = pickedSeat
+      ? mode === 'alliance'
+        ? seatParty[pickedSeat]
+        : tickedSeats.has(pickedSeat)
+          ? youContest
+          : undefined
+      : undefined;
+    const ownRows: ContestRow[] = holder ? [{ party: holder }] : [];
     const seatContest = pickedSeat && pickedSeatName && (
       <SeatContest
         seat={pickedSeatName}
@@ -677,8 +670,53 @@ export default function SinglePlayer() {
           { label: mode === 'alliance' ? 'Your alliance' : 'Your party', rows: ownRows },
           { label: 'Opponents', rows: opponentParties.map((p) => ({ party: p })) }
         ]}
-        note={contestNote}
       />
+    );
+    // Alliance Mode, under the sliders: a "Change contestant party" dropdown
+    // with a tick box per ally for the clicked seat. Ticking another ally
+    // hands the seat over (not taking the current one below the minimum).
+    const stuck = holder && !canGive(holder.id);
+    const changeContestant = (
+      <details className={styles.changeBox}>
+        <summary className={styles.changeSummary}>Change contestant party</summary>
+        <div className={styles.changeBody}>
+          {!pickedSeat || !pickedSeatName ? (
+            <p className={styles.changeHint}>Click a constituency on the map first.</p>
+          ) : (
+            <>
+              <p className={styles.changeSeat}>{pickedSeatName}</p>
+              <div className={styles.partnerGrid}>
+                {side.map((p) => {
+                  const on = p.id === holder?.id;
+                  return (
+                    <label
+                      key={p.id}
+                      className={`${styles.partnerRow} ${on ? styles.partnerRowOn : ''} ${stuck && !on ? styles.partnerRowOff : ''}`}
+                      title={p.name}
+                    >
+                      <PartySymbol src={p.symbol ?? undefined} label={p.symbolLabel} className={styles.partnerSymbol} />
+                      <span className={styles.partnerName}>{p.short}</span>
+                      <input
+                        type="checkbox"
+                        className={styles.partnerTick}
+                        checked={on}
+                        disabled={stuck && !on}
+                        onChange={() => moveSeat(pickedSeat, p.id)}
+                        aria-label={`${p.name} contests ${pickedSeatName}`}
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+              {stuck && (
+                <p className={styles.changeHint}>
+                  {holder.short} is at its minimum of {MIN_PARTNER_SEATS} seats, so this seat stays with it.
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      </details>
     );
     // Next reveals the "Add Your Candidates" box; Start Game then takes its
     // place (and doesn't do anything yet).
@@ -856,6 +894,7 @@ export default function SinglePlayer() {
                     partners={partnerList}
                     onChange={(id, n) => setShare(id as PartyId, n)}
                   />
+                  {changeContestant}
                 </>
               ) : (
                 <>
