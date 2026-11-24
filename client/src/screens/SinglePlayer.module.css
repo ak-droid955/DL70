@@ -1299,3 +1299,11 @@ span.candidateSymbol {
     max-width: none;
   }
 }
+/* Each picker box is only as tall as its own content, so ticking a partner
+   (which adds Next to the partner box) doesn't stretch the CM box. */
+.pickerPair > .candidateCard {
+  align-self: start;
+}
+.pickerPair .cardFooter {
+  margin-top: 0;
+}
