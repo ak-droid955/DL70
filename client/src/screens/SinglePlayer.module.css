@@ -234,10 +234,11 @@
   box-shadow: none;
 }
 
+/* The mode buttons, one above another. */
 .modes {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 /* Sits under the party card; same frosted card, with breathing room. */
