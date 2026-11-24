@@ -14,6 +14,7 @@ import manishSisodia from '../assets/candidates/aap/manish-sisodia.webp';
 import saurabhBharadwaj from '../assets/candidates/aap/saurabh-bharadwaj.webp';
 import abhijeetDipke from '../assets/candidates/cjp/abhijeet-dipke.webp';
 import ashutoshRanka from '../assets/candidates/cjp/ashutosh-ranka.webp';
+import placeholderLeader from '../assets/candidates/placeholder.webp';
 import devenderYadav from '../assets/candidates/inc/devender-yadav.webp';
 import sandeepDikshit from '../assets/candidates/inc/sandeep-dikshit.webp';
 import harshMalhotra from '../assets/candidates/bjp/harsh-malhotra.webp';
@@ -305,6 +306,12 @@ const PARTY_COLORS: Partial<Record<PartyId, string>> = {
 // its own list yet gets numbered placeholder slots with blank pictures.
 type Candidate = { name: string; image?: string };
 const PLACEHOLDER_CANDIDATES: readonly Candidate[] = [1, 2, 3, 4].map((n) => ({ name: `Candidate ${n}` }));
+// Parties whose leaders aren't named yet: numbered slots that share a generic
+// leader silhouette.
+const SILHOUETTE_CANDIDATES: readonly Candidate[] = PLACEHOLDER_CANDIDATES.map((c) => ({
+  ...c,
+  image: placeholderLeader
+}));
 const CANDIDATES: Partial<Record<PartyId, readonly Candidate[]>> = {
   bjp: [
     { name: 'Rekha Gupta', image: rekhaGupta },
@@ -325,7 +332,12 @@ const CANDIDATES: Partial<Record<PartyId, readonly Candidate[]>> = {
   cjp: [
     { name: 'Abhijeet Dipke', image: abhijeetDipke },
     { name: 'Ashutosh Ranka', image: ashutoshRanka }
-  ]
+  ],
+  sad: SILHOUETTE_CANDIDATES,
+  cpim: SILHOUETTE_CANDIDATES,
+  bsp: SILHOUETTE_CANDIDATES,
+  jdu: SILHOUETTE_CANDIDATES,
+  rjd: SILHOUETTE_CANDIDATES
 };
 
 /** Single-player entry page: pick the party you will play as, and a mode. */
