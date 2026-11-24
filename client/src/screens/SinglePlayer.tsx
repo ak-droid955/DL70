@@ -560,18 +560,21 @@ export default function SinglePlayer() {
                   {PARTIES.filter((p) => p.id !== selected).map((p) => {
                     const on = partners.has(p.id);
                     return (
-                      <button
+                      <label
                         key={p.id}
-                        type="button"
-                        aria-pressed={on}
-                        className={`${styles.slot} ${styles.partnerSlot} ${on ? styles.slotSelected : ''}`}
-                        onClick={() => togglePartner(p.id)}
-                        aria-label={p.name}
+                        className={`${styles.partnerRow} ${on ? styles.partnerRowOn : ''}`}
                         title={p.name}
                       >
-                        <PartySymbol src={p.symbol} label={p.symbolLabel} className={styles.logo} />
-                        <span className={styles.name}>{p.short}</span>
-                      </button>
+                        <PartySymbol src={p.symbol} label={p.symbolLabel} className={styles.partnerSymbol} />
+                        <span className={styles.partnerName}>{p.short}</span>
+                        <input
+                          type="checkbox"
+                          className={styles.partnerTick}
+                          checked={on}
+                          onChange={() => togglePartner(p.id)}
+                          aria-label={p.name}
+                        />
+                      </label>
                     );
                   })}
                 </div>

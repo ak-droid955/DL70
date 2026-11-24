@@ -823,13 +823,6 @@ span.candidateSymbol {
 .splitPickers .lineup {
   gap: 14px;
 }
-.splitPickers .partnerGrid {
-  gap: 10px;
-  margin-top: 14px;
-}
-.splitPickers .partnerSlot {
-  width: 92px;
-}
 
 /* Back on the left, then the hint or Start Game, under both pickers. */
 .cardFooter {
@@ -850,33 +843,52 @@ span.candidateSymbol {
   max-width: 320px;
 }
 .partnerGrid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
   margin-top: 12px;
 }
-.partnerSlot {
-  width: 150px;
-  aspect-ratio: auto;
-  gap: 6px;
-  padding: 8px 6px;
+/* One compact row per party: symbol, initials, tick box. */
+.partnerRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 2px solid var(--paper-border);
+  background: var(--card-paper);
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
 }
-.partnerSlot .logo {
-  width: 40px;
+.partnerRow:hover {
+  border-color: var(--ink);
 }
-.partnerSlot .name {
-  font-size: 12.5px;
-  white-space: normal;
+.partnerRowOn {
+  border-color: var(--ink);
+  background: oklch(95% 0.012 75);
 }
-@media (max-width: 760px) {
-  .partnerGrid {
-    flex-direction: column;
-    gap: 10px;
-  }
-  .partnerSlot {
-    width: 100%;
-  }
+.partnerSymbol {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  object-fit: contain;
+}
+.partnerName {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  text-align: left;
+}
+.partnerTick {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--ink);
+  cursor: pointer;
 }
 
 /* Card under the candidate picker, split by a T: a full-width top strip,
@@ -940,20 +952,5 @@ span.candidateSymbol {
   }
   .splitPickers .partnerSection {
     border-top: 2.5px solid var(--ink);
-  }
-  .splitPickers .partnerGrid {
-    flex-direction: row;
-    gap: 8px;
-  }
-  .splitPickers .partnerSlot {
-    width: calc((100% - 16px) / 3);
-    flex-direction: column;
-    justify-content: center;
-    gap: 6px;
-    padding: 8px 4px;
-    text-align: center;
-  }
-  .splitPickers .partnerSlot .logo {
-    width: 36px;
   }
 }
