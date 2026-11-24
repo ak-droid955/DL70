@@ -27,7 +27,7 @@ import DistrictList from './DistrictList';
 import MiniSeatMap from './MiniSeatMap';
 import ParliamentArch from './ParliamentArch';
 import RoomShell, { shellStyles } from './RoomShell';
-import SeatContest, { type ContestParty } from './SeatContest';
+import SeatContest, { type ContestParty, type ContestRow } from './SeatContest';
 import SeatShare from './SeatShare';
 import styles from './SinglePlayer.module.css';
 
@@ -395,6 +395,7 @@ export default function SinglePlayer() {
     setPartners(next);
     // Picking or dropping a partner restarts the sliders at an even split.
     setShares(evenShares(PARTIES.map((p) => p.id).filter((p) => next.has(p))));
+    setSeatOverrides({});
   };
   const partnerSeats = (id: PartyId) => shares[id] ?? MIN_PARTNER_SEATS;
   // Move one partner's slider, keeping the minimum for your own party.
@@ -416,6 +417,9 @@ export default function SinglePlayer() {
   // Alliance Mode: a random order of the seats, dealt out in turn to your
   // party and each partner by their seat share. Shuffle deals a new order.
   const [shuffles, setShuffles] = useState(0);
+  // Alliance Mode: seats given by hand to a particular ally (seat number to
+  // party), kept ahead of the random deal. Shuffling clears them.
+  const [seatOverrides, setSeatOverrides] = useState<Record<string, PartyId>>({});
   // Seat clicked on the candidate page's map, whose contest is shown below it.
   const [pickedSeat, setPickedSeat] = useState<string | null>(null);
   const seatOrder = useMemo(() => {
@@ -592,19 +596,46 @@ export default function SinglePlayer() {
       symbolLabel: real?.symbolLabel,
       color: partyColor
     };
-    // Which party contests each seat on the map, dealt from the shuffled order.
+    // Which ally contests each seat on the map: seats given by hand first
+    // (while that ally has seats left in its share), then the rest dealt
+    // from the shuffled order, your party's share first, then each partner's.
+    const side: (ContestParty & { seats: number })[] = [{ ...youContest, seats: yourSeats }, ...partnerList];
     const seatColors: Record<string, string> = {};
     const seatParty: Record<string, ContestParty> = {};
     {
-      let at = 0;
-      for (const p of [{ ...youContest, seats: yourSeats }, ...partnerList]) {
-        seatOrder.slice(at, at + p.seats).forEach((acNo) => {
-          seatColors[acNo] = p.color;
+      const left = new Map(side.map((p) => [p.id, p.seats]));
+      for (const [acNo, id] of Object.entries(seatOverrides)) {
+        const p = side.find((x) => x.id === id);
+        if (p && (left.get(id) ?? 0) > 0) {
           seatParty[acNo] = p;
-        });
-        at += p.seats;
+          left.set(id, (left.get(id) ?? 0) - 1);
+        }
       }
+      let i = 0;
+      for (const acNo of seatOrder) {
+        if (seatParty[acNo]) continue;
+        while (i < side.length && (left.get(side[i].id) ?? 0) <= 0) i += 1;
+        if (i >= side.length) break;
+        seatParty[acNo] = side[i];
+        left.set(side[i].id, (left.get(side[i].id) ?? 0) - 1);
+      }
+      Object.entries(seatParty).forEach(([acNo, p]) => (seatColors[acNo] = p.color));
     }
+    // Hand a seat to another ally: one seat moves from the old ally's share
+    // to the new one's, as long as the old one stays at or above the minimum.
+    const seatsOf = (id: string) => side.find((p) => p.id === id)?.seats ?? 0;
+    const canGive = (id: string) => seatsOf(id) - 1 >= MIN_PARTNER_SEATS;
+    const moveSeat = (acNo: string, to: string) => {
+      const from = seatParty[acNo]?.id;
+      if (!from || from === to || !canGive(from)) return;
+      setShares((cur) => {
+        const next = { ...cur };
+        if (from !== selected) next[from as PartyId] = partnerSeats(from as PartyId) - 1;
+        if (to !== selected) next[to as PartyId] = partnerSeats(to as PartyId) + 1;
+        return next;
+      });
+      setSeatOverrides((cur) => ({ ...cur, [acNo]: to as PartyId }));
+    };
     // Everyone contesting the clicked seat: your side's candidate (your party,
     // or in Alliance Mode whichever ally the seat went to; in 1 vs Many only
     // if the seat is ticked), then the opponents picked, if any.
@@ -619,22 +650,35 @@ export default function SinglePlayer() {
       color: PARTY_COLORS[p.id] ?? 'var(--ink-muted)'
     }));
     const pickedSeatName = seats.find((st) => st.acNo === pickedSeat)?.name;
-    const ownSide = pickedSeat
-      ? mode === 'alliance'
-        ? seatParty[pickedSeat]
-        : tickedSeats.has(pickedSeat)
-          ? youContest
-          : undefined
-      : undefined;
-    const contesting = [...(ownSide ? [ownSide] : []), ...opponentParties];
+    // Your side's rows, each with a tick box for who contests the seat: in
+    // Alliance Mode one ally (ticking another hands the seat over); in 1 vs
+    // Many your party, ticked or not as in the district list.
+    let ownRows: ContestRow[] = [];
+    let contestNote: string | undefined;
+    if (pickedSeat) {
+      if (mode === 'alliance') {
+        const holder = seatParty[pickedSeat];
+        const stuck = holder && !canGive(holder.id);
+        ownRows = side.map((p) => ({
+          party: p,
+          ticked: p.id === holder?.id,
+          locked: stuck,
+          onTick: () => moveSeat(pickedSeat, p.id)
+        }));
+        if (stuck) contestNote = `${holder.short} is at its minimum of ${MIN_PARTNER_SEATS} seats, so this seat stays with it.`;
+      } else {
+        ownRows = [{ party: youContest, ticked: tickedSeats.has(pickedSeat), onTick: () => toggleSeat(pickedSeat) }];
+      }
+    }
     const seatContest = pickedSeat && pickedSeatName && (
-      contesting.length > 0 ? (
-        <SeatContest seat={pickedSeatName} parties={contesting} />
-      ) : (
-        <p className={styles.contestEmpty}>
-          {pickedSeatName}: no one contesting yet. Tick the seat or pick your opponents.
-        </p>
-      )
+      <SeatContest
+        seat={pickedSeatName}
+        groups={[
+          { label: mode === 'alliance' ? 'Your alliance' : 'Your party', rows: ownRows },
+          { label: 'Opponents', rows: opponentParties.map((p) => ({ party: p })) }
+        ]}
+        note={contestNote}
+      />
     );
     // Next reveals the "Add Your Candidates" box; Start Game then takes its
     // place (and doesn't do anything yet).
@@ -825,7 +869,10 @@ export default function SinglePlayer() {
                 mode === 'alliance' ? (
                   <div className={styles.shareMap}>
                     <MiniSeatMap seats={seats} seatColors={seatColors} selected={pickedSeat} onSelect={setPickedSeat} />
-                    <button type="button" className={styles.cardBack} onClick={() => setShuffles((n) => n + 1)}>
+                    <button type="button" className={styles.cardBack} onClick={() => {
+                        setShuffles((n) => n + 1);
+                        setSeatOverrides({});
+                      }}>
                       🔀 Shuffle seats
                     </button>
                     {seatContest}
