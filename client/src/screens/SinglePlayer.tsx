@@ -204,20 +204,13 @@ const NO_SEATS: ReadonlySet<string> = new Set();
 
 type Shares = Partial<Record<PartyId, number>>;
 
-/** Seat shares for `ids`: existing shares kept, new partners at the
- *  minimum, then the biggest shares trimmed (never below the minimum) until
- *  your own party has at least the minimum left. */
-function fitShares(ids: PartyId[], cur: Shares): Shares {
+/** Starting seat shares for `ids`: the 70 seats split evenly between your
+ *  party and the partners (50-50 with one partner), any odd seats going to
+ *  your party. */
+function evenShares(ids: PartyId[]): Shares {
+  const each = Math.floor(TOTAL_SEATS / (ids.length + 1));
   const next: Shares = {};
-  ids.forEach((id) => (next[id] = cur[id] ?? MIN_PARTNER_SEATS));
-  let over = ids.reduce((a, id) => a + (next[id] ?? 0), 0) - (TOTAL_SEATS - MIN_PARTNER_SEATS);
-  while (over > 0) {
-    const big = ids.reduce((a, b) => ((next[b] ?? 0) > (next[a] ?? 0) ? b : a));
-    const cut = Math.min(over, (next[big] ?? 0) - MIN_PARTNER_SEATS);
-    if (cut <= 0) break;
-    next[big] = (next[big] ?? 0) - cut;
-    over -= cut;
-  }
+  ids.forEach((id) => (next[id] = each));
   return next;
 }
 
@@ -387,12 +380,8 @@ export default function SinglePlayer() {
     else if (next.size < MAX_PARTNERS) next.add(id);
     else return;
     setPartners(next);
-    setShares((cur) =>
-      fitShares(
-        PARTIES.map((p) => p.id).filter((p) => next.has(p)),
-        cur
-      )
-    );
+    // Picking or dropping a partner restarts the sliders at an even split.
+    setShares(evenShares(PARTIES.map((p) => p.id).filter((p) => next.has(p))));
   };
   const partnerSeats = (id: PartyId) => shares[id] ?? MIN_PARTNER_SEATS;
   // Move one partner's slider, keeping the minimum for your own party.
