@@ -655,7 +655,8 @@ export default function SinglePlayer() {
     // Opponent alliances, keeping only parties still among the opponents
     // (the opponent option or your partners may have changed since).
     const opponentIds = new Set(opponentParties.map((p) => p.id));
-    const validOpponentAlliances = opponentAlliances
+    // None with Play Standard, which doesn't offer them.
+    const validOpponentAlliances = (opponents === 'standard' ? [] : opponentAlliances)
       .map((a) => ({ ...a, members: a.members.filter((id) => opponentIds.has(id)) }))
       .filter((a) => a.members.length >= 2);
     const pickedSeatName = seats.find((st) => st.acNo === pickedSeat)?.name;
@@ -902,14 +903,17 @@ export default function SinglePlayer() {
                 )}
               </div>
             </div>
-            <div className={`${shellStyles.card} ${styles.card} ${styles.allianceCard}`}>
-              <OpponentAlliances
-                parties={opponentParties}
-                alliances={validOpponentAlliances}
-                onChange={setOpponentAlliances}
-                hint={opponents ? undefined : 'Pick your opponents above first.'}
-              />
-            </div>
+            {/* Not offered with Play Standard. */}
+            {opponents !== 'standard' && (
+              <div className={`${shellStyles.card} ${styles.card} ${styles.allianceCard}`}>
+                <OpponentAlliances
+                  parties={opponentParties}
+                  alliances={validOpponentAlliances}
+                  onChange={setOpponentAlliances}
+                  hint={opponents ? undefined : 'Pick your opponents above first.'}
+                />
+              </div>
+            )}
           </div>
 
           {/* Shown once Next is pressed: a card split by a T into a titled
