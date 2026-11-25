@@ -309,6 +309,19 @@ const MODES = [
 
 type ModeId = (typeof MODES)[number]['id'];
 
+// Every Delhi Legislative Assembly election since the assembly was restored
+// in 1993, listed on the Historical Elections page.
+const HISTORICAL_ELECTIONS: readonly { year: number; assembly: string }[] = [
+  { year: 1993, assembly: '1st Assembly' },
+  { year: 1998, assembly: '2nd Assembly' },
+  { year: 2003, assembly: '3rd Assembly' },
+  { year: 2008, assembly: '4th Assembly' },
+  { year: 2013, assembly: '5th Assembly' },
+  { year: 2015, assembly: '6th Assembly' },
+  { year: 2020, assembly: '7th Assembly' },
+  { year: 2025, assembly: '8th Assembly' }
+];
+
 // Who you play against on the candidate page: Delhi's main contenders, or
 // every other party in the game. Parties you play as or ally with are left
 // out either way.
@@ -381,6 +394,8 @@ export default function SinglePlayer() {
   // Historical Elections page (empty for now). Kept in this component so the
   // picks survive going back.
   const [page, setPage] = useState<'pick' | 'candidate' | 'historical'>('pick');
+  // Election picked from the Historical Elections menu.
+  const [historicalYear, setHistoricalYear] = useState<number | null>(null);
   // Which of the party's candidates is picked on the candidate page.
   const [candidate, setCandidate] = useState<number | null>(null);
   // Parties picked as alliance partners (Alliance Mode only).
@@ -566,10 +581,39 @@ export default function SinglePlayer() {
     }
   };
 
-  // Historical Elections: its own page, empty for now. The header's back link
-  // returns to the picker with the mode kept.
+  // Historical Elections: a menu of past Delhi elections beside a box that
+  // is empty for now. The header's back link returns to the picker with the
+  // mode kept.
   if (page === 'historical') {
-    return <RoomShell variant="booth" onBack={() => setPage('pick')}>{null}</RoomShell>;
+    return (
+      <RoomShell variant="booth" onBack={() => setPage('pick')}>
+        <div className={`${shellStyles.card} ${styles.card} ${styles.historyCard}`}>
+          <h1 className={styles.heading}>Historical Elections</h1>
+          <div className={styles.historyLayout}>
+            <div className={styles.historyMenu} role="radiogroup" aria-label="Election">
+              {HISTORICAL_ELECTIONS.map((e) => {
+                const on = historicalYear === e.year;
+                return (
+                  <button
+                    key={e.year}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    className={`${styles.historyItem} ${on ? styles.historyItemOn : ''}`}
+                    onClick={() => setHistoricalYear(e.year)}
+                  >
+                    <span className={styles.historyYear}>{e.year}</span>
+                    <span className={styles.historyAssembly}>{e.assembly}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {/* Empty for now. */}
+            <div className={styles.historyBox} />
+          </div>
+        </div>
+      </RoomShell>
+    );
   }
 
   // 1 vs Many and Alliance Mode: pick which of your own party's leaders you
