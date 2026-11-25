@@ -1307,3 +1307,8 @@ span.candidateSymbol {
 .pickerPair .cardFooter {
   margin-top: 0;
 }
+/* Start Game at the foot of the opponent column, full width. */
+.startGame {
+  max-width: none;
+  margin: 16px 0 0;
+}

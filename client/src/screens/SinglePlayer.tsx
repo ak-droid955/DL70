@@ -731,18 +731,18 @@ export default function SinglePlayer() {
         </div>
       </details>
     );
-    // Next reveals the "Add Your Candidates" box; Start Game then takes its
-    // place (and doesn't do anything yet).
-    const nextOrStart =
-      !showSeats ? (
-        <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`} onClick={() => setShowSeats(true)}>
-          Next →
-        </button>
-      ) : (
-        <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`}>
-          Start Game
-        </button>
-      );
+    // Next reveals the "Add Your Candidates" box. Start Game then appears at
+    // the foot of the opponent column (and doesn't do anything yet).
+    const nextOrStart = !showSeats && (
+      <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`} onClick={() => setShowSeats(true)}>
+        Next →
+      </button>
+    );
+    const startGame = showSeats && (
+      <button type="button" className={`${styles.nextBtn} ${styles.startBtn} ${styles.startGame}`}>
+        Start Game
+      </button>
+    );
     return (
       <RoomShell variant="booth">
         <div className={`${styles.column} ${styles.candidateColumn}`}>
@@ -811,8 +811,8 @@ export default function SinglePlayer() {
               >
                 ← Back
               </button>
-              {/* Alliance Mode: Next / Start Game live in the alliance
-                  partner box instead. */}
+              {/* Alliance Mode: Next lives in the alliance partner box
+                  instead. */}
               {candidate === null ? (
                 <p className={styles.nextHint}>Select a candidate to continue.</p>
               ) : mode === 'alliance' ? null : (
@@ -859,7 +859,7 @@ export default function SinglePlayer() {
               </div>
               {/* Next appears here once a partner (and a CM candidate) is
                   picked. */}
-              {partners.size > 0 && candidate !== null && (
+              {partners.size > 0 && candidate !== null && !showSeats && (
                 <div className={styles.cardFooter}>{nextOrStart}</div>
               )}
             </div>
@@ -902,8 +902,11 @@ export default function SinglePlayer() {
                   </div>
                 )}
               </div>
+              {/* Play Standard: Start Game under the explainer. */}
+              {opponents === 'standard' && startGame}
             </div>
-            {/* Not offered with Play Standard. */}
+            {/* Not offered with Play Standard. Start Game sits below the
+                alliances otherwise. */}
             {opponents !== 'standard' && (
               <div className={`${shellStyles.card} ${styles.card} ${styles.allianceCard}`}>
                 <OpponentAlliances
@@ -912,6 +915,7 @@ export default function SinglePlayer() {
                   onChange={setOpponentAlliances}
                   hint={opponents ? undefined : 'Pick your opponents above first.'}
                 />
+                {startGame}
               </div>
             )}
           </div>
