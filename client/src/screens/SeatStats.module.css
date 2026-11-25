@@ -1,0 +1,158 @@
+.stats {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Sized to its contents rather than the panel, so the Name and Party
+   columns are only as wide as their longest entry, and centred in any
+   space left over. */
+.table {
+  width: auto;
+  max-width: 100%;
+  align-self: center;
+  border-collapse: collapse;
+  font-size: 13px;
+  color: var(--ink);
+}
+.caption {
+  margin-bottom: 6px;
+  text-align: left;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+/* Bordered results table: repeat winners and parties share merged cells. */
+.table th,
+.table td {
+  padding: 6px 8px;
+  border: 1.5px solid var(--paper-border);
+  text-align: left;
+  vertical-align: middle;
+  font-weight: 600;
+}
+.table thead th {
+  background: oklch(95% 0.012 75);
+  font-weight: 700;
+  text-align: center;
+}
+.year {
+  width: 3.2em;
+  font-weight: 700;
+}
+.bar {
+  width: 10px;
+  padding: 0 !important;
+}
+.partyTd {
+  white-space: nowrap;
+  padding-right: 10px !important;
+}
+.partyCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+.symbol {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.pieWrap {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.pie {
+  width: 110px;
+  height: 110px;
+  flex: none;
+}
+.pie path,
+.pie circle {
+  stroke: var(--card-paper);
+  stroke-width: 0.03;
+}
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.legendTitle {
+  margin-bottom: 2px;
+  font-size: 11.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.legendRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+}
+
+.empty {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+/* Seat contest table (candidate page). */
+.contestTable {
+  min-width: 200px;
+}
+.seatCaption {
+  margin-bottom: 8px;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.table th.groupHead {
+  background: oklch(95% 0.012 75);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  text-align: left;
+}
+.tickTd {
+  width: 28px;
+  text-align: center !important;
+}
+.tick {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--ink);
+  cursor: pointer;
+}
+.tick:disabled {
+  cursor: not-allowed;
+}
+/* Allies not contesting this seat. */
+.rowOff td:not(.tickTd) {
+  opacity: 0.45;
+}

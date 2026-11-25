@@ -1,0 +1,79 @@
+.share {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 2px solid var(--paper-border);
+  border-radius: 10px;
+  background: var(--card-paper);
+}
+.youRow {
+  border-color: var(--ink);
+}
+
+.party {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.swatch {
+  flex: none;
+  width: 10px;
+  height: 22px;
+  border-radius: 3px;
+}
+.symbol {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+.name {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.youLabel {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.slider {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.count {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  margin: 2px 0 0;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ink-muted);
+  text-align: center;
+}
