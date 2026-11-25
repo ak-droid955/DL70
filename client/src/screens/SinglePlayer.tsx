@@ -915,7 +915,8 @@ export default function SinglePlayer() {
                   onChange={setOpponentAlliances}
                   hint={opponents ? undefined : 'Pick your opponents above first.'}
                 />
-                {startGame}
+                {/* Only once at least one opponent alliance is made. */}
+                {validOpponentAlliances.length > 0 && startGame}
               </div>
             )}
           </div>
