@@ -733,12 +733,15 @@ export default function SinglePlayer() {
     );
     // Next reveals the "Add Your Candidates" box. Start Game then appears at
     // the foot of the opponent column (and doesn't do anything yet).
-    const nextOrStart = !showSeats && (
+    // Alliance Mode has no Next: Add Your Candidates shows as soon as a CM
+    // candidate is picked and an ally ticked. 1 vs Many still uses Next.
+    const seatsShown = mode === 'alliance' ? candidate !== null && partners.size > 0 : showSeats;
+    const nextOrStart = !seatsShown && (
       <button type="button" className={`${styles.nextBtn} ${styles.startBtn}`} onClick={() => setShowSeats(true)}>
         Next →
       </button>
     );
-    const startGame = showSeats && (
+    const startGame = seatsShown && (
       <button type="button" className={`${styles.nextBtn} ${styles.startBtn} ${styles.startGame}`}>
         Start Game
       </button>
@@ -811,8 +814,7 @@ export default function SinglePlayer() {
               >
                 ← Back
               </button>
-              {/* Alliance Mode: Next lives in the alliance partner box
-                  instead. */}
+              {/* Alliance Mode has no Next (see seatsShown). */}
               {candidate === null ? (
                 <p className={styles.nextHint}>Select a candidate to continue.</p>
               ) : mode === 'alliance' ? null : (
@@ -857,11 +859,6 @@ export default function SinglePlayer() {
                   </p>
                 )}
               </div>
-              {/* Next appears here once a partner (and a CM candidate) is
-                  picked. */}
-              {partners.size > 0 && candidate !== null && !showSeats && (
-                <div className={styles.cardFooter}>{nextOrStart}</div>
-              )}
             </div>
           )}
 
@@ -928,7 +925,7 @@ export default function SinglePlayer() {
               the party's colour on the arch and map); Alliance Mode has
               seat-sharing sliders instead, shown on the arch. It sits in the
               same grid as the boxes above, under the CM candidate box. */}
-          {showSeats && (
+          {seatsShown && (
           <div ref={seatsCardRef} className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${styles.tCard}`}>
             <div className={styles.tTop}>
               <h2 className={`${styles.heading} ${styles.tTitle}`}>Add Your Candidates</h2>
