@@ -310,16 +310,24 @@ const MODES = [
 type ModeId = (typeof MODES)[number]['id'];
 
 // Every Delhi Legislative Assembly election since the assembly was restored
-// in 1993, listed on the Historical Elections page.
-const HISTORICAL_ELECTIONS: readonly { year: number; assembly: string }[] = [
-  { year: 1993, assembly: '1st Assembly' },
-  { year: 1998, assembly: '2nd Assembly' },
-  { year: 2003, assembly: '3rd Assembly' },
-  { year: 2008, assembly: '4th Assembly' },
-  { year: 2013, assembly: '5th Assembly' },
-  { year: 2015, assembly: '6th Assembly' },
-  { year: 2020, assembly: '7th Assembly' },
-  { year: 2025, assembly: '8th Assembly' }
+// in 1993, listed on the Historical Elections page, with the game's parties
+// that contested it on their own symbol. Only these can be played as, or
+// played against, in that election.
+//
+// Source: Wikipedia's "<year> Delhi Legislative Assembly election" pages
+// (party-wise results tables) and statisticstimes.com, read November 2026.
+// Left out where the pages don't list the party: CPI(M) after 2013, and SAD
+// in 2008 (that candidate was from the separate SAD (Amritsar)). SAD in 2015
+// had one candidate on its own symbol; its other three ran on BJP's.
+const HISTORICAL_ELECTIONS: readonly { year: number; assembly: string; parties: readonly PartyId[] }[] = [
+  { year: 1993, assembly: '1st Assembly', parties: ['bjp', 'inc', 'bsp', 'cpim'] },
+  { year: 1998, assembly: '2nd Assembly', parties: ['inc', 'bjp', 'bsp'] },
+  { year: 2003, assembly: '3rd Assembly', parties: ['inc', 'bjp', 'bsp'] },
+  { year: 2008, assembly: '4th Assembly', parties: ['inc', 'bjp', 'bsp', 'jdu', 'rjd'] },
+  { year: 2013, assembly: '5th Assembly', parties: ['bjp', 'aap', 'inc', 'bsp', 'jdu', 'sad', 'cpim'] },
+  { year: 2015, assembly: '6th Assembly', parties: ['aap', 'bjp', 'inc', 'bsp', 'sad'] },
+  { year: 2020, assembly: '7th Assembly', parties: ['aap', 'bjp', 'inc', 'bsp', 'jdu', 'rjd'] },
+  { year: 2025, assembly: '8th Assembly', parties: ['bjp', 'aap', 'inc', 'bsp', 'jdu'] }
 ];
 
 // Who you play against on the candidate page: Delhi's main contenders, or
@@ -396,6 +404,8 @@ export default function SinglePlayer() {
   const [page, setPage] = useState<'pick' | 'candidate' | 'historical'>('pick');
   // Election picked from the Historical Elections menu.
   const [historicalYear, setHistoricalYear] = useState<number | null>(null);
+  // Party you play as in that election; cleared when the election changes.
+  const [historicalParty, setHistoricalParty] = useState<PartyId | null>(null);
   // Which of the party's candidates is picked on the candidate page.
   const [candidate, setCandidate] = useState<number | null>(null);
   // Parties picked as alliance partners (Alliance Mode only).
@@ -581,10 +591,16 @@ export default function SinglePlayer() {
     }
   };
 
-  // Historical Elections: a menu of past Delhi elections beside a box that
-  // is empty for now. The header's back link returns to the picker with the
-  // mode kept.
+  // Historical Elections: a menu of past Delhi elections beside a box where
+  // you pick your party from those that contested the picked election. The
+  // rest of that election's parties are your opponents. The header's back
+  // link returns to the picker with the mode kept.
   if (page === 'historical') {
+    const election = HISTORICAL_ELECTIONS.find((e) => e.year === historicalYear);
+    const contested = election
+      ? election.parties.map((id) => PARTIES.find((p) => p.id === id)!).filter(Boolean)
+      : [];
+    const opponents = contested.filter((p) => p.id !== historicalParty);
     return (
       <RoomShell variant="booth" onBack={() => setPage('pick')}>
         <div className={`${shellStyles.card} ${styles.card} ${styles.historyCard}`}>
@@ -600,7 +616,10 @@ export default function SinglePlayer() {
                     role="radio"
                     aria-checked={on}
                     className={`${styles.historyItem} ${on ? styles.historyItemOn : ''}`}
-                    onClick={() => setHistoricalYear(e.year)}
+                    onClick={() => {
+                      if (e.year !== historicalYear) setHistoricalParty(null);
+                      setHistoricalYear(e.year);
+                    }}
                   >
                     <span className={styles.historyYear}>{e.year}</span>
                     <span className={styles.historyAssembly}>{e.assembly}</span>
@@ -608,8 +627,50 @@ export default function SinglePlayer() {
                 );
               })}
             </div>
-            {/* Empty for now. */}
-            <div className={styles.historyBox} />
+            <div className={`${styles.historyBox} ${election ? styles.historyBoxFilled : ''}`}>
+              {!election ? (
+                <p className={styles.historyEmpty}>Pick an election to see the parties that contested it.</p>
+              ) : (
+                <>
+                  <h2 className={styles.historyBoxHeading}>Select Your Party</h2>
+                  <p className={styles.historyBoxSub}>
+                    Parties in the {election.year} election. You can only play as, and against, these.
+                  </p>
+                  <div className={styles.historyParties} role="radiogroup" aria-label="Party">
+                    {contested.map((party) => {
+                      const on = historicalParty === party.id;
+                      return (
+                        <button
+                          key={party.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={on}
+                          className={`${styles.slot} ${on ? styles.slotSelected : ''}`}
+                          onClick={() => setHistoricalParty(party.id)}
+                          aria-label={party.name}
+                          title={party.name}
+                        >
+                          <PartySymbol src={party.symbol} label={party.symbolLabel} className={styles.logo} />
+                          <span className={styles.name}>{party.short}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {historicalParty && (
+                    <div className={styles.historyOpponents}>
+                      <span className={styles.historyOpponentsLabel}>Your opponents</span>
+                      <div className={styles.chips}>
+                        {opponents.map((p) => (
+                          <span key={p.id} className={styles.chip} title={p.name}>
+                            {p.short}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         </div>
       </RoomShell>

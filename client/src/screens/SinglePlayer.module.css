@@ -1366,6 +1366,62 @@ span.candidateSymbol {
   border: 2px dashed oklch(60% 0.02 60 / 0.6);
   background: oklch(99% 0.006 75 / 0.6);
 }
+.historyBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  box-sizing: border-box;
+}
+.historyBoxFilled {
+  justify-content: flex-start;
+  border-style: solid;
+  border-color: var(--paper-border);
+}
+.historyEmpty {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+.historyBoxHeading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--ink);
+}
+.historyBoxSub {
+  margin: 4px 0 16px;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+.historyParties {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.historyOpponents {
+  width: 100%;
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.historyOpponentsLabel {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+}
 @media (max-width: 640px) {
   .historyLayout {
     grid-template-columns: minmax(0, 1fr);
@@ -1382,4 +1438,28 @@ span.candidateSymbol {
   .historyBox {
     min-height: 220px;
   }
+  .historyParties {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* The historical party tiles keep the stacked symbol-over-name layout at
+   every width (the main picker's phone rows would hide the names here). */
+.historyParties .slot {
+  aspect-ratio: auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 6px;
+  text-align: center;
+}
+.historyParties .logo {
+  width: 44px;
+  flex: none;
+}
+.historyParties .name {
+  font-size: 13px;
+}
+.historyOpponents .chips {
+  justify-content: flex-start;
 }
