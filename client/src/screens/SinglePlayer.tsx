@@ -591,7 +591,7 @@ export default function SinglePlayer() {
     }
   };
 
-  // Historical Elections: a menu of past Delhi elections beside a box where
+  // Historical Elections: a row of past Delhi elections above a box where
   // you pick your party from those that contested the picked election. The
   // rest of that election's parties are your opponents. The header's back
   // link returns to the picker with the mode kept.
