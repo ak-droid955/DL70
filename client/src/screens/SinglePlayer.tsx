@@ -319,16 +319,57 @@ type ModeId = (typeof MODES)[number]['id'];
 // Left out where the pages don't list the party: CPI(M) after 2013, and SAD
 // in 2008 (that candidate was from the separate SAD (Amritsar)). SAD in 2015
 // had one candidate on its own symbol; its other three ran on BJP's.
-const HISTORICAL_ELECTIONS: readonly { year: number; assembly: string; parties: readonly PartyId[] }[] = [
+//
+// Pre-poll alliances among those parties are kept as they were: allies are
+// shown together, and the party you pick plays alongside its allies rather
+// than against them. 2013/2015: BJP with SAD; 2020: NDA (BJP, JD(U)) and
+// UPA (INC, RJD); 2025: NDA (BJP, JD(U)). Partners outside the game (LJP)
+// are left out.
+type HistoricalAlliance = { name: string; parties: readonly PartyId[] };
+const HISTORICAL_ELECTIONS: readonly {
+  year: number;
+  assembly: string;
+  parties: readonly PartyId[];
+  alliances?: readonly HistoricalAlliance[];
+}[] = [
   { year: 1993, assembly: '1st Assembly', parties: ['bjp', 'inc', 'bsp', 'cpim'] },
   { year: 1998, assembly: '2nd Assembly', parties: ['inc', 'bjp', 'bsp'] },
   { year: 2003, assembly: '3rd Assembly', parties: ['inc', 'bjp', 'bsp'] },
   { year: 2008, assembly: '4th Assembly', parties: ['inc', 'bjp', 'bsp', 'jdu', 'rjd'] },
-  { year: 2013, assembly: '5th Assembly', parties: ['bjp', 'aap', 'inc', 'bsp', 'jdu', 'sad', 'cpim'] },
-  { year: 2015, assembly: '6th Assembly', parties: ['aap', 'bjp', 'inc', 'bsp', 'sad'] },
-  { year: 2020, assembly: '7th Assembly', parties: ['aap', 'bjp', 'inc', 'bsp', 'jdu', 'rjd'] },
-  { year: 2025, assembly: '8th Assembly', parties: ['bjp', 'aap', 'inc', 'bsp', 'jdu'] }
+  {
+    year: 2013,
+    assembly: '5th Assembly',
+    parties: ['bjp', 'aap', 'inc', 'bsp', 'jdu', 'sad', 'cpim'],
+    alliances: [{ name: 'NDA', parties: ['bjp', 'sad'] }]
+  },
+  {
+    year: 2015,
+    assembly: '6th Assembly',
+    parties: ['aap', 'bjp', 'inc', 'bsp', 'sad'],
+    alliances: [{ name: 'NDA', parties: ['bjp', 'sad'] }]
+  },
+  {
+    year: 2020,
+    assembly: '7th Assembly',
+    parties: ['aap', 'bjp', 'inc', 'bsp', 'jdu', 'rjd'],
+    alliances: [
+      { name: 'NDA', parties: ['bjp', 'jdu'] },
+      { name: 'UPA', parties: ['inc', 'rjd'] }
+    ]
+  },
+  {
+    year: 2025,
+    assembly: '8th Assembly',
+    parties: ['bjp', 'aap', 'inc', 'bsp', 'jdu'],
+    alliances: [{ name: 'NDA', parties: ['bjp', 'jdu'] }]
+  }
 ];
+
+/** The alliance `party` was in at `year`'s election, if any. */
+function historicalAllianceOf(year: number | null, party: PartyId | null): HistoricalAlliance | undefined {
+  if (year === null || party === null) return undefined;
+  return HISTORICAL_ELECTIONS.find((e) => e.year === year)?.alliances?.find((a) => a.parties.includes(party));
+}
 
 // Who you play against on the candidate page: Delhi's main contenders, or
 // every other party in the game. Parties you play as or ally with are left
@@ -667,6 +708,7 @@ export default function SinglePlayer() {
   // election page with the picks kept.
   if (page === 'historicalParty') {
     const hParty = PARTIES.find((p) => p.id === historicalParty);
+    const hAlliance = historicalAllianceOf(historicalYear, historicalParty);
     const lineup =
       (historicalYear && historicalParty && HISTORICAL_CANDIDATES[historicalYear]?.[historicalParty]) ||
       PLACEHOLDER_CANDIDATES;
@@ -677,6 +719,7 @@ export default function SinglePlayer() {
           {hParty && (
             <p className={styles.candidateSub}>
               {hParty.name} · {historicalYear}
+              {hAlliance && ` · ${hAlliance.name}`}
             </p>
           )}
           <div className={styles.lineup} role="radiogroup" aria-label="Candidate">
@@ -716,6 +759,17 @@ export default function SinglePlayer() {
     const contested = election
       ? election.parties.map((id) => PARTIES.find((p) => p.id === id)!).filter(Boolean)
       : [];
+    // Tiles in display order: each alliance as one group (lead party first),
+    // then the parties that stood alone.
+    const allied = new Set(election?.alliances?.flatMap((a) => a.parties) ?? []);
+    const partyGroups: { alliance?: HistoricalAlliance; parties: typeof contested }[] = [
+      ...(election?.alliances ?? []).map((a) => ({
+        alliance: a,
+        parties: a.parties.map((id) => PARTIES.find((p) => p.id === id)!).filter(Boolean)
+      })),
+      ...contested.filter((p) => !allied.has(p.id)).map((p) => ({ parties: [p] }))
+    ];
+    const pickedAlliance = historicalAllianceOf(historicalYear, historicalParty);
     return (
       <RoomShell variant="booth" onBack={() => setPage('pick')}>
         <div className={`${shellStyles.card} ${styles.card} ${styles.historyCard}`}>
@@ -752,28 +806,49 @@ export default function SinglePlayer() {
                 <>
                   <h2 className={styles.historyBoxHeading}>Select Your Party</h2>
                   <div className={styles.historyParties} role="radiogroup" aria-label="Party">
-                    {contested.map((party) => {
-                      const on = historicalParty === party.id;
-                      return (
-                        <button
-                          key={party.id}
-                          type="button"
-                          role="radio"
-                          aria-checked={on}
-                          className={`${styles.slot} ${on ? styles.slotSelected : ''}`}
-                          onClick={() => {
-                            if (party.id !== historicalParty) setHistoricalCandidate(null);
-                            setHistoricalParty(party.id);
-                          }}
-                          aria-label={party.name}
-                          title={party.name}
-                        >
-                          <PartySymbol src={party.symbol} label={party.symbolLabel} className={styles.logo} />
-                          <span className={styles.name}>{party.short}</span>
-                        </button>
+                    {partyGroups.map((group) => {
+                      const tiles = group.parties.map((party) => {
+                        const on = historicalParty === party.id;
+                        return (
+                          <button
+                            key={party.id}
+                            type="button"
+                            role="radio"
+                            aria-checked={on}
+                            className={`${styles.slot} ${on ? styles.slotSelected : ''}`}
+                            onClick={() => {
+                              if (party.id !== historicalParty) setHistoricalCandidate(null);
+                              setHistoricalParty(party.id);
+                            }}
+                            aria-label={party.name}
+                            title={party.name}
+                          >
+                            <PartySymbol src={party.symbol} label={party.symbolLabel} className={styles.logo} />
+                            <span className={styles.name}>{party.short}</span>
+                          </button>
+                        );
+                      });
+                      // Allies sit together in a labelled group.
+                      return group.alliance ? (
+                        <div key={group.alliance.name} className={styles.historyAlliance}>
+                          <span className={styles.historyAllianceName}>{group.alliance.name}</span>
+                          <div className={styles.historyAllianceTiles}>{tiles}</div>
+                        </div>
+                      ) : (
+                        tiles
                       );
                     })}
                   </div>
+                  {pickedAlliance && (
+                    <p className={styles.historyAllyNote}>
+                      Playing in the {pickedAlliance.name} with{' '}
+                      {pickedAlliance.parties
+                        .filter((id) => id !== historicalParty)
+                        .map((id) => PARTIES.find((p) => p.id === id)?.short)
+                        .join(', ')}
+                      .
+                    </p>
+                  )}
                   {/* Next opens the next page once a party is picked. */}
                   {historicalParty ? (
                     <button
