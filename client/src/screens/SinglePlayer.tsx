@@ -393,6 +393,62 @@ const CANDIDATES: Partial<Record<PartyId, readonly Candidate[]>> = {
   bsp: delhiChief('Laxman Singh')
 };
 
+// Historical Elections: CM candidates per election and party, the leaders
+// who fronted (or were the main contenders to lead) that party in that
+// election. Portraits already in the game are reused; everyone else gets the
+// leader silhouette until their photo is added. Smaller parties get numbered
+// placeholder slots for now.
+const PORTRAITS: Readonly<Record<string, string>> = {
+  'Arvind Kejriwal': arvindKejriwal,
+  Atishi: atishi,
+  'Manish Sisodia': manishSisodia,
+  'Saurabh Bharadwaj': saurabhBharadwaj,
+  'Rekha Gupta': rekhaGupta,
+  'Parvesh Verma': parveshVerma,
+  'Sandeep Dikshit': sandeepDikshit,
+  'Devender Yadav': devenderYadav
+};
+const leaders = (...names: string[]): readonly Candidate[] =>
+  names.map((name) => ({ name, image: PORTRAITS[name] ?? placeholderLeader }));
+const HISTORICAL_CANDIDATES: Readonly<Record<number, Partial<Record<PartyId, readonly Candidate[]>>>> = {
+  1993: {
+    bjp: leaders('Madan Lal Khurana', 'Sahib Singh Verma', 'Vijay Kumar Malhotra'),
+    inc: leaders('H. K. L. Bhagat', 'Jag Parvesh Chandra')
+  },
+  1998: {
+    bjp: leaders('Sushma Swaraj', 'Sahib Singh Verma', 'Madan Lal Khurana'),
+    inc: leaders('Sheila Dikshit')
+  },
+  2003: {
+    bjp: leaders('Madan Lal Khurana', 'Vijay Kumar Malhotra'),
+    inc: leaders('Sheila Dikshit')
+  },
+  2008: {
+    bjp: leaders('Vijay Kumar Malhotra', 'Harsh Vardhan'),
+    inc: leaders('Sheila Dikshit')
+  },
+  2013: {
+    bjp: leaders('Harsh Vardhan', 'Vijay Goel'),
+    aap: leaders('Arvind Kejriwal', 'Manish Sisodia'),
+    inc: leaders('Sheila Dikshit')
+  },
+  2015: {
+    bjp: leaders('Kiran Bedi', 'Satish Upadhyay'),
+    aap: leaders('Arvind Kejriwal', 'Manish Sisodia'),
+    inc: leaders('Ajay Maken')
+  },
+  2020: {
+    bjp: leaders('Manoj Tiwari', 'Parvesh Verma'),
+    aap: leaders('Arvind Kejriwal', 'Manish Sisodia'),
+    inc: leaders('Subhash Chopra', 'Kirti Azad')
+  },
+  2025: {
+    bjp: leaders('Rekha Gupta', 'Parvesh Verma', 'Virendra Sachdeva'),
+    aap: leaders('Arvind Kejriwal', 'Atishi', 'Manish Sisodia'),
+    inc: leaders('Devender Yadav', 'Sandeep Dikshit')
+  }
+};
+
 /** Single-player entry page: pick the party you will play as, and a mode. */
 export default function SinglePlayer() {
   const [selected, setSelected] = useState<PartyId | null>(null);
@@ -406,6 +462,8 @@ export default function SinglePlayer() {
   const [historicalYear, setHistoricalYear] = useState<number | null>(null);
   // Party you play as in that election; cleared when the election changes.
   const [historicalParty, setHistoricalParty] = useState<PartyId | null>(null);
+  // CM candidate picked on the page after that (index into its list).
+  const [historicalCandidate, setHistoricalCandidate] = useState<number | null>(null);
   // Which of the party's candidates is picked on the candidate page.
   const [candidate, setCandidate] = useState<number | null>(null);
   // Parties picked as alliance partners (Alliance Mode only).
@@ -595,13 +653,50 @@ export default function SinglePlayer() {
   // you pick your party from those that contested the picked election. The
   // rest of that election's parties are your opponents. The header's back
   // link returns to the picker with the mode kept.
-  // Historical Elections, after Next: its own page with an empty box for
-  // now. Back returns to the election page with the picks kept.
+  // Historical Elections, after Next: pick the CM candidate you play as,
+  // from the picked party's leaders in that election. Back returns to the
+  // election page with the picks kept.
   if (page === 'historicalParty') {
+    const hParty = PARTIES.find((p) => p.id === historicalParty);
+    const lineup =
+      (historicalYear && historicalParty && HISTORICAL_CANDIDATES[historicalYear]?.[historicalParty]) ||
+      PLACEHOLDER_CANDIDATES;
     return (
       <RoomShell variant="booth" onBack={() => setPage('historical')}>
-        <div className={`${shellStyles.card} ${styles.card} ${styles.historyCard}`}>
-          <div className={`${styles.historyBox} ${styles.historyPartyBox}`} />
+        <div className={`${shellStyles.card} ${styles.card} ${styles.candidateCard} ${styles.historyCmCard}`}>
+          <h1 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your CM Candidate</h1>
+          {hParty && (
+            <p className={styles.candidateSub}>
+              {hParty.name} · {historicalYear}
+            </p>
+          )}
+          <div className={styles.lineup} role="radiogroup" aria-label="Candidate">
+            {lineup.map((c, i) => {
+              const on = historicalCandidate === i;
+              return (
+                <div key={c.name} className={styles.lineupSlot}>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    aria-label={c.name}
+                    className={`${styles.candidateBox} ${on ? styles.candidateBoxSelected : ''}`}
+                    onClick={() => setHistoricalCandidate(i)}
+                  >
+                    {c.image ? (
+                      <img className={`${styles.candidatePhoto} ${styles.candidateImg}`} src={c.image} alt="" />
+                    ) : (
+                      <span className={styles.candidatePhoto} aria-hidden="true" />
+                    )}
+                    <span className={styles.candidateParty}>
+                      <PartySymbol src={hParty?.symbol} label={hParty?.symbolLabel} className={styles.candidateSymbol} />
+                      <span className={styles.candidateName}>{c.name}</span>
+                    </span>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </RoomShell>
     );
@@ -628,7 +723,10 @@ export default function SinglePlayer() {
                     aria-checked={on}
                     className={`${styles.historyItem} ${on ? styles.historyItemOn : ''}`}
                     onClick={() => {
-                      if (e.year !== historicalYear) setHistoricalParty(null);
+                      if (e.year !== historicalYear) {
+                        setHistoricalParty(null);
+                        setHistoricalCandidate(null);
+                      }
                       setHistoricalYear(e.year);
                     }}
                   >
@@ -654,7 +752,10 @@ export default function SinglePlayer() {
                           role="radio"
                           aria-checked={on}
                           className={`${styles.slot} ${on ? styles.slotSelected : ''}`}
-                          onClick={() => setHistoricalParty(party.id)}
+                          onClick={() => {
+                            if (party.id !== historicalParty) setHistoricalCandidate(null);
+                            setHistoricalParty(party.id);
+                          }}
                           aria-label={party.name}
                           title={party.name}
                         >

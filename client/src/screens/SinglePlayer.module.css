@@ -1445,12 +1445,8 @@ span.candidateSymbol {
 .historyNext {
   max-width: 420px;
 }
-/* The empty box on the page Next opens from the historical party box. */
-.historyPartyBox {
-  min-height: 360px;
-}
-@media (max-width: 640px) {
-  .historyPartyBox {
-    min-height: 240px;
-  }
+/* Historical CM candidate card: as wide as the other modes' candidate card. */
+.historyCmCard {
+  width: 100%;
+  max-width: 700px;
 }
