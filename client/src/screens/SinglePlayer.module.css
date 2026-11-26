@@ -1313,39 +1313,39 @@ span.candidateSymbol {
   margin: 16px 0 0;
 }
 
-/* Historical Elections page: the election menu on the left, an empty box
-   (to be filled later) on the right. */
+/* Historical Elections page: the elections in a row across the top, and
+   below them the box where you pick your party for the picked election. */
 .historyCard {
   width: 100%;
-  max-width: 760px;
+  max-width: 900px;
 }
 .historyLayout {
-  display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 18px;
 }
 .historyMenu {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 8px;
 }
 .historyItem {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 10px 14px;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 4px;
   border-radius: 12px;
   border: 2.5px solid var(--ink);
   background: oklch(99% 0.006 75 / 0.9);
   color: var(--ink);
   font-family: var(--font-ui);
-  text-align: left;
+  text-align: center;
   cursor: pointer;
   transition: transform 0.15s ease;
 }
 .historyItem:hover {
-  transform: translateX(2px);
+  transform: translateY(-2px);
 }
 .historyItemOn {
   background: var(--ink);
@@ -1357,11 +1357,12 @@ span.candidateSymbol {
 }
 .historyAssembly {
   font-weight: 600;
-  font-size: 12px;
+  font-size: 11px;
+  white-space: nowrap;
   opacity: 0.75;
 }
 .historyBox {
-  min-height: 360px;
+  min-height: 300px;
   border-radius: 14px;
   border: 2px dashed oklch(60% 0.02 60 / 0.6);
   background: oklch(99% 0.006 75 / 0.6);
@@ -1404,9 +1405,13 @@ span.candidateSymbol {
 }
 .historyParties {
   width: 100%;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 12px;
+}
+.historyParties .slot {
+  width: 104px;
 }
 .historyOpponents {
   width: 100%;
@@ -1422,24 +1427,23 @@ span.candidateSymbol {
   font-size: 13px;
   color: var(--ink);
 }
-@media (max-width: 640px) {
-  .historyLayout {
-    grid-template-columns: minmax(0, 1fr);
-  }
+/* Too narrow for eight across: two rows of four. */
+@media (max-width: 760px) {
   .historyMenu {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
-  .historyItem {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
+}
+@media (max-width: 640px) {
+  .historyAssembly {
+    white-space: normal;
+    font-size: 10.5px;
+    line-height: 1.2;
   }
   .historyBox {
     min-height: 220px;
   }
-  .historyParties {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .historyParties .slot {
+    width: calc((100% - 24px) / 3);
   }
 }
 
