@@ -1362,7 +1362,8 @@ span.candidateSymbol {
   opacity: 0.75;
 }
 .historyBox {
-  min-height: 300px;
+  /* Only as tall as what it holds; the empty state keeps a little height. */
+  min-height: 120px;
   border-radius: 14px;
   border: 2px dashed oklch(60% 0.02 60 / 0.6);
   background: oklch(99% 0.006 75 / 0.6);
@@ -1438,9 +1439,6 @@ span.candidateSymbol {
     white-space: normal;
     font-size: 10.5px;
     line-height: 1.2;
-  }
-  .historyBox {
-    min-height: 220px;
   }
   .historyParties .slot {
     width: calc((100% - 24px) / 3);
