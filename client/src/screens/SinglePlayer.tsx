@@ -401,11 +401,13 @@ export default function SinglePlayer() {
   // picker that follows Next for 1 vs Many and Alliance Mode, or the
   // Historical Elections page (empty for now). Kept in this component so the
   // picks survive going back.
-  const [page, setPage] = useState<'pick' | 'candidate' | 'historical'>('pick');
+  const [page, setPage] = useState<'pick' | 'candidate' | 'historical' | 'historicalParty'>('pick');
   // Election picked from the Historical Elections menu.
   const [historicalYear, setHistoricalYear] = useState<number | null>(null);
   // Party you play as in that election; cleared when the election changes.
   const [historicalParty, setHistoricalParty] = useState<PartyId | null>(null);
+  // Play Standard / Play All for that election; cleared with the election.
+  const [historicalOpponents, setHistoricalOpponents] = useState<OpponentsId | null>(null);
   // Which of the party's candidates is picked on the candidate page.
   const [candidate, setCandidate] = useState<number | null>(null);
   // Parties picked as alliance partners (Alliance Mode only).
@@ -595,12 +597,23 @@ export default function SinglePlayer() {
   // you pick your party from those that contested the picked election. The
   // rest of that election's parties are your opponents. The header's back
   // link returns to the picker with the mode kept.
+  // Historical Elections, after a party is clicked: its own page with an
+  // empty box for now. Back returns to the election page with the picks kept.
+  if (page === 'historicalParty') {
+    return (
+      <RoomShell variant="booth" onBack={() => setPage('historical')}>
+        <div className={`${shellStyles.card} ${styles.card} ${styles.historyCard}`}>
+          <div className={`${styles.historyBox} ${styles.historyPartyBox}`} />
+        </div>
+      </RoomShell>
+    );
+  }
+
   if (page === 'historical') {
     const election = HISTORICAL_ELECTIONS.find((e) => e.year === historicalYear);
     const contested = election
       ? election.parties.map((id) => PARTIES.find((p) => p.id === id)!).filter(Boolean)
       : [];
-    const opponents = contested.filter((p) => p.id !== historicalParty);
     return (
       <RoomShell variant="booth" onBack={() => setPage('pick')}>
         <div className={`${shellStyles.card} ${styles.card} ${styles.historyCard}`}>
@@ -617,7 +630,10 @@ export default function SinglePlayer() {
                     aria-checked={on}
                     className={`${styles.historyItem} ${on ? styles.historyItemOn : ''}`}
                     onClick={() => {
-                      if (e.year !== historicalYear) setHistoricalParty(null);
+                      if (e.year !== historicalYear) {
+                        setHistoricalParty(null);
+                        setHistoricalOpponents(null);
+                      }
                       setHistoricalYear(e.year);
                     }}
                   >
@@ -632,6 +648,25 @@ export default function SinglePlayer() {
                 <p className={styles.historyEmpty}>Pick an election to see the parties that contested it.</p>
               ) : (
                 <>
+                  {/* The same two opponent options as the other modes, here
+                      limited to this election's parties. */}
+                  <div className={`${styles.modes} ${styles.historyPlay}`} role="radiogroup" aria-label="Opponents">
+                    {OPPONENT_OPTIONS.map((o) => {
+                      const on = historicalOpponents === o.id;
+                      return (
+                        <button
+                          key={o.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={on}
+                          className={`${styles.modeBtn} ${on ? styles.modeBtnSelected : ''}`}
+                          onClick={() => setHistoricalOpponents(o.id)}
+                        >
+                          {o.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                   <h2 className={styles.historyBoxHeading}>Select Your Party</h2>
                   <p className={styles.historyBoxSub}>
                     Parties in the {election.year} election. You can only play as, and against, these.
@@ -646,7 +681,12 @@ export default function SinglePlayer() {
                           role="radio"
                           aria-checked={on}
                           className={`${styles.slot} ${on ? styles.slotSelected : ''}`}
-                          onClick={() => setHistoricalParty(party.id)}
+                          onClick={() => {
+                            // Opens the party's page for this election.
+                            setHistoricalParty(party.id);
+                            setPage('historicalParty');
+                            window.scrollTo(0, 0);
+                          }}
                           aria-label={party.name}
                           title={party.name}
                         >
@@ -656,18 +696,6 @@ export default function SinglePlayer() {
                       );
                     })}
                   </div>
-                  {historicalParty && (
-                    <div className={styles.historyOpponents}>
-                      <span className={styles.historyOpponentsLabel}>Your opponents</span>
-                      <div className={styles.chips}>
-                        {opponents.map((p) => (
-                          <span key={p.id} className={styles.chip} title={p.name}>
-                            {p.short}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </>
               )}
             </div>

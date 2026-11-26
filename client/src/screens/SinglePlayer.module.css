@@ -1414,20 +1414,6 @@ span.candidateSymbol {
 .historyParties .slot {
   width: 104px;
 }
-.historyOpponents {
-  width: 100%;
-  margin-top: 18px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-}
-.historyOpponentsLabel {
-  font-family: var(--font-ui);
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--ink);
-}
 /* Too narrow for eight across: two rows of four. */
 @media (max-width: 760px) {
   .historyMenu {
@@ -1462,6 +1448,20 @@ span.candidateSymbol {
 .historyParties .name {
   font-size: 13px;
 }
-.historyOpponents .chips {
-  justify-content: flex-start;
+
+/* Play Standard / Play All at the top of the historical party box. */
+.historyPlay {
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+/* The empty box on the page a historical party click opens. */
+.historyPartyBox {
+  min-height: 360px;
+}
+@media (max-width: 640px) {
+  .historyPartyBox {
+    min-height: 240px;
+  }
 }
