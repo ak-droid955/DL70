@@ -644,9 +644,6 @@ export default function SinglePlayer() {
               ) : (
                 <>
                   <h2 className={styles.historyBoxHeading}>Select Your Party</h2>
-                  <p className={styles.historyBoxSub}>
-                    Parties in the {election.year} election. You can only play as, and against, these.
-                  </p>
                   <div className={styles.historyParties} role="radiogroup" aria-label="Party">
                     {contested.map((party) => {
                       const on = historicalParty === party.id;

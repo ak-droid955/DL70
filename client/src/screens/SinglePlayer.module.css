@@ -1390,19 +1390,11 @@ span.candidateSymbol {
   color: var(--ink-muted);
 }
 .historyBoxHeading {
-  margin: 0;
+  margin: 0 0 16px;
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 20px;
   color: var(--ink);
-}
-.historyBoxSub {
-  margin: 4px 0 16px;
-  text-align: center;
-  font-family: var(--font-ui);
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--ink-muted);
 }
 .historyParties {
   width: 100%;
