@@ -406,8 +406,6 @@ export default function SinglePlayer() {
   const [historicalYear, setHistoricalYear] = useState<number | null>(null);
   // Party you play as in that election; cleared when the election changes.
   const [historicalParty, setHistoricalParty] = useState<PartyId | null>(null);
-  // Play Standard / Play All for that election; cleared with the election.
-  const [historicalOpponents, setHistoricalOpponents] = useState<OpponentsId | null>(null);
   // Which of the party's candidates is picked on the candidate page.
   const [candidate, setCandidate] = useState<number | null>(null);
   // Parties picked as alliance partners (Alliance Mode only).
@@ -597,8 +595,8 @@ export default function SinglePlayer() {
   // you pick your party from those that contested the picked election. The
   // rest of that election's parties are your opponents. The header's back
   // link returns to the picker with the mode kept.
-  // Historical Elections, after a party is clicked: its own page with an
-  // empty box for now. Back returns to the election page with the picks kept.
+  // Historical Elections, after Next: its own page with an empty box for
+  // now. Back returns to the election page with the picks kept.
   if (page === 'historicalParty') {
     return (
       <RoomShell variant="booth" onBack={() => setPage('historical')}>
@@ -630,10 +628,7 @@ export default function SinglePlayer() {
                     aria-checked={on}
                     className={`${styles.historyItem} ${on ? styles.historyItemOn : ''}`}
                     onClick={() => {
-                      if (e.year !== historicalYear) {
-                        setHistoricalParty(null);
-                        setHistoricalOpponents(null);
-                      }
+                      if (e.year !== historicalYear) setHistoricalParty(null);
                       setHistoricalYear(e.year);
                     }}
                   >
@@ -648,25 +643,6 @@ export default function SinglePlayer() {
                 <p className={styles.historyEmpty}>Pick an election to see the parties that contested it.</p>
               ) : (
                 <>
-                  {/* The same two opponent options as the other modes, here
-                      limited to this election's parties. */}
-                  <div className={`${styles.modes} ${styles.historyPlay}`} role="radiogroup" aria-label="Opponents">
-                    {OPPONENT_OPTIONS.map((o) => {
-                      const on = historicalOpponents === o.id;
-                      return (
-                        <button
-                          key={o.id}
-                          type="button"
-                          role="radio"
-                          aria-checked={on}
-                          className={`${styles.modeBtn} ${on ? styles.modeBtnSelected : ''}`}
-                          onClick={() => setHistoricalOpponents(o.id)}
-                        >
-                          {o.label}
-                        </button>
-                      );
-                    })}
-                  </div>
                   <h2 className={styles.historyBoxHeading}>Select Your Party</h2>
                   <p className={styles.historyBoxSub}>
                     Parties in the {election.year} election. You can only play as, and against, these.
@@ -681,12 +657,7 @@ export default function SinglePlayer() {
                           role="radio"
                           aria-checked={on}
                           className={`${styles.slot} ${on ? styles.slotSelected : ''}`}
-                          onClick={() => {
-                            // Opens the party's page for this election.
-                            setHistoricalParty(party.id);
-                            setPage('historicalParty');
-                            window.scrollTo(0, 0);
-                          }}
+                          onClick={() => setHistoricalParty(party.id)}
                           aria-label={party.name}
                           title={party.name}
                         >
@@ -696,6 +667,21 @@ export default function SinglePlayer() {
                       );
                     })}
                   </div>
+                  {/* Next opens the next page once a party is picked. */}
+                  {historicalParty ? (
+                    <button
+                      type="button"
+                      className={`${styles.nextBtn} ${styles.historyNext}`}
+                      onClick={() => {
+                        setPage('historicalParty');
+                        window.scrollTo(0, 0);
+                      }}
+                    >
+                      Next →
+                    </button>
+                  ) : (
+                    <p className={styles.nextHint}>Select your party to continue.</p>
+                  )}
                 </>
               )}
             </div>

@@ -1449,14 +1449,11 @@ span.candidateSymbol {
   font-size: 13px;
 }
 
-/* Play Standard / Play All at the top of the historical party box. */
-.historyPlay {
-  width: 100%;
+/* Next under the historical party tiles. */
+.historyNext {
   max-width: 420px;
-  margin-bottom: 18px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-/* The empty box on the page a historical party click opens. */
+/* The empty box on the page Next opens from the historical party box. */
 .historyPartyBox {
   min-height: 360px;
 }
