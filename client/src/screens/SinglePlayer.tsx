@@ -31,6 +31,10 @@ import vijayGoel from '../assets/candidates/bjp/vijay-goel.webp';
 import kiranBedi from '../assets/candidates/bjp/kiran-bedi.webp';
 import manojTiwari from '../assets/candidates/bjp/manoj-tiwari.webp';
 import virendraSachdeva from '../assets/candidates/bjp/virendra-sachdeva.webp';
+import ajayMaken from '../assets/candidates/inc/ajay-maken.webp';
+import kirtiAzad from '../assets/candidates/inc/kirti-azad.webp';
+import mayawati from '../assets/candidates/bsp/mayawati.webp';
+import kanshiRam from '../assets/candidates/bsp/kanshi-ram.webp';
 import { PROFANITY_MESSAGE, hasProfanity } from '../lib/profanity';
 import { useGame } from '../state/GameProvider';
 import DistrictList from './DistrictList';
@@ -468,7 +472,11 @@ const PORTRAITS: Readonly<Record<string, string>> = {
   'Vijay Goel': vijayGoel,
   'Kiran Bedi': kiranBedi,
   'Manoj Tiwari': manojTiwari,
-  'Virendra Sachdeva': virendraSachdeva
+  'Virendra Sachdeva': virendraSachdeva,
+  'Ajay Maken': ajayMaken,
+  'Kirti Azad': kirtiAzad,
+  Mayawati: mayawati,
+  'Kanshi Ram': kanshiRam
 };
 const leaders = (...names: string[]): readonly Candidate[] =>
   names.map((name) => ({ name, image: PORTRAITS[name] ?? placeholderLeader }));
