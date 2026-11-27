@@ -1517,13 +1517,10 @@ export default function SinglePlayer() {
               );
             })}
           </div>
-        </div>
 
-        {/* Game modes, in their own card below the party card. Single choice;
-            Next opens the chosen mode's page. */}
-        {/* Until a mode is picked the card is only as wide as its buttons;
-            picking one widens it to show the explainer beside them. */}
-        <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${activeMode ? '' : styles.modeCardCompact}`}>
+        {/* Game modes, in the same box as the parties below a divider line.
+            Single choice; Next opens the chosen mode's page. */}
+        <div className={styles.modeSection}>
           <h2 className={styles.heading}>Select Mode</h2>
           {/* Mode buttons on the left; past a divider, the picked mode's
               explainer and Next on the right. */}
@@ -1580,6 +1577,7 @@ export default function SinglePlayer() {
           </div>
           )}
           </div>
+        </div>
         </div>
       </div>
 
