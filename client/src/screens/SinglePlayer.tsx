@@ -35,6 +35,7 @@ import ajayMaken from '../assets/candidates/inc/ajay-maken.webp';
 import kirtiAzad from '../assets/candidates/inc/kirti-azad.webp';
 import mayawati from '../assets/candidates/bsp/mayawati.webp';
 import kanshiRam from '../assets/candidates/bsp/kanshi-ram.webp';
+import manjinderSinghSirsa from '../assets/candidates/sad/manjinder-singh-sirsa.webp';
 import { PROFANITY_MESSAGE, hasProfanity } from '../lib/profanity';
 import { useGame } from '../state/GameProvider';
 import DistrictList from './DistrictList';
@@ -477,7 +478,8 @@ const PORTRAITS: Readonly<Record<string, string>> = {
   'Ajay Maken': ajayMaken,
   'Kirti Azad': kirtiAzad,
   Mayawati: mayawati,
-  'Kanshi Ram': kanshiRam
+  'Kanshi Ram': kanshiRam,
+  'Manjinder Singh Sirsa': manjinderSinghSirsa
 };
 const leaders = (...names: string[]): readonly Candidate[] =>
   names.map((name) => ({ name, image: PORTRAITS[name] ?? placeholderLeader }));
