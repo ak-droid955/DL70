@@ -21,6 +21,11 @@ import harshMalhotra from '../assets/candidates/bjp/harsh-malhotra.webp';
 import kapilMishra from '../assets/candidates/bjp/kapil-mishra.webp';
 import parveshVerma from '../assets/candidates/bjp/parvesh-verma.webp';
 import rekhaGupta from '../assets/candidates/bjp/rekha-gupta.webp';
+import madanLalKhurana from '../assets/candidates/bjp/madan-lal-khurana.webp';
+import sushmaSwaraj from '../assets/candidates/bjp/sushma-swaraj.webp';
+import sahibSinghVerma from '../assets/candidates/bjp/sahib-singh-verma.webp';
+import vijayKumarMalhotra from '../assets/candidates/bjp/vijay-kumar-malhotra.webp';
+import sheilaDikshit from '../assets/candidates/inc/sheila-dikshit.webp';
 import { PROFANITY_MESSAGE, hasProfanity } from '../lib/profanity';
 import { useGame } from '../state/GameProvider';
 import DistrictList from './DistrictList';
@@ -448,7 +453,12 @@ const PORTRAITS: Readonly<Record<string, string>> = {
   'Rekha Gupta': rekhaGupta,
   'Parvesh Verma': parveshVerma,
   'Sandeep Dikshit': sandeepDikshit,
-  'Devender Yadav': devenderYadav
+  'Devender Yadav': devenderYadav,
+  'Madan Lal Khurana': madanLalKhurana,
+  'Sushma Swaraj': sushmaSwaraj,
+  'Sahib Singh Verma': sahibSinghVerma,
+  'Vijay Kumar Malhotra': vijayKumarMalhotra,
+  'Sheila Dikshit': sheilaDikshit
 };
 const leaders = (...names: string[]): readonly Candidate[] =>
   names.map((name) => ({ name, image: PORTRAITS[name] ?? placeholderLeader }));
