@@ -790,10 +790,13 @@ span.candidateSymbol {
   .lineup {
     gap: 20px 16px;
   }
-  /* Two to a row even on the narrowest phones (320px), rather than one. */
-  .lineupSlot,
-  .candidateBox {
+  /* Two to a row even on the narrowest phones (320px), rather than one.
+     The slot takes its share of the row; the card fills its slot. */
+  .lineupSlot {
     width: min(130px, calc(50% - 8px));
+  }
+  .candidateBox {
+    width: 100%;
   }
 }
 
@@ -1518,9 +1521,11 @@ span.candidateSymbol {
   .pickerPair .lineup {
     gap: 20px 16px;
   }
-  .pickerPair .lineupSlot,
-  .pickerPair .candidateBox {
+  .pickerPair .lineupSlot {
     width: min(130px, calc(50% - 8px));
+  }
+  .pickerPair .candidateBox {
+    width: 100%;
   }
   .pickerPair .candidateBox {
     aspect-ratio: 3 / 4;
