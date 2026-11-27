@@ -451,9 +451,10 @@ const CANDIDATES: Partial<Record<PartyId, readonly Candidate[]>> = {
 // Historical Elections: CM candidates per election and party, the leaders
 // who fronted (or were the main contenders to lead) that party in that
 // election. Portraits already in the game are reused; everyone else gets the
-// leader silhouette until their photo is added. Smaller parties get numbered
-// placeholder slots for now. BSP is fronted by its national leader (Kanshi
-// Ram, then Mayawati) until 2015, and its Delhi president after.
+// leader silhouette until their photo is added. BSP is fronted by its national leader (Kanshi Ram,
+// then Mayawati) until 2015, and its Delhi president after. CPI(M), JD(U)
+// and RJD by their national leader at the time (general secretary or party
+// president); SAD by its Delhi face, Manjinder Singh Sirsa.
 const PORTRAITS: Readonly<Record<string, string>> = {
   'Arvind Kejriwal': arvindKejriwal,
   Atishi: atishi,
@@ -482,6 +483,7 @@ const leaders = (...names: string[]): readonly Candidate[] =>
   names.map((name) => ({ name, image: PORTRAITS[name] ?? placeholderLeader }));
 const HISTORICAL_CANDIDATES: Readonly<Record<number, Partial<Record<PartyId, readonly Candidate[]>>>> = {
   1993: {
+    cpim: leaders('Harkishan Singh Surjeet'),
     bsp: leaders('Kanshi Ram'),
     bjp: leaders('Madan Lal Khurana', 'Sahib Singh Verma', 'Vijay Kumar Malhotra'),
     inc: leaders('H. K. L. Bhagat', 'Jag Parvesh Chandra')
@@ -497,29 +499,38 @@ const HISTORICAL_CANDIDATES: Readonly<Record<number, Partial<Record<PartyId, rea
     inc: leaders('Sheila Dikshit')
   },
   2008: {
+    jdu: leaders('Sharad Yadav'),
+    rjd: leaders('Lalu Prasad Yadav'),
     bsp: leaders('Mayawati'),
     bjp: leaders('Vijay Kumar Malhotra', 'Harsh Vardhan'),
     inc: leaders('Sheila Dikshit')
   },
   2013: {
+    jdu: leaders('Sharad Yadav'),
+    sad: leaders('Manjinder Singh Sirsa'),
+    cpim: leaders('Prakash Karat'),
     bsp: leaders('Mayawati'),
     bjp: leaders('Harsh Vardhan', 'Vijay Goel'),
     aap: leaders('Arvind Kejriwal', 'Manish Sisodia'),
     inc: leaders('Sheila Dikshit')
   },
   2015: {
+    sad: leaders('Manjinder Singh Sirsa'),
     bsp: leaders('Mayawati'),
     bjp: leaders('Kiran Bedi', 'Satish Upadhyay'),
     aap: leaders('Arvind Kejriwal', 'Manish Sisodia'),
     inc: leaders('Ajay Maken')
   },
   2020: {
+    jdu: leaders('Nitish Kumar'),
+    rjd: leaders('Lalu Prasad Yadav'),
     bsp: leaders('Laxman Singh'),
     bjp: leaders('Manoj Tiwari', 'Parvesh Verma'),
     aap: leaders('Arvind Kejriwal', 'Manish Sisodia'),
     inc: leaders('Subhash Chopra', 'Kirti Azad')
   },
   2025: {
+    jdu: leaders('Nitish Kumar'),
     bsp: leaders('Laxman Singh'),
     bjp: leaders('Rekha Gupta', 'Parvesh Verma', 'Virendra Sachdeva'),
     aap: leaders('Arvind Kejriwal', 'Atishi', 'Manish Sisodia'),
