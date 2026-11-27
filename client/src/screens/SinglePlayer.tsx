@@ -894,7 +894,12 @@ export default function SinglePlayer() {
                             aria-checked={on}
                             className={`${styles.slot} ${on ? styles.slotSelected : ''}`}
                             onClick={() => {
-                              if (party.id !== historicalParty) setHistoricalCandidate(null);
+                              // A party with a single CM candidate in this
+                              // election has them picked straight away.
+                              if (party.id !== historicalParty)
+                                setHistoricalCandidate(
+                                  HISTORICAL_CANDIDATES[election.year]?.[party.id]?.length === 1 ? 0 : null
+                                );
                               setHistoricalParty(party.id);
                             }}
                             aria-label={party.name}
