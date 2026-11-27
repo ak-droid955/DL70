@@ -790,11 +790,10 @@ span.candidateSymbol {
   .lineup {
     gap: 20px 16px;
   }
-  .lineupSlot {
-    width: 130px;
-  }
+  /* Two to a row even on the narrowest phones (320px), rather than one. */
+  .lineupSlot,
   .candidateBox {
-    width: 130px;
+    width: min(130px, calc(50% - 8px));
   }
 }
 
@@ -918,8 +917,8 @@ span.candidateSymbol {
 .partnerRow {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
+  gap: 6px;
+  padding: 6px 8px;
   border-radius: 10px;
   border: 2px solid var(--paper-border);
   background: var(--card-paper);
@@ -945,6 +944,9 @@ span.candidateSymbol {
   font-family: var(--font-ui);
   font-weight: 700;
   font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: var(--ink);
   text-align: left;
 }
@@ -1506,5 +1508,24 @@ span.candidateSymbol {
 @media (max-width: 640px) {
   .historyEmptyPage {
     min-height: 240px;
+  }
+}
+
+/* Phones: the CM candidate and partner boxes stack, so Alliance Mode's
+   candidate cards needn't be squeezed to sit beside the partner list. Same
+   size as 1 vs Many's, two to a row, so long names no longer break mid-word. */
+@media (max-width: 640px) {
+  .pickerPair .lineup {
+    gap: 20px 16px;
+  }
+  .pickerPair .lineupSlot,
+  .pickerPair .candidateBox {
+    width: min(130px, calc(50% - 8px));
+  }
+  .pickerPair .candidateBox {
+    aspect-ratio: 3 / 4;
+  }
+  .pickerPair .candidateName {
+    font-size: 12px;
   }
 }
