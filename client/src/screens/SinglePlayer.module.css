@@ -1490,3 +1490,11 @@ span.candidateSymbol {
     width: 84px;
   }
 }
+
+/* 1 vs Many's opponent tick list: titled like the Opponent Alliances box it
+   replaces in that mode. */
+.allianceCard .candidateHeading {
+  margin: 0 0 12px;
+  font-size: 20px;
+  letter-spacing: -0.3px;
+}

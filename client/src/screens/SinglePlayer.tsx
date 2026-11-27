@@ -563,6 +563,9 @@ export default function SinglePlayer() {
   const [partners, setPartners] = useState<ReadonlySet<PartyId>>(() => new Set());
   // Standard or all-party opposition, picked under Add Your Candidates.
   const [opponents, setOpponents] = useState<OpponentsId | null>(null);
+  // 1 vs Many: the parties ticked as opponents. null until changed, which
+  // means the default: Delhi's main parties (BJP, AAP, INC) other than yours.
+  const [opponentTicks, setOpponentTicks] = useState<ReadonlySet<PartyId> | null>(null);
   // Alliances among the opponents: named groups of two or more party ids.
   const [opponentAlliances, setOpponentAlliances] = useState<OpponentAlliance[]>([]);
   // Seats each alliance partner contests; your party takes the rest.
@@ -944,7 +947,29 @@ export default function SinglePlayer() {
         : 'All of Delhi’s main parties are on your side. Pick Play All to face the rest.',
       all: `Face every other party in the game: ${rivalNames(rivals)}.`
     };
-    const activeOpponents = OPPONENT_OPTIONS.find((o) => o.id === opponents);
+    // 1 vs Many picks opponents by tick box instead (main parties ticked to
+    // start); Play Standard / Play All just set the ticks, and stay lit while
+    // the ticks match them.
+    const oneVsMany = mode === 'one-vs-many';
+    const tickedOpponents: ReadonlySet<PartyId> = new Set(
+      [...(opponentTicks ?? STANDARD_PARTIES)].filter((id) => rivals.some((r) => r.id === id))
+    );
+    const sameSet = (list: typeof rivals) =>
+      list.length === tickedOpponents.size && list.every((p) => tickedOpponents.has(p.id));
+    const pickedOpponents: OpponentsId | null = oneVsMany
+      ? sameSet(standardRivals) && standardRivals.length > 0
+        ? 'standard'
+        : sameSet(rivals)
+          ? 'all'
+          : null
+      : opponents;
+    const toggleOpponent = (id: PartyId) => {
+      const next = new Set(tickedOpponents);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      setOpponentTicks(next);
+    };
+    const activeOpponents = OPPONENT_OPTIONS.find((o) => o.id === pickedOpponents);
     // Your party, as a row in a seat's contest table.
     const youContest: ContestParty = {
       id: selected,
@@ -998,7 +1023,13 @@ export default function SinglePlayer() {
     // or in Alliance Mode whichever ally the seat went to; in 1 vs Many only
     // if the seat is ticked), then the opponents picked, if any.
     const opponentParties: ContestParty[] = (
-      opponents === 'standard' ? standardRivals : opponents === 'all' ? rivals : []
+      oneVsMany
+        ? rivals.filter((p) => tickedOpponents.has(p.id))
+        : opponents === 'standard'
+          ? standardRivals
+          : opponents === 'all'
+            ? rivals
+            : []
     ).map((p) => ({
       id: p.id,
       short: p.short,
@@ -1229,7 +1260,7 @@ export default function SinglePlayer() {
               <div className={styles.modeSplit}>
                 <div className={styles.modes} role="radiogroup" aria-label="Opponents">
                   {OPPONENT_OPTIONS.map((o) => {
-                    const isSelected = opponents === o.id;
+                    const isSelected = pickedOpponents === o.id;
                     return (
                       <button
                         key={o.id}
@@ -1237,7 +1268,11 @@ export default function SinglePlayer() {
                         role="radio"
                         aria-checked={isSelected}
                         className={`${styles.modeBtn} ${isSelected ? styles.modeBtnSelected : ''}`}
-                        onClick={() => setOpponents(o.id)}
+                        onClick={() =>
+                          oneVsMany
+                            ? setOpponentTicks(new Set((o.id === 'standard' ? standardRivals : rivals).map((p) => p.id)))
+                            : setOpponents(o.id)
+                        }
                       >
                         {o.label}
                       </button>
@@ -1254,12 +1289,44 @@ export default function SinglePlayer() {
                   </div>
                 )}
               </div>
-              {/* Play Standard: Start Game under the explainer. */}
-              {opponents === 'standard' && startGame}
+              {/* Play Standard: Start Game under the explainer (Alliance
+                  Mode; 1 vs Many has it under the tick list). */}
+              {!oneVsMany && opponents === 'standard' && startGame}
             </div>
-            {/* Not offered with Play Standard. Start Game sits below the
-                alliances otherwise. */}
-            {opponents !== 'standard' && (
+            {/* 1 vs Many: tick which parties you face, main parties ticked to
+                start. Start Game below once at least one is ticked. */}
+            {oneVsMany && (
+              <div className={`${shellStyles.card} ${styles.card} ${styles.allianceCard}`}>
+                <h2 className={`${styles.heading} ${styles.candidateHeading}`}>Your Opponents</h2>
+                <div className={styles.partnerGrid}>
+                  {rivals.map((p) => {
+                    const on = tickedOpponents.has(p.id);
+                    return (
+                      <label
+                        key={p.id}
+                        className={`${styles.partnerRow} ${on ? styles.partnerRowOn : ''}`}
+                        title={p.name}
+                      >
+                        <PartySymbol src={p.symbol} label={p.symbolLabel} className={styles.partnerSymbol} />
+                        <span className={styles.partnerName}>{p.short}</span>
+                        <input
+                          type="checkbox"
+                          className={styles.partnerTick}
+                          checked={on}
+                          onChange={() => toggleOpponent(p.id)}
+                          aria-label={p.name}
+                        />
+                      </label>
+                    );
+                  })}
+                </div>
+                {tickedOpponents.size === 0 && <p className={styles.partnerLimit}>Tick at least one opponent.</p>}
+                {tickedOpponents.size > 0 && startGame}
+              </div>
+            )}
+            {/* Alliance Mode only, and not with Play Standard. Start Game
+                sits below the alliances otherwise. */}
+            {!oneVsMany && opponents !== 'standard' && (
               <div className={`${shellStyles.card} ${styles.card} ${styles.allianceCard}`}>
                 <OpponentAlliances
                   parties={opponentParties}
