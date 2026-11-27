@@ -1548,6 +1548,15 @@ export default function SinglePlayer() {
               tall as the longest one; only the picked mode's is visible. */}
           {activeMode && (
           <div className={styles.modeRow}>
+          {/* Next needs a mode, and a party too unless the mode is Historical
+              Elections (which replays real parties, so none is picked).
+              It opens the chosen mode's page, and sits above the explainer. */}
+          {mode && !canProceed && <p className={styles.nextHint}>Select your party above to continue.</p>}
+          {canProceed && (
+            <button type="button" className={styles.nextBtn} onClick={goNext}>
+              Next →
+            </button>
+          )}
             <div className={styles.modeInfoStack}>
               {MODES.map((m) => {
                 const shown = m.id === activeMode.id;
@@ -1565,15 +1574,6 @@ export default function SinglePlayer() {
               })}
             </div>
 
-          {/* Next needs a mode, and a party too unless the mode is Historical
-              Elections (which replays real parties, so none is picked).
-              It opens the chosen mode's page. */}
-          {mode && !canProceed && <p className={styles.nextHint}>Select your party above to continue.</p>}
-          {canProceed && (
-            <button type="button" className={styles.nextBtn} onClick={goNext}>
-              Next →
-            </button>
-          )}
           </div>
           )}
           </div>
