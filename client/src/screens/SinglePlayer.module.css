@@ -1538,13 +1538,15 @@ span.candidateSymbol {
 /* Select Mode, in the party box below a divider line that runs the box's
    full width (the card's side padding is 28px, 16px on phones). */
 .modeSection {
-  margin: 24px -28px 0;
+  /* The negative bottom margin trims the box's 28px bottom padding to 16px,
+     so there's little empty space under the mode buttons / Next. */
+  margin: 24px -28px -12px;
   padding: 22px 28px 0;
   border-top: 2.5px solid var(--ink);
 }
 @media (max-width: 640px) {
   .modeSection {
-    margin: 20px -16px 0;
+    margin: 20px -16px -8px;
     padding: 18px 16px 0;
   }
 }
