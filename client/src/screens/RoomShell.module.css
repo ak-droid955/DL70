@@ -66,9 +66,17 @@
   animation: dl70Fade 0.5s ease both;
 }
 
+/* Single-player pages: no gap between the header and the first card. */
+.bodyFlush {
+  padding-top: 0;
+}
+
 @media (max-width: 640px) {
   .body {
     padding: 22px 14px 44px;
+  }
+  .bodyFlush {
+    padding-top: 0;
   }
   .card {
     padding: 20px 16px;
