@@ -1133,7 +1133,14 @@ export default function SinglePlayer() {
       </button>
     );
     return (
-      <RoomShell variant="booth">
+      // The header's back link returns to the party and mode picker.
+      <RoomShell
+        variant="booth"
+        onBack={() => {
+          setPage('pick');
+          window.scrollTo(0, 0);
+        }}
+      >
         <div className={`${styles.column} ${styles.candidateColumn}`}>
           {/* The CM candidate picker, with Back / Start Game at its foot. In
               Alliance Mode the alliance partner picker sits beside it in a
@@ -1189,24 +1196,14 @@ export default function SinglePlayer() {
 
             </div>
 
-            <div className={styles.cardFooter}>
-              <button
-                type="button"
-                className={styles.cardBack}
-                onClick={() => {
-                  setPage('pick');
-                  window.scrollTo(0, 0);
-                }}
-              >
-                ← Back
-              </button>
-              {/* Alliance Mode has no Next (see seatsShown). */}
-              {candidate === null ? (
-                <p className={styles.nextHint}>Select a candidate to continue.</p>
-              ) : mode === 'alliance' ? null : (
-                nextOrStart
-              )}
-            </div>
+            {/* The hint until a candidate is picked, then (1 vs Many only) Next
+                until it's pressed. Alliance Mode has no Next (see seatsShown).
+                Going back is the header's back link. */}
+            {(candidate === null || (mode !== 'alliance' && nextOrStart)) && (
+              <div className={styles.cardFooter}>
+                {candidate === null ? <p className={styles.nextHint}>Select a candidate to continue.</p> : nextOrStart}
+              </div>
+            )}
           </div>
 
           {/* Alliance Mode: pick partner parties from those you didn't
