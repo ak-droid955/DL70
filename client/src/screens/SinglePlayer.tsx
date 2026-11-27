@@ -424,7 +424,9 @@ const CANDIDATES: Partial<Record<PartyId, readonly Candidate[]>> = {
     { name: 'Rekha Gupta', image: rekhaGupta },
     { name: 'Parvesh Verma', image: parveshVerma },
     { name: 'Kapil Mishra', image: kapilMishra },
-    { name: 'Harsh Malhotra', image: harshMalhotra }
+    { name: 'Harsh Malhotra', image: harshMalhotra },
+    { name: 'Manjinder Singh Sirsa', image: manjinderSinghSirsa },
+    { name: 'Manoj Tiwari', image: manojTiwari }
   ],
   aap: [
     { name: 'Arvind Kejriwal', image: arvindKejriwal },

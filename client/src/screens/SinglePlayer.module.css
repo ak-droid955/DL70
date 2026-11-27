@@ -836,11 +836,11 @@ span.candidateSymbol {
   font-size: 22px;
 }
 .pickerPair .lineup {
-  flex-wrap: nowrap;
   gap: 8px;
 }
-/* Smaller candidate cards, all in one row, so the CM side is no taller than
-   the alliance partner list beside it. */
+/* Smaller candidate cards, so the CM side stays close to the height of the
+   alliance partner list beside it. A party with more candidates than fit in
+   one row (BJP has six) wraps onto a second row. */
 .pickerPair .lineupSlot,
 .pickerPair .candidateBox {
   width: 80px;
