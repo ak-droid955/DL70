@@ -1498,3 +1498,13 @@ span.candidateSymbol {
   font-size: 20px;
   letter-spacing: -0.3px;
 }
+
+/* The empty box on the page after the historical CM candidate's Next. */
+.historyEmptyPage {
+  min-height: 360px;
+}
+@media (max-width: 640px) {
+  .historyEmptyPage {
+    min-height: 240px;
+  }
+}

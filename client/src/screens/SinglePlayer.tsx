@@ -550,7 +550,9 @@ export default function SinglePlayer() {
   // picker that follows Next for 1 vs Many and Alliance Mode, or the
   // Historical Elections page (empty for now). Kept in this component so the
   // picks survive going back.
-  const [page, setPage] = useState<'pick' | 'candidate' | 'historical' | 'historicalParty'>('pick');
+  const [page, setPage] = useState<
+    'pick' | 'candidate' | 'historical' | 'historicalParty' | 'historicalNext'
+  >('pick');
   // Election picked from the Historical Elections menu.
   const [historicalYear, setHistoricalYear] = useState<number | null>(null);
   // Party you play as in that election; cleared when the election changes.
@@ -752,6 +754,18 @@ export default function SinglePlayer() {
   // Historical Elections, after Next: pick the CM candidate you play as,
   // from the picked party's leaders in that election. Back returns to the
   // election page with the picks kept.
+  // Historical Elections, after the CM candidate's Next: its own page, an
+  // empty box for now. Back returns to the candidate page with the pick kept.
+  if (page === 'historicalNext') {
+    return (
+      <RoomShell variant="booth" onBack={() => setPage('historicalParty')}>
+        <div className={`${shellStyles.card} ${styles.card} ${styles.historyCard}`}>
+          <div className={`${styles.historyBox} ${styles.historyEmptyPage}`} />
+        </div>
+      </RoomShell>
+    );
+  }
+
   if (page === 'historicalParty') {
     const hParty = PARTIES.find((p) => p.id === historicalParty);
     const hAlliance = historicalAllianceOf(historicalYear, historicalParty);
@@ -794,6 +808,23 @@ export default function SinglePlayer() {
                 </div>
               );
             })}
+          </div>
+          {/* Next once a candidate is picked; it opens the next page. */}
+          <div className={styles.cardFooter}>
+            {historicalCandidate === null ? (
+              <p className={styles.nextHint}>Select a candidate to continue.</p>
+            ) : (
+              <button
+                type="button"
+                className={`${styles.nextBtn} ${styles.startBtn}`}
+                onClick={() => {
+                  setPage('historicalNext');
+                  window.scrollTo(0, 0);
+                }}
+              >
+                Next →
+              </button>
+            )}
           </div>
         </div>
       </RoomShell>
