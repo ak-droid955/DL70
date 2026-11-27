@@ -1,0 +1,82 @@
+/* Full-screen "rotate your device" prompt shown over the game in portrait on
+   phones and tablets. Above every other overlay. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 32px 28px;
+  text-align: center;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* A phone outline that turns from portrait to landscape, on a loop. */
+.phone {
+  width: 58px;
+  height: 96px;
+  margin-bottom: 10px;
+  border: 4px solid var(--paper);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: turn 2.4s ease-in-out infinite;
+}
+.screen {
+  width: 70%;
+  height: 72%;
+  border-radius: 4px;
+  background: oklch(68% 0.19 48);
+}
+@keyframes turn {
+  0%,
+  25% {
+    transform: rotate(0deg);
+  }
+  55%,
+  85% {
+    transform: rotate(-90deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .phone {
+    animation: none;
+    transform: rotate(-90deg);
+  }
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+}
+.text {
+  margin: 0;
+  max-width: 320px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.45;
+  opacity: 0.85;
+}
+.button {
+  margin-top: 8px;
+  padding: 13px 26px;
+  border: none;
+  border-radius: 100px;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 15px;
+  background: oklch(68% 0.19 48);
+  color: var(--ink);
+  cursor: pointer;
+}

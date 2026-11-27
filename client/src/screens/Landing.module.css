@@ -866,11 +866,15 @@
   .heroSpotCreate {
     left: 50%;
     top: 74%;
+    /* Centred like Join above it; the desktop leftward nudge doesn't apply. */
+    transform: translate(calc(-50% + 3px), -50%);
   }
   .heroJoin,
   .heroCreate {
     font-size: 16px;
     padding: 16px 26px;
+    /* One line each, so the stacked pair can't grow into each other. */
+    white-space: nowrap;
   }
   .features,
   .news {

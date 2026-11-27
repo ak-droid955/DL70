@@ -790,11 +790,13 @@ span.candidateSymbol {
   .lineup {
     gap: 20px 16px;
   }
+  /* Two to a row even on the narrowest phones (320px), rather than one.
+     The slot takes its share of the row; the card fills its slot. */
   .lineupSlot {
-    width: 130px;
+    width: min(130px, calc(50% - 8px));
   }
   .candidateBox {
-    width: 130px;
+    width: 100%;
   }
 }
 
@@ -836,11 +838,11 @@ span.candidateSymbol {
   font-size: 22px;
 }
 .pickerPair .lineup {
-  flex-wrap: nowrap;
   gap: 8px;
 }
-/* Smaller candidate cards, all in one row, so the CM side is no taller than
-   the alliance partner list beside it. */
+/* Smaller candidate cards, so the CM side stays close to the height of the
+   alliance partner list beside it. A party with more candidates than fit in
+   one row (BJP has six) wraps onto a second row. */
 .pickerPair .lineupSlot,
 .pickerPair .candidateBox {
   width: 80px;
@@ -918,8 +920,8 @@ span.candidateSymbol {
 .partnerRow {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
+  gap: 6px;
+  padding: 6px 8px;
   border-radius: 10px;
   border: 2px solid var(--paper-border);
   background: var(--card-paper);
@@ -945,6 +947,9 @@ span.candidateSymbol {
   font-family: var(--font-ui);
   font-weight: 700;
   font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: var(--ink);
   text-align: left;
 }
@@ -1311,4 +1316,237 @@ span.candidateSymbol {
 .startGame {
   max-width: none;
   margin: 16px 0 0;
+}
+
+/* Historical Elections page: the elections in a row across the top, and
+   below them the box where you pick your party for the picked election. */
+.historyCard {
+  width: 100%;
+  max-width: 900px;
+}
+.historyLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.historyMenu {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+}
+.historyItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 4px;
+  border-radius: 12px;
+  border: 2.5px solid var(--ink);
+  background: oklch(99% 0.006 75 / 0.9);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.historyItem:hover {
+  transform: translateY(-2px);
+}
+.historyItemOn {
+  background: var(--ink);
+  color: var(--paper);
+}
+.historyYear {
+  font-weight: 800;
+  font-size: 16px;
+}
+.historyAssembly {
+  font-weight: 600;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0.75;
+}
+.historyBox {
+  /* Only as tall as what it holds; the empty state keeps a little height. */
+  min-height: 120px;
+  border-radius: 14px;
+  border: 2px dashed oklch(60% 0.02 60 / 0.6);
+  background: oklch(99% 0.006 75 / 0.6);
+}
+.historyBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  box-sizing: border-box;
+}
+.historyBoxFilled {
+  justify-content: flex-start;
+  border-style: solid;
+  border-color: var(--paper-border);
+}
+.historyEmpty {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+.historyBoxHeading {
+  margin: 0 0 16px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--ink);
+}
+.historyParties {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+.historyParties .slot {
+  width: 104px;
+}
+/* Too narrow for eight across: two rows of four. */
+@media (max-width: 760px) {
+  .historyMenu {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .historyAssembly {
+    white-space: normal;
+    font-size: 10.5px;
+    line-height: 1.2;
+  }
+  .historyParties .slot {
+    width: calc((100% - 24px) / 3);
+  }
+}
+
+/* The historical party tiles keep the stacked symbol-over-name layout at
+   every width (the main picker's phone rows would hide the names here). */
+.historyParties .slot {
+  aspect-ratio: auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 6px;
+  text-align: center;
+}
+.historyParties .logo {
+  width: 44px;
+  flex: none;
+}
+.historyParties .name {
+  font-size: 13px;
+}
+
+/* Next under the historical party tiles. */
+.historyNext {
+  max-width: 420px;
+}
+/* Historical CM candidate card: as wide as the other modes' candidate card. */
+.historyCmCard {
+  width: 100%;
+  max-width: 700px;
+}
+
+/* Historical pre-poll alliance: its parties' tiles grouped in one outline,
+   labelled with the alliance name. */
+.historyAlliance {
+  position: relative;
+  display: flex;
+  padding: 14px 8px 8px;
+  border: 2px dashed var(--ink);
+  border-radius: 16px;
+}
+.historyAllianceName {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 10px;
+  border-radius: 100px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+}
+.historyAllianceTiles {
+  display: flex;
+  gap: 8px;
+}
+.historyAllyNote {
+  margin: 14px 0 0;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+}
+@media (max-width: 640px) {
+  .historyAlliance .slot {
+    width: 84px;
+  }
+}
+
+/* 1 vs Many's opponent tick list: titled like the Opponent Alliances box it
+   replaces in that mode. */
+.allianceCard .candidateHeading {
+  margin: 0 0 12px;
+  font-size: 20px;
+  letter-spacing: -0.3px;
+}
+
+/* The empty box on the page after the historical CM candidate's Next. */
+.historyEmptyPage {
+  min-height: 360px;
+}
+@media (max-width: 640px) {
+  .historyEmptyPage {
+    min-height: 240px;
+  }
+}
+
+/* Phones: the CM candidate and partner boxes stack, so Alliance Mode's
+   candidate cards needn't be squeezed to sit beside the partner list. Same
+   size as 1 vs Many's, two to a row, so long names no longer break mid-word. */
+@media (max-width: 640px) {
+  .pickerPair .lineup {
+    gap: 20px 16px;
+  }
+  .pickerPair .lineupSlot {
+    width: min(130px, calc(50% - 8px));
+  }
+  .pickerPair .candidateBox {
+    width: 100%;
+  }
+  .pickerPair .candidateBox {
+    aspect-ratio: 3 / 4;
+  }
+  .pickerPair .candidateName {
+    font-size: 12px;
+  }
+}
+
+/* Select Mode, in the party box below a divider line that runs the box's
+   full width (the card's side padding is 28px, 16px on phones). */
+.modeSection {
+  /* The negative bottom margin trims the box's 28px bottom padding to 16px,
+     so there's little empty space under the mode buttons / Next. */
+  margin: 24px -28px -12px;
+  padding: 22px 28px 0;
+  border-top: 2.5px solid var(--ink);
+}
+@media (max-width: 640px) {
+  .modeSection {
+    margin: 20px -16px -8px;
+    padding: 18px 16px 0;
+  }
 }

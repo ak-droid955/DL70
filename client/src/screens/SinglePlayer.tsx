@@ -21,6 +21,21 @@ import harshMalhotra from '../assets/candidates/bjp/harsh-malhotra.webp';
 import kapilMishra from '../assets/candidates/bjp/kapil-mishra.webp';
 import parveshVerma from '../assets/candidates/bjp/parvesh-verma.webp';
 import rekhaGupta from '../assets/candidates/bjp/rekha-gupta.webp';
+import madanLalKhurana from '../assets/candidates/bjp/madan-lal-khurana.webp';
+import sushmaSwaraj from '../assets/candidates/bjp/sushma-swaraj.webp';
+import sahibSinghVerma from '../assets/candidates/bjp/sahib-singh-verma.webp';
+import vijayKumarMalhotra from '../assets/candidates/bjp/vijay-kumar-malhotra.webp';
+import sheilaDikshit from '../assets/candidates/inc/sheila-dikshit.webp';
+import harshVardhan from '../assets/candidates/bjp/harsh-vardhan.webp';
+import vijayGoel from '../assets/candidates/bjp/vijay-goel.webp';
+import kiranBedi from '../assets/candidates/bjp/kiran-bedi.webp';
+import manojTiwari from '../assets/candidates/bjp/manoj-tiwari.webp';
+import virendraSachdeva from '../assets/candidates/bjp/virendra-sachdeva.webp';
+import ajayMaken from '../assets/candidates/inc/ajay-maken.webp';
+import kirtiAzad from '../assets/candidates/inc/kirti-azad.webp';
+import mayawati from '../assets/candidates/bsp/mayawati.webp';
+import kanshiRam from '../assets/candidates/bsp/kanshi-ram.webp';
+import manjinderSinghSirsa from '../assets/candidates/sad/manjinder-singh-sirsa.webp';
 import { PROFANITY_MESSAGE, hasProfanity } from '../lib/profanity';
 import { useGame } from '../state/GameProvider';
 import DistrictList from './DistrictList';
@@ -309,6 +324,68 @@ const MODES = [
 
 type ModeId = (typeof MODES)[number]['id'];
 
+// Every Delhi Legislative Assembly election since the assembly was restored
+// in 1993, listed on the Historical Elections page, with the game's parties
+// that contested it on their own symbol. Only these can be played as, or
+// played against, in that election.
+//
+// Source: Wikipedia's "<year> Delhi Legislative Assembly election" pages
+// (party-wise results tables) and statisticstimes.com, read November 2026.
+// Left out where the pages don't list the party: CPI(M) after 2013, and SAD
+// in 2008 (that candidate was from the separate SAD (Amritsar)). SAD in 2015
+// had one candidate on its own symbol; its other three ran on BJP's.
+//
+// Pre-poll alliances among those parties are kept as they were: allies are
+// shown together, and the party you pick plays alongside its allies rather
+// than against them. 2013/2015: BJP with SAD; 2020: NDA (BJP, JD(U)) and
+// UPA (INC, RJD); 2025: NDA (BJP, JD(U)). Partners outside the game (LJP)
+// are left out.
+type HistoricalAlliance = { name: string; parties: readonly PartyId[] };
+const HISTORICAL_ELECTIONS: readonly {
+  year: number;
+  assembly: string;
+  parties: readonly PartyId[];
+  alliances?: readonly HistoricalAlliance[];
+}[] = [
+  { year: 1993, assembly: '1st Assembly', parties: ['bjp', 'inc', 'bsp', 'cpim'] },
+  { year: 1998, assembly: '2nd Assembly', parties: ['inc', 'bjp', 'bsp'] },
+  { year: 2003, assembly: '3rd Assembly', parties: ['inc', 'bjp', 'bsp'] },
+  { year: 2008, assembly: '4th Assembly', parties: ['inc', 'bjp', 'bsp', 'jdu', 'rjd'] },
+  {
+    year: 2013,
+    assembly: '5th Assembly',
+    parties: ['bjp', 'aap', 'inc', 'bsp', 'jdu', 'sad', 'cpim'],
+    alliances: [{ name: 'NDA', parties: ['bjp', 'sad'] }]
+  },
+  {
+    year: 2015,
+    assembly: '6th Assembly',
+    parties: ['aap', 'bjp', 'inc', 'bsp', 'sad'],
+    alliances: [{ name: 'NDA', parties: ['bjp', 'sad'] }]
+  },
+  {
+    year: 2020,
+    assembly: '7th Assembly',
+    parties: ['aap', 'bjp', 'inc', 'bsp', 'jdu', 'rjd'],
+    alliances: [
+      { name: 'NDA', parties: ['bjp', 'jdu'] },
+      { name: 'UPA', parties: ['inc', 'rjd'] }
+    ]
+  },
+  {
+    year: 2025,
+    assembly: '8th Assembly',
+    parties: ['bjp', 'aap', 'inc', 'bsp', 'jdu'],
+    alliances: [{ name: 'NDA', parties: ['bjp', 'jdu'] }]
+  }
+];
+
+/** The alliance `party` was in at `year`'s election, if any. */
+function historicalAllianceOf(year: number | null, party: PartyId | null): HistoricalAlliance | undefined {
+  if (year === null || party === null) return undefined;
+  return HISTORICAL_ELECTIONS.find((e) => e.year === year)?.alliances?.find((a) => a.parties.includes(party));
+}
+
 // Who you play against on the candidate page: Delhi's main contenders, or
 // every other party in the game. Parties you play as or ally with are left
 // out either way.
@@ -347,7 +424,9 @@ const CANDIDATES: Partial<Record<PartyId, readonly Candidate[]>> = {
     { name: 'Rekha Gupta', image: rekhaGupta },
     { name: 'Parvesh Verma', image: parveshVerma },
     { name: 'Kapil Mishra', image: kapilMishra },
-    { name: 'Harsh Malhotra', image: harshMalhotra }
+    { name: 'Harsh Malhotra', image: harshMalhotra },
+    { name: 'Manjinder Singh Sirsa', image: manjinderSinghSirsa },
+    { name: 'Manoj Tiwari', image: manojTiwari }
   ],
   aap: [
     { name: 'Arvind Kejriwal', image: arvindKejriwal },
@@ -372,20 +451,123 @@ const CANDIDATES: Partial<Record<PartyId, readonly Candidate[]>> = {
   bsp: delhiChief('Laxman Singh')
 };
 
+// Historical Elections: CM candidates per election and party, the leaders
+// who fronted (or were the main contenders to lead) that party in that
+// election. Portraits already in the game are reused; everyone else gets the
+// leader silhouette until their photo is added. BSP is fronted by its national leader (Kanshi Ram,
+// then Mayawati) until 2015, and its Delhi president after. CPI(M), JD(U)
+// and RJD by their national leader at the time (general secretary or party
+// president); SAD by its Delhi face, Manjinder Singh Sirsa.
+const PORTRAITS: Readonly<Record<string, string>> = {
+  'Arvind Kejriwal': arvindKejriwal,
+  Atishi: atishi,
+  'Manish Sisodia': manishSisodia,
+  'Saurabh Bharadwaj': saurabhBharadwaj,
+  'Rekha Gupta': rekhaGupta,
+  'Parvesh Verma': parveshVerma,
+  'Sandeep Dikshit': sandeepDikshit,
+  'Devender Yadav': devenderYadav,
+  'Madan Lal Khurana': madanLalKhurana,
+  'Sushma Swaraj': sushmaSwaraj,
+  'Sahib Singh Verma': sahibSinghVerma,
+  'Vijay Kumar Malhotra': vijayKumarMalhotra,
+  'Sheila Dikshit': sheilaDikshit,
+  'Harsh Vardhan': harshVardhan,
+  'Vijay Goel': vijayGoel,
+  'Kiran Bedi': kiranBedi,
+  'Manoj Tiwari': manojTiwari,
+  'Virendra Sachdeva': virendraSachdeva,
+  'Ajay Maken': ajayMaken,
+  'Kirti Azad': kirtiAzad,
+  Mayawati: mayawati,
+  'Kanshi Ram': kanshiRam,
+  'Manjinder Singh Sirsa': manjinderSinghSirsa
+};
+const leaders = (...names: string[]): readonly Candidate[] =>
+  names.map((name) => ({ name, image: PORTRAITS[name] ?? placeholderLeader }));
+const HISTORICAL_CANDIDATES: Readonly<Record<number, Partial<Record<PartyId, readonly Candidate[]>>>> = {
+  1993: {
+    cpim: leaders('Harkishan Singh Surjeet'),
+    bsp: leaders('Kanshi Ram'),
+    bjp: leaders('Madan Lal Khurana', 'Sahib Singh Verma', 'Vijay Kumar Malhotra'),
+    inc: leaders('H. K. L. Bhagat', 'Jag Parvesh Chandra')
+  },
+  1998: {
+    bsp: leaders('Kanshi Ram'),
+    bjp: leaders('Sushma Swaraj', 'Sahib Singh Verma', 'Madan Lal Khurana'),
+    inc: leaders('Sheila Dikshit')
+  },
+  2003: {
+    bsp: leaders('Mayawati'),
+    bjp: leaders('Madan Lal Khurana', 'Vijay Kumar Malhotra'),
+    inc: leaders('Sheila Dikshit')
+  },
+  2008: {
+    jdu: leaders('Sharad Yadav'),
+    rjd: leaders('Lalu Prasad Yadav'),
+    bsp: leaders('Mayawati'),
+    bjp: leaders('Vijay Kumar Malhotra', 'Harsh Vardhan'),
+    inc: leaders('Sheila Dikshit')
+  },
+  2013: {
+    jdu: leaders('Sharad Yadav'),
+    sad: leaders('Manjinder Singh Sirsa'),
+    cpim: leaders('Prakash Karat'),
+    bsp: leaders('Mayawati'),
+    bjp: leaders('Harsh Vardhan', 'Vijay Goel'),
+    aap: leaders('Arvind Kejriwal', 'Manish Sisodia'),
+    inc: leaders('Sheila Dikshit')
+  },
+  2015: {
+    sad: leaders('Manjinder Singh Sirsa'),
+    bsp: leaders('Mayawati'),
+    bjp: leaders('Kiran Bedi', 'Satish Upadhyay'),
+    aap: leaders('Arvind Kejriwal', 'Manish Sisodia'),
+    inc: leaders('Ajay Maken')
+  },
+  2020: {
+    jdu: leaders('Nitish Kumar'),
+    rjd: leaders('Lalu Prasad Yadav'),
+    bsp: leaders('Laxman Singh'),
+    bjp: leaders('Manoj Tiwari', 'Parvesh Verma'),
+    aap: leaders('Arvind Kejriwal', 'Manish Sisodia'),
+    inc: leaders('Subhash Chopra', 'Kirti Azad')
+  },
+  2025: {
+    jdu: leaders('Nitish Kumar'),
+    bsp: leaders('Laxman Singh'),
+    bjp: leaders('Rekha Gupta', 'Parvesh Verma', 'Virendra Sachdeva'),
+    aap: leaders('Arvind Kejriwal', 'Atishi', 'Manish Sisodia'),
+    inc: leaders('Devender Yadav', 'Sandeep Dikshit')
+  }
+};
+
 /** Single-player entry page: pick the party you will play as, and a mode. */
 export default function SinglePlayer() {
   const [selected, setSelected] = useState<PartyId | null>(null);
   const [mode, setMode] = useState<ModeId | null>(null);
-  // Which page of the flow is showing: the party/mode picker, or the
-  // candidate picker that follows Next for 1 vs Many and Alliance Mode. Kept
-  // in this component so the picks survive going back.
-  const [page, setPage] = useState<'pick' | 'candidate'>('pick');
+  // Which page of the flow is showing: the party/mode picker, the candidate
+  // picker that follows Next for 1 vs Many and Alliance Mode, or the
+  // Historical Elections page (empty for now). Kept in this component so the
+  // picks survive going back.
+  const [page, setPage] = useState<
+    'pick' | 'candidate' | 'historical' | 'historicalParty' | 'historicalNext'
+  >('pick');
+  // Election picked from the Historical Elections menu.
+  const [historicalYear, setHistoricalYear] = useState<number | null>(null);
+  // Party you play as in that election; cleared when the election changes.
+  const [historicalParty, setHistoricalParty] = useState<PartyId | null>(null);
+  // CM candidate picked on the page after that (index into its list).
+  const [historicalCandidate, setHistoricalCandidate] = useState<number | null>(null);
   // Which of the party's candidates is picked on the candidate page.
   const [candidate, setCandidate] = useState<number | null>(null);
   // Parties picked as alliance partners (Alliance Mode only).
   const [partners, setPartners] = useState<ReadonlySet<PartyId>>(() => new Set());
   // Standard or all-party opposition, picked under Add Your Candidates.
   const [opponents, setOpponents] = useState<OpponentsId | null>(null);
+  // 1 vs Many: the parties ticked as opponents. null until changed, which
+  // means the default: Delhi's main parties (BJP, AAP, INC) other than yours.
+  const [opponentTicks, setOpponentTicks] = useState<ReadonlySet<PartyId> | null>(null);
   // Alliances among the opponents: named groups of two or more party ids.
   const [opponentAlliances, setOpponentAlliances] = useState<OpponentAlliance[]>([]);
   // Seats each alliance partner contests; your party takes the rest.
@@ -558,8 +740,220 @@ export default function SinglePlayer() {
       setPage('candidate');
       // Open the new page at its top rather than wherever Next was.
       window.scrollTo(0, 0);
+    } else if (mode === 'historical') {
+      setPanelOpen(false);
+      setPage('historical');
+      window.scrollTo(0, 0);
     }
   };
+
+  // Historical Elections: a row of past Delhi elections above a box where
+  // you pick your party from those that contested the picked election. The
+  // rest of that election's parties are your opponents. The header's back
+  // link returns to the picker with the mode kept.
+  // Historical Elections, after Next: pick the CM candidate you play as,
+  // from the picked party's leaders in that election. Back returns to the
+  // election page with the picks kept.
+  // Historical Elections, after the CM candidate's Next: its own page, an
+  // empty box for now. Back returns to the candidate page with the pick kept.
+  if (page === 'historicalNext') {
+    return (
+      <RoomShell variant="booth" onBack={() => setPage('historicalParty')}>
+        <div className={`${shellStyles.card} ${styles.card} ${styles.historyCard}`}>
+          <div className={`${styles.historyBox} ${styles.historyEmptyPage}`} />
+        </div>
+      </RoomShell>
+    );
+  }
+
+  if (page === 'historicalParty') {
+    const hParty = PARTIES.find((p) => p.id === historicalParty);
+    const hAlliance = historicalAllianceOf(historicalYear, historicalParty);
+    const lineup =
+      (historicalYear && historicalParty && HISTORICAL_CANDIDATES[historicalYear]?.[historicalParty]) ||
+      PLACEHOLDER_CANDIDATES;
+    return (
+      <RoomShell variant="booth" onBack={() => setPage('historical')}>
+        <div className={`${shellStyles.card} ${styles.card} ${styles.candidateCard} ${styles.historyCmCard}`}>
+          <h1 className={`${styles.heading} ${styles.candidateHeading}`}>Select Your CM Candidate</h1>
+          {hParty && (
+            <p className={styles.candidateSub}>
+              {hParty.name} · {historicalYear}
+              {hAlliance && ` · ${hAlliance.name}`}
+            </p>
+          )}
+          <div className={styles.lineup} role="radiogroup" aria-label="Candidate">
+            {lineup.map((c, i) => {
+              const on = historicalCandidate === i;
+              return (
+                <div key={c.name} className={styles.lineupSlot}>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    aria-label={c.name}
+                    className={`${styles.candidateBox} ${on ? styles.candidateBoxSelected : ''}`}
+                    onClick={() => setHistoricalCandidate(i)}
+                  >
+                    {c.image ? (
+                      <img className={`${styles.candidatePhoto} ${styles.candidateImg}`} src={c.image} alt="" />
+                    ) : (
+                      <span className={styles.candidatePhoto} aria-hidden="true" />
+                    )}
+                    <span className={styles.candidateParty}>
+                      <PartySymbol src={hParty?.symbol} label={hParty?.symbolLabel} className={styles.candidateSymbol} />
+                      <span className={styles.candidateName}>{c.name}</span>
+                    </span>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+          {/* Next once a candidate is picked; it opens the next page. */}
+          <div className={styles.cardFooter}>
+            {historicalCandidate === null ? (
+              <p className={styles.nextHint}>Select a candidate to continue.</p>
+            ) : (
+              <button
+                type="button"
+                className={`${styles.nextBtn} ${styles.startBtn}`}
+                onClick={() => {
+                  setPage('historicalNext');
+                  window.scrollTo(0, 0);
+                }}
+              >
+                Next →
+              </button>
+            )}
+          </div>
+        </div>
+      </RoomShell>
+    );
+  }
+
+  if (page === 'historical') {
+    const election = HISTORICAL_ELECTIONS.find((e) => e.year === historicalYear);
+    const contested = election
+      ? election.parties.map((id) => PARTIES.find((p) => p.id === id)!).filter(Boolean)
+      : [];
+    // Tiles in display order: each alliance as one group (lead party first),
+    // then the parties that stood alone.
+    const allied = new Set(election?.alliances?.flatMap((a) => a.parties) ?? []);
+    const partyGroups: { alliance?: HistoricalAlliance; parties: typeof contested }[] = [
+      ...(election?.alliances ?? []).map((a) => ({
+        alliance: a,
+        parties: a.parties.map((id) => PARTIES.find((p) => p.id === id)!).filter(Boolean)
+      })),
+      ...contested.filter((p) => !allied.has(p.id)).map((p) => ({ parties: [p] }))
+    ];
+    const pickedAlliance = historicalAllianceOf(historicalYear, historicalParty);
+    return (
+      <RoomShell variant="booth" onBack={() => setPage('pick')}>
+        <div className={`${shellStyles.card} ${styles.card} ${styles.historyCard}`}>
+          <h1 className={styles.heading}>Historical Elections</h1>
+          <div className={styles.historyLayout}>
+            <div className={styles.historyMenu} role="radiogroup" aria-label="Election">
+              {HISTORICAL_ELECTIONS.map((e) => {
+                const on = historicalYear === e.year;
+                return (
+                  <button
+                    key={e.year}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    className={`${styles.historyItem} ${on ? styles.historyItemOn : ''}`}
+                    onClick={() => {
+                      if (e.year !== historicalYear) {
+                        setHistoricalParty(null);
+                        setHistoricalCandidate(null);
+                      }
+                      setHistoricalYear(e.year);
+                    }}
+                  >
+                    <span className={styles.historyYear}>{e.year}</span>
+                    <span className={styles.historyAssembly}>{e.assembly}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className={`${styles.historyBox} ${election ? styles.historyBoxFilled : ''}`}>
+              {!election ? (
+                <p className={styles.historyEmpty}>Pick an election to see the parties that contested it.</p>
+              ) : (
+                <>
+                  <h2 className={styles.historyBoxHeading}>Select Your Party</h2>
+                  <div className={styles.historyParties} role="radiogroup" aria-label="Party">
+                    {partyGroups.map((group) => {
+                      const tiles = group.parties.map((party) => {
+                        const on = historicalParty === party.id;
+                        return (
+                          <button
+                            key={party.id}
+                            type="button"
+                            role="radio"
+                            aria-checked={on}
+                            className={`${styles.slot} ${on ? styles.slotSelected : ''}`}
+                            onClick={() => {
+                              // A party with a single CM candidate in this
+                              // election has them picked straight away.
+                              if (party.id !== historicalParty)
+                                setHistoricalCandidate(
+                                  HISTORICAL_CANDIDATES[election.year]?.[party.id]?.length === 1 ? 0 : null
+                                );
+                              setHistoricalParty(party.id);
+                            }}
+                            aria-label={party.name}
+                            title={party.name}
+                          >
+                            <PartySymbol src={party.symbol} label={party.symbolLabel} className={styles.logo} />
+                            <span className={styles.name}>{party.short}</span>
+                          </button>
+                        );
+                      });
+                      // Allies sit together in a labelled group.
+                      return group.alliance ? (
+                        <div key={group.alliance.name} className={styles.historyAlliance}>
+                          <span className={styles.historyAllianceName}>{group.alliance.name}</span>
+                          <div className={styles.historyAllianceTiles}>{tiles}</div>
+                        </div>
+                      ) : (
+                        tiles
+                      );
+                    })}
+                  </div>
+                  {pickedAlliance && (
+                    <p className={styles.historyAllyNote}>
+                      Playing in the {pickedAlliance.name} with{' '}
+                      {pickedAlliance.parties
+                        .filter((id) => id !== historicalParty)
+                        .map((id) => PARTIES.find((p) => p.id === id)?.short)
+                        .join(', ')}
+                      .
+                    </p>
+                  )}
+                  {/* Next opens the next page once a party is picked. */}
+                  {historicalParty ? (
+                    <button
+                      type="button"
+                      className={`${styles.nextBtn} ${styles.historyNext}`}
+                      onClick={() => {
+                        setPage('historicalParty');
+                        window.scrollTo(0, 0);
+                      }}
+                    >
+                      Next →
+                    </button>
+                  ) : (
+                    <p className={styles.nextHint}>Select your party to continue.</p>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </RoomShell>
+    );
+  }
 
   // 1 vs Many and Alliance Mode: pick which of your own party's leaders you
   // play as. Start Game doesn't do anything yet.
@@ -589,7 +983,29 @@ export default function SinglePlayer() {
         : 'All of Delhi’s main parties are on your side. Pick Play All to face the rest.',
       all: `Face every other party in the game: ${rivalNames(rivals)}.`
     };
-    const activeOpponents = OPPONENT_OPTIONS.find((o) => o.id === opponents);
+    // 1 vs Many picks opponents by tick box instead (main parties ticked to
+    // start); Play Standard / Play All just set the ticks, and stay lit while
+    // the ticks match them.
+    const oneVsMany = mode === 'one-vs-many';
+    const tickedOpponents: ReadonlySet<PartyId> = new Set(
+      [...(opponentTicks ?? STANDARD_PARTIES)].filter((id) => rivals.some((r) => r.id === id))
+    );
+    const sameSet = (list: typeof rivals) =>
+      list.length === tickedOpponents.size && list.every((p) => tickedOpponents.has(p.id));
+    const pickedOpponents: OpponentsId | null = oneVsMany
+      ? sameSet(standardRivals) && standardRivals.length > 0
+        ? 'standard'
+        : sameSet(rivals)
+          ? 'all'
+          : null
+      : opponents;
+    const toggleOpponent = (id: PartyId) => {
+      const next = new Set(tickedOpponents);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      setOpponentTicks(next);
+    };
+    const activeOpponents = OPPONENT_OPTIONS.find((o) => o.id === pickedOpponents);
     // Your party, as a row in a seat's contest table.
     const youContest: ContestParty = {
       id: selected,
@@ -643,7 +1059,13 @@ export default function SinglePlayer() {
     // or in Alliance Mode whichever ally the seat went to; in 1 vs Many only
     // if the seat is ticked), then the opponents picked, if any.
     const opponentParties: ContestParty[] = (
-      opponents === 'standard' ? standardRivals : opponents === 'all' ? rivals : []
+      oneVsMany
+        ? rivals.filter((p) => tickedOpponents.has(p.id))
+        : opponents === 'standard'
+          ? standardRivals
+          : opponents === 'all'
+            ? rivals
+            : []
     ).map((p) => ({
       id: p.id,
       short: p.short,
@@ -747,7 +1169,14 @@ export default function SinglePlayer() {
       </button>
     );
     return (
-      <RoomShell variant="booth">
+      // The header's back link returns to the party and mode picker.
+      <RoomShell
+        variant="booth"
+        onBack={() => {
+          setPage('pick');
+          window.scrollTo(0, 0);
+        }}
+      >
         <div className={`${styles.column} ${styles.candidateColumn}`}>
           {/* The CM candidate picker, with Back / Start Game at its foot. In
               Alliance Mode the alliance partner picker sits beside it in a
@@ -803,24 +1232,14 @@ export default function SinglePlayer() {
 
             </div>
 
-            <div className={styles.cardFooter}>
-              <button
-                type="button"
-                className={styles.cardBack}
-                onClick={() => {
-                  setPage('pick');
-                  window.scrollTo(0, 0);
-                }}
-              >
-                ← Back
-              </button>
-              {/* Alliance Mode has no Next (see seatsShown). */}
-              {candidate === null ? (
-                <p className={styles.nextHint}>Select a candidate to continue.</p>
-              ) : mode === 'alliance' ? null : (
-                nextOrStart
-              )}
-            </div>
+            {/* The hint until a candidate is picked, then (1 vs Many only) Next
+                until it's pressed. Alliance Mode has no Next (see seatsShown).
+                Going back is the header's back link. */}
+            {(candidate === null || (mode !== 'alliance' && nextOrStart)) && (
+              <div className={styles.cardFooter}>
+                {candidate === null ? <p className={styles.nextHint}>Select a candidate to continue.</p> : nextOrStart}
+              </div>
+            )}
           </div>
 
           {/* Alliance Mode: pick partner parties from those you didn't
@@ -874,7 +1293,7 @@ export default function SinglePlayer() {
               <div className={styles.modeSplit}>
                 <div className={styles.modes} role="radiogroup" aria-label="Opponents">
                   {OPPONENT_OPTIONS.map((o) => {
-                    const isSelected = opponents === o.id;
+                    const isSelected = pickedOpponents === o.id;
                     return (
                       <button
                         key={o.id}
@@ -882,7 +1301,11 @@ export default function SinglePlayer() {
                         role="radio"
                         aria-checked={isSelected}
                         className={`${styles.modeBtn} ${isSelected ? styles.modeBtnSelected : ''}`}
-                        onClick={() => setOpponents(o.id)}
+                        onClick={() =>
+                          oneVsMany
+                            ? setOpponentTicks(new Set((o.id === 'standard' ? standardRivals : rivals).map((p) => p.id)))
+                            : setOpponents(o.id)
+                        }
                       >
                         {o.label}
                       </button>
@@ -899,12 +1322,44 @@ export default function SinglePlayer() {
                   </div>
                 )}
               </div>
-              {/* Play Standard: Start Game under the explainer. */}
-              {opponents === 'standard' && startGame}
+              {/* Play Standard: Start Game under the explainer (Alliance
+                  Mode; 1 vs Many has it under the tick list). */}
+              {!oneVsMany && opponents === 'standard' && startGame}
             </div>
-            {/* Not offered with Play Standard. Start Game sits below the
-                alliances otherwise. */}
-            {opponents !== 'standard' && (
+            {/* 1 vs Many: tick which parties you face, main parties ticked to
+                start. Start Game below once at least one is ticked. */}
+            {oneVsMany && (
+              <div className={`${shellStyles.card} ${styles.card} ${styles.allianceCard}`}>
+                <h2 className={`${styles.heading} ${styles.candidateHeading}`}>Your Opponents</h2>
+                <div className={styles.partnerGrid}>
+                  {rivals.map((p) => {
+                    const on = tickedOpponents.has(p.id);
+                    return (
+                      <label
+                        key={p.id}
+                        className={`${styles.partnerRow} ${on ? styles.partnerRowOn : ''}`}
+                        title={p.name}
+                      >
+                        <PartySymbol src={p.symbol} label={p.symbolLabel} className={styles.partnerSymbol} />
+                        <span className={styles.partnerName}>{p.short}</span>
+                        <input
+                          type="checkbox"
+                          className={styles.partnerTick}
+                          checked={on}
+                          onChange={() => toggleOpponent(p.id)}
+                          aria-label={p.name}
+                        />
+                      </label>
+                    );
+                  })}
+                </div>
+                {tickedOpponents.size === 0 && <p className={styles.partnerLimit}>Tick at least one opponent.</p>}
+                {tickedOpponents.size > 0 && startGame}
+              </div>
+            )}
+            {/* Alliance Mode only, and not with Play Standard. Start Game
+                sits below the alliances otherwise. */}
+            {!oneVsMany && opponents !== 'standard' && (
               <div className={`${shellStyles.card} ${styles.card} ${styles.allianceCard}`}>
                 <OpponentAlliances
                   parties={opponentParties}
@@ -1062,13 +1517,10 @@ export default function SinglePlayer() {
               );
             })}
           </div>
-        </div>
 
-        {/* Game modes, in their own card below the party card. Single choice;
-            nothing acts on the chosen mode yet. */}
-        {/* Until a mode is picked the card is only as wide as its buttons;
-            picking one widens it to show the explainer beside them. */}
-        <div className={`${shellStyles.card} ${styles.card} ${styles.modeCard} ${activeMode ? '' : styles.modeCardCompact}`}>
+        {/* Game modes, in the same box as the parties below a divider line.
+            Single choice; Next opens the chosen mode's page. */}
+        <div className={styles.modeSection}>
           <h2 className={styles.heading}>Select Mode</h2>
           {/* Mode buttons on the left; past a divider, the picked mode's
               explainer and Next on the right. */}
@@ -1096,6 +1548,15 @@ export default function SinglePlayer() {
               tall as the longest one; only the picked mode's is visible. */}
           {activeMode && (
           <div className={styles.modeRow}>
+          {/* Next needs a mode, and a party too unless the mode is Historical
+              Elections (which replays real parties, so none is picked).
+              It opens the chosen mode's page, and sits above the explainer. */}
+          {mode && !canProceed && <p className={styles.nextHint}>Select your party above to continue.</p>}
+          {canProceed && (
+            <button type="button" className={styles.nextBtn} onClick={goNext}>
+              Next →
+            </button>
+          )}
             <div className={styles.modeInfoStack}>
               {MODES.map((m) => {
                 const shown = m.id === activeMode.id;
@@ -1113,18 +1574,10 @@ export default function SinglePlayer() {
               })}
             </div>
 
-          {/* Next needs a mode, and a party too unless the mode is Historical
-              Elections (which replays real parties, so none is picked).
-              What it leads to is still to come. */}
-          {mode && !canProceed && <p className={styles.nextHint}>Select your party above to continue.</p>}
-          {canProceed && (
-            <button type="button" className={styles.nextBtn} onClick={goNext}>
-              Next →
-            </button>
-          )}
           </div>
           )}
           </div>
+        </div>
         </div>
       </div>
 
